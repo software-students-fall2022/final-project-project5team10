@@ -5,10 +5,10 @@ FROM python:3.10.8
 EXPOSE 3000
 
 # set working dir within image
-WORKDIR /backend
+WORKDIR /app
 
 # copy current dir contents into image dir
-ADD /backend /backend
+ADD /app /app
 
 # pip install requirements
 RUN pip install --upgrade pip

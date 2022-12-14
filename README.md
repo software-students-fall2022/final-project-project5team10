@@ -1,6 +1,4 @@
-[![Frontend CI](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-frontend.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-frontend.yaml)
-
-[![Backend CI](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-backend.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-backend.yaml)
+[![App CI](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml)
 
 # Final Project
 

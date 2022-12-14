@@ -1,19 +1,13 @@
 services:
-  frontend:
-    container_name: frontend
-    build: ./frontend
-    command: python ./frontend/frontend.py
+  app:
+    container_name: app
+    build: ./app
+    command: python ./app/app.py
     ports:
       - "3000:3000"
     volumes:
     links:
       - db
-  backend:
-    container_name: backend
-    build: ./backend
-    volumes:
-    ports:
-      - "3001:3000"
   db:
     container_name: db
     image: mongo:latest
