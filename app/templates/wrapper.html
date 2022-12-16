@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> APP Name </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+      rel="stylesheet"
+      href="../static/css/wrapper.css"
+      href="{{ url_for('static', filename='css/wrapper.css') }}"
+    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abel">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <nav>
+          <div class="padded">
+            <div class="nav-content">
+              <a class="nav-link" href="{{ url_for('home')}}">
+                <h1>NYU Study Spots</h1>
+              </a>
+              <a class="nav-link" href="{{ url_for('logout')}}">
+                <span class="material-symbols-outlined nav-icon">login</span>
+              </a>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <main>{% block container %} {% endblock %}</main>
+      <footer>
+        <div class="bottom-nav">
+            <div class="bottom-nav-content">
+              <a class="bottom-nav-icon" href="{{ url_for('home')}}"><span class="material-symbols-outlined nav-icon">home</span></a>
+              <a class="bottom-nav-icon" href="{{ url_for('search')}}"><span class="material-symbols-outlined nav-icon">search</span></a>
+              <a class="bottom-nav-icon" href="{{ url_for('create_post')}}"><span class="material-symbols-outlined nav-icon">add</span></a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
