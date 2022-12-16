@@ -90,7 +90,7 @@ def authenticate():
 @app.route('/home')
 @flask_login.login_required
 def home():
-    return render_template("index.html")
+    return render_template("home.html")
 
 # route to handle the submission of the login form
 @app.route('/signup', methods=['POST'])
@@ -98,6 +98,8 @@ def signup():
     # grab the data from the form submission
     username = request.form['fusername']
     password = request.form['fpassword']
+    if username == "" or password == "" or username.isspace():
+        return render_template("login.html", message = "Invalid username or password")
     hashed_password = generate_password_hash(password) # generate a hashed password to store - don't store the original
     
     # check whether an account with this email already exists... don't allow duplicates
@@ -125,6 +127,8 @@ def signup():
 def login():
     username = request.form['fusername']
     password = request.form['fpassword']
+    if username == "" or password == "" or username.isspace():
+        return render_template("login.html", message = "Invalid username or password")
     user = locate_user(username=username) # load up any existing user with this email address from the database
     # check whether the password the user entered matches the hashed password in the database
     if user and check_password_hash(user.data['password'], password):
@@ -141,6 +145,11 @@ def logout():
     flask_login.logout_user()
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
+
+@app.route('/account')
+@flask_login.login_required
+def display_account():
+    pass
 ################## run server ##################
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=3000)
