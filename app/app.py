@@ -78,39 +78,6 @@ def inject_user():
     # make the currently-logged-in user, if any, available to all templates as 'user'
     return dict(user=flask_login.current_user)
 
-# db for all books on the site?
-# create book object, add to the user and to all books
-#bookshelf = {
-#    "Harry Potter"
-
-#}
-
-@app.route('/chat',methods=['GET','POST'])
-def chat():
-    return render_template('/chat.html')
-
-
-@app.route('/book_to_swap', methods=['GET','POST'])
-def choose_book():
-    #myBooks = flask_login.current_user.books
-    myBooks = user["books"]
-    return render_template('book_to_swap.html', books = myBooks)
-
-@app.route('/send_swap/<bookname>', methods=['GET','POST'])
-def send_swap(bookname):
-    if request.method == 'GET':
-        #book = db.books.find{"name": bookname} #replace with object_id later
-        for i in range(len(user["books"])):
-            if user["books"][i]["name"] == bookname:
-                return render_template('send_swap.html',book= user["books"][i])
-                #break
-        #book = user["books"][bookname]
-        #print("chicken",file=sys.stdout)
-        return render_template('send_swap.html')
-    else:
-        # send the request to the othe user
-        return redirect('/chat')
-
 ################## routes ##################
 # set up the routes
 @app.route('/')
@@ -172,6 +139,48 @@ def logout():
     flask_login.logout_user()
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
+
+
+# SWAP FUNCTIONS
+
+# db for all books on the site?
+# create book object, add to the user and to all books
+#bookshelf = {
+#    "Harry Potter"
+
+#}
+# temp data
+user = {
+   "email": "abc123@gmail.com",
+   "books": [{"name": "Harry Potter"},{"name": "The Hobbit"},{"name": "The Batman"},{"name": "Scream"}]
+}
+
+@app.route('/chat',methods=['GET','POST'])
+def chat():
+    return render_template('/chat.html')
+
+
+@app.route('/book_to_swap', methods=['GET','POST'])
+def choose_book():
+    #myBooks = flask_login.current_user.books
+    myBooks = user["books"]
+    return render_template('book_to_swap.html', books = myBooks)
+
+@app.route('/send_swap/<bookname>', methods=['GET','POST'])
+def send_swap(bookname):
+    if request.method == 'GET':
+        #book = db.books.find{"name": bookname} #replace with object_id later
+        for i in range(len(user["books"])):
+            if user["books"][i]["name"] == bookname:
+                return render_template('send_swap.html',book= user["books"][i])
+                #break
+        #book = user["books"][bookname]
+        #print("chicken",file=sys.stdout)
+        return render_template('send_swap.html')
+    else:
+        # send the request to the othe user
+        return redirect('/chat')
+
 ################## run server ##################
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=3000)
