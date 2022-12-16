@@ -55,10 +55,11 @@ nav {
   text-decoration: none;
 }
 
+
 .nav-content {
-  display: flex;
+  /* display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; */
   flex-wrap: nowrap;
 }
 
@@ -74,6 +75,17 @@ nav {
   font-size: 2rem !important;
 }
 
+.nav-right{
+  display: flex;
+  justify-content: space-between;
+  align-items: right;
+}
+
+.nav-left{
+    display: flex;
+    justify-content: space-between;
+    align-items: left;
+  }
 /* Typography */
 h1 {
   font-size: 1.8rem;

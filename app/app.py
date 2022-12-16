@@ -146,10 +146,21 @@ def logout():
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
 
-@app.route('/account')
+@app.route('/add_book')
+@flask_login.login_required
+def add_book(user_id):
+    pass
+
+@app.route('/view_chat')
+@flask_login.login_required
+def view_chat():
+    pass
+
+@app.route('/account/<user_id>')
 @flask_login.login_required
 def display_account():
     pass
+
 ################## run server ##################
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=3000)
