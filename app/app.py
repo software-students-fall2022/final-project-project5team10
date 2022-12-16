@@ -156,10 +156,13 @@ def add_book(user_id):
 def view_chat():
     pass
 
-@app.route('/account/<user_id>')
+@app.route('/account')
 @flask_login.login_required
 def display_account():
-    pass
+    user =flask_login.current_user
+    docs = db.books.find({}, {"user_id": user.id})
+
+    return render_template("account.html", username=user.data["username"], docs=docs)
 
 ################## run server ##################
 if __name__=='__main__':
