@@ -1,1 +1,6 @@
 flask
+flask_login
+werkzeug
+pymongo
+datetime
+
