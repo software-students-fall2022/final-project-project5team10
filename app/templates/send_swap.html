@@ -1,0 +1,23 @@
+{% extends 'index.html' %}
+{% block container %}
+
+<div class="bookInfo">
+    <img alt="Photo of Book">
+    <h2>$XX</h2>
+    <div class="bookDetails">
+        <h2>Book Info:</h2>
+        <h3>Title: {{book.name}}</h3>
+        <h3>Edition:</h3>
+        <h3>Publisher:</h3>
+        <h3>Condition:</h3>
+    </div>
+    <!--Send/Cancel Request-->
+        <form id="cancelrequest" method="POST" action="/book_to_swap">
+            <input type="submit" name="cancel" value="Cancel">
+        </form>
+        <form id="sendrequest" method="POST">
+            <input type="submit" name="send" value="Send Request to Swap">
+        </form>
+</div>
+
+{% endblock %}

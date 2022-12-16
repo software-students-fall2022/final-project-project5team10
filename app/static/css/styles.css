@@ -1,0 +1,21 @@
+/* Rectangle 11 */
+
+
+/*Send_Swap*/
+.bookInfo {
+    width: 790px;
+    height: 258px;
+    display: block;
+    margin: auto;
+}
+.bookDetails {
+    box-sizing: border-box;
+    width: 790px;
+    height: 258px;
+    padding: 20px 20px;
+    border: 1px solid #000000;
+}
+#sendrequest {
+    position: relative;
+}
+
