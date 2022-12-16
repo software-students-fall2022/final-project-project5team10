@@ -2,10 +2,10 @@ services:
   app:
     container_name: app
     build: ./app
-    command: python ./app/app.py
+    command: python app.py
     ports:
       - "3000:3000"
-    volumes:
+    # volumes:
     links:
       - db
   db:

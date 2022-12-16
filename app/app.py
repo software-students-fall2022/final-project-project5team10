@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
-from dotenv import dotenv_values
 from werkzeug.utils import secure_filename
 
 import pymongo
@@ -21,15 +20,9 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
 ################## routes ##################
-config = dotenv_values(".env")
 
-# turn on debugging if in development mode
-if config['FLASK_ENV'] == 'development':
-    # turn on debugging, if in development
-    app.debug = True  # debug mnode
-
-
-db = pymongo.MongoClient(host='db', port=27017)
+client = pymongo.MongoClient(host='db', port=27017)
+db = client["project5"]
 
 # a class to represent a user
 class User(flask_login.UserMixin):
@@ -95,6 +88,7 @@ def authenticate():
     return render_template("login.html", message = "Please login or sign up!")
 
 @app.route('/home')
+@flask_login.login_required
 def home():
     return render_template("index.html")
 
@@ -149,4 +143,4 @@ def logout():
     return redirect(url_for('authenticate'))
 ################## run server ##################
 if __name__=='__main__':
-    app.run(port=3000)
+    app.run(host='0.0.0.0', port=3000)
