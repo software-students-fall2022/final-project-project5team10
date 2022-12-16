@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moderator Log-in</title>
+  <link
+  rel="stylesheet"
+  href="../static/css/moderator_login.css"
+  href="{{ url_for('static', filename='css/moderator_login.css') }}"
+  >
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abel">
+
+</head>
+<body>
+<div class="login">
+  <form method="POST">
+    <h1>Welcome!</h1>
+    <h2>{{message}}</h2>
+    <div class="content">
+      <div class="input-field">
+        <input type="username" placeholder="Username" name = "fusername">
+      </div>
+      <div class="input-field">
+        <input type="password" placeholder="Password" name = "fpassword">
+    <div class="action">
+      <button type = "submit" formaction="{{ url_for('login_submit')}}">Log in</button>
+    </div>
+    <div class="action">
+      <button type = "submit" formaction="{{ url_for('signup_submit')}}">Sign Up</button>
+    </div>
+  </form>
+</div>
+</body>
+</html>
