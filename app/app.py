@@ -146,10 +146,25 @@ def logout():
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
 
-@app.route('/add_book')
+@app.route('/add_book', methods=["GET", "POST"])
 @flask_login.login_required
-def add_book(user_id):
-    pass
+def add_book():
+    user =flask_login.current_user
+    if request.method == "GET":
+        return render_template("add_book.html")
+    
+    # POST REQUEST FROM FORM 
+    if request.method == "POST":
+        book = {}
+        book["title"] = request.form['ftitle']
+        book["publisher"] = request.form['fpublisher']
+        book["user_id"] =user.id
+        book["edition"] = request.form['fedition']
+        book["conditon"] = request.form['fcondition']
+        book["price"] = float(request.form['fprice'])
+
+        db.books.insert_one(book)
+        return redirect(url_for('display_account'))
 
 @app.route('/view_chat')
 @flask_login.login_required
@@ -161,9 +176,10 @@ def view_chat():
 def display_account():
     user =flask_login.current_user
     docs = db.books.find({}, {"user_id": user.id})
+    print(docs)
 
     return render_template("account.html", username=user.data["username"], docs=docs)
 
 ################## run server ##################
 if __name__=='__main__':
-    app.run(host='0.0.0.0', port=3000)
+    app.run(host='0.0.0.0',debug=True, port=3000)

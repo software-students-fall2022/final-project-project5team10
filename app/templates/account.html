@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="../static/css/styles.css"/>
     </head>
     <body>
-        <form method="POST">
+        <form method="GET">
             <h1>Welcome, {{username}}</h1>
             <div></div>
               <button type = "submit" formaction="{{ url_for('add_book')}}">Add Book to Sell</button>
@@ -21,9 +21,9 @@
 
         <h1> Books for sale </h1>
         {% for doc in docs %}
-            <h1> doc.title</h1>
+            <h1> {{doc.title}}</h1>
         {%endfor%}
-        
+
     </body>
 </html> 
 
