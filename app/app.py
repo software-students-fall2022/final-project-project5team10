@@ -1,3 +1,4 @@
+
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
 
@@ -141,6 +142,25 @@ def logout():
     flask_login.logout_user()
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
+
+#route to account page
+@app.route('/account',methods=['GET'])
+@flask_login.login_required
+def account():
+    #GET USER
+    user=flask_login.current_user
+
+    #Set username
+    userName=user.username
+
+    #GET BOOKS FOR SALE 
+    books = list() #temp
+
+    #GET USER'S BOOKS FROM DATABASE
+
+    
+    
+    return render_template("account.html",userName=userName,books=books)
 ################## run server ##################
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=3000)
