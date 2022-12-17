@@ -11,12 +11,10 @@
         <h3>Publisher: {{book.publisher}}</h3>
         <h3>Condition: {{book.condition}}</h3>
     </div>
-    <!--Send/Cancel Request-->
-        <form id="cancelrequest" method="POST">
-            <input type="submit" name="fcancel" value="Cancel">
-        </form>
-        <form id="sendrequest" method="POST">
-            <input type="submit" name="fsend" value="Send Request to Swap">
+    <!--choose this book to swap-->
+        <form id="requestswap" method="POST">
+            <input type="submit" name="request" value="Request to Swap">
         </form>
 </div>
+
 {% endblock %}
