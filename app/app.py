@@ -227,7 +227,7 @@ def send_swap(bookid,otherbookid):
             username = db.users.find_one({"user_id": otheruserid})
             #reciever = locate_user(username=username) # get username from prev page
             db.requests.insert_one({"sender": ObjectId(user.id), "reciever": ObjectId(otheruserid), "booktoswap": ObjectId(bookid), "bookrequested": ObjectId(otherbookid)})
-            return redirect('/view_chat')
+            return redirect(url_for('chat'))
 
 ################## run server ##################
 if __name__=='__main__':
