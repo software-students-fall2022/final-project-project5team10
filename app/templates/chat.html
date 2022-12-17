@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <nav>
+
+        </nav>
+
+        <div id="main">
+            <!-- Select Chat room -->
+            <nav id="rooms">
+            
+            </nav>
+
+            <!-- right side area -->
+            <div id="rightside">
+                <!-- show message -->
+                <div id="display-chat">
+
+                </div>
+                <!-- type message&send -->
+                <div id="input-chat">
+                    <input type="text" id="user_message" placeholder="Message here..." autocomplete="off">
+                    <button type="button" id="send_message">SEND</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- socketio scriptjs -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+        <!-- chat socketio custom script -->
+        <script src="{{url_for('static', filename ='js/chat.js')}}"></script>
+    </body>
+</html>

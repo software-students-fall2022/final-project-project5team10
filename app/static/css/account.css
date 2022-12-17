@@ -1,0 +1,46 @@
+#name {
+    text-align: center;
+    font-size: 300%;
+    text-decoration: underline;
+}
+
+#booksForSaleTitle {
+    text-align: center;
+    font-size: 150%;
+}
+
+.block {
+    display: block;
+    width: 100%;
+    border: none;
+    background-color: #bea9df;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    color: white;
+    border-radius: 8px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    background-color: #bea9df;
+    padding: 10px;
+    height: 550px;
+    overflow: auto;
+    border-radius: 15px;
+}
+.grid-item {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    font-size: 20px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}

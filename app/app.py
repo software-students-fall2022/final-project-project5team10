@@ -1,3 +1,4 @@
+
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
 from flask_socketio import SocketIO, send 
@@ -92,7 +93,7 @@ def authenticate():
 @app.route('/home')
 @flask_login.login_required
 def home():
-    return render_template("index.html")
+    return render_template("home.html")
 
 # route to handle the submission of the login form
 @app.route('/signup', methods=['POST'])
@@ -100,6 +101,8 @@ def signup():
     # grab the data from the form submission
     username = request.form['fusername']
     password = request.form['fpassword']
+    if username == "" or password == "" or username.isspace():
+        return render_template("login.html", message = "Invalid username or password")
     hashed_password = generate_password_hash(password) # generate a hashed password to store - don't store the original
     
     # check whether an account with this email already exists... don't allow duplicates
@@ -127,6 +130,8 @@ def signup():
 def login():
     username = request.form['fusername']
     password = request.form['fpassword']
+    if username == "" or password == "" or username.isspace():
+        return render_template("login.html", message = "Invalid username or password")
     user = locate_user(username=username) # load up any existing user with this email address from the database
     # check whether the password the user entered matches the hashed password in the database
     if user and check_password_hash(user.data['password'], password):
@@ -144,14 +149,50 @@ def logout():
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
 
-# live chat between users
-@socketio.on('message')
-def handle_message(message):
-    print("Received message: " + message)
-    if message != "User connected!":
-        send(message,broadcast=True)
+@app.route('/add_book', methods=["GET", "POST"])
+@flask_login.login_required
+def add_book():
+    user =flask_login.current_user
+    if request.method == "GET":
+        return render_template("add_book.html")
+    
+    # POST REQUEST FROM FORM 
+    if request.method == "POST":
+        book = {}
+        book["title"] = request.form['ftitle']
+        book["publisher"] = request.form['fpublisher']
+        book["user_id"] =user.id
+        book["edition"] = request.form['fedition']
+        book["conditon"] = request.form['fcondition']
+        book["price"] = float(request.form['fprice'])
 
+        db.books.insert_one(book)
+        return redirect(url_for('display_account'))
+
+# live chat between users
+@app.route('/chat', methods = ["GET","POST"])
+# @flask_login.login_required
+# @socketio.on('view-chat')
+def chat():
+    return render_template('chat.html')
+
+@socketio.on('message')
+def message(data):
+    print(f"\n\n{data}\n\n")
+    send(data)
+
+
+@app.route('/account')
+@flask_login.login_required
+def display_account():
+    user =flask_login.current_user
+    docs = db.books.find({"user_id": user.id})
+    print(user.id, file=sys.stderr)
+    print(docs, file=sys.stderr)
+
+    return render_template("account.html", username=user.data["username"], docs=docs)
 
 ################## run server ##################
 if __name__=='__main__':
-    app.run(host='0.0.0.0', port=3000)
+    socketio.run(app, debug=True)
+    app.run(host='0.0.0.0',debug=True, port=3000)
