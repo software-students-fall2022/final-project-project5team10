@@ -1,0 +1,94 @@
+h1
+{
+  font-family: "Abel";
+}
+body {
+  margin: 10;
+  /* border: 10px solid; */
+}
+  
+header,
+footer,
+main {
+  margin: 0;
+  /* border: 10px solid; */
+}
+
+header
+main {
+  margin-bottom: 5px;
+}
+
+p.field {
+  font-size: 12px;
+}
+
+footer {
+  font-size: 11.5px;
+}
+
+.list {
+  list-style-type: none;
+}
+
+main {
+  margin-top: 8rem;
+  margin-bottom: 3.5rem;
+}
+
+/* Layout Template */
+nav {
+  padding: 0.5rem 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgb(29, 5, 29);
+  color: white;
+  border-bottom: solid #EBEBEB 1px;
+  box-shadow: 0 0 2rem rgb(0 0 0 / 10%);
+}
+
+.nav-link, .nav-link:hover, .nav-link:active {
+  color: white;
+  text-decoration: none;
+}
+
+
+.nav-content {
+  /* display: flex;
+  justify-content: space-between;
+  align-items: center; */
+  flex-wrap: nowrap;
+}
+
+.padded {
+  width: 85%;
+  max-width: 75rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.nav-icon {
+  font-size: 2rem !important;
+}
+
+.nav-right{
+  display: flex;
+  justify-content: space-between;
+  align-items: right;
+}
+
+.nav-left{
+    display: flex;
+    justify-content: space-between;
+    align-items: left;
+  }
+/* Typography */
+h1 {
+  font-size: 1.8rem;
+  font-family: sans-serif;
+}
+
