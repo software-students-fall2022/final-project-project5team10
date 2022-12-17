@@ -1,30 +1,47 @@
-{% extends 'wrapper.html' %}
-{% block container %}
 <!DOCTYPE html>
 <html lang="en">
-
     <head>
-        <meta charset="UTF-8">
+        <meta charset="UTF-8" />
         <title></title>
-        <link rel="stylesheet" href="../static/css/styles.css"/>
+        <link rel="stylesheet" href="../static/css/account.css" />
     </head>
+
     <body>
-        <form method="GET">
-            <h1>Welcome, {{username}}</h1>
-            <div></div>
-              <button type = "submit" formaction="{{ url_for('add_book')}}">Add Book to Sell</button>
+        <section class="content">
+            {% block container %}
+            <div class="books"></div>
+            <div id="buttons">
+                <p id="name">{{userName}}</p>
+                <form>
+                    <button
+                        type="submit"
+                        formaction="{{ url_for('test')}}"
+                        class="block"
+                    >
+                        Add book to sell
+                    </button>
+                </form>
+                <br />
+                <form>
+                    <button
+                        type="submit"
+                        formaction="{{ url_for('test')}}"
+                        class="block"
+                    >
+                        View Chat
+                    </button>
+                </form>
             </div>
-            <div class="action">
-              <button type = "submit" formaction="{{ url_for('view_chat')}}">View Chat</button>
+            <br />
+            <p id="booksForSaleTitle">Books for sale</p>
+            <div class="grid-container">
+                {% for book in books %}
+                <div class="grid-item"><a href="/">book</a></div>
+                {%endfor%}
             </div>
-          </form>
-
-        <h1> Books for sale </h1>
-        {% for doc in docs %}
-            <h1> {{doc.title}}</h1>
-        {%endfor%}
-
+            {% endblock %}
+        </section>
     </body>
-</html> 
+</html>
 
 {% endblock %}
