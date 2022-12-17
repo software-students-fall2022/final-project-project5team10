@@ -1,8 +1,17 @@
 [![App CI](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml)
 
-# Final Project
+# Bookshares
 
-An exercise to put to practice software development teamwork, subsystem communication, containers, deployment, and CI/CD pipelines. See [instructions](./instructions.md) for details.
+Bookshares aims to make college textbooks more affordable through the exchange of used books.
+
+## How to Use
+
+Users can register for an account. With an account, one can:
+* chat with other users
+* search for books
+* check book reviews
+* upload books to your account to put them up for exchange
+
 
 ## Authors
 
