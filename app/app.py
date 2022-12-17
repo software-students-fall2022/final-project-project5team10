@@ -185,12 +185,6 @@ def display_account():
 
 #----------------swap routes----------------#
 
-@app.route('/searchresults',methods=['GET','POST'])
-def show_books():
-    user =flask_login.current_user
-    books = db.books.find({"user_id": {"$ne": user.id}})
-    return render_template('/searchresults.html',books=books)
-
 @app.route('/book_for_sale<bookid>', methods=['GET','POST'])
 def for_sale(bookid):
     print(bookid)
