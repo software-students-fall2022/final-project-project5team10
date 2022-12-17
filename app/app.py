@@ -141,44 +141,43 @@ def logout():
     return redirect(url_for('authenticate'))
 
 
-# SWAP FUNCTIONS
+#----------------SWAP FUNCTIONS----------------#
 
-# db for all books on the site?
-# create book object, add to the user and to all books
-#bookshelf = {
-#    "Harry Potter"
-
-#}
 # temp data
-user = {
-   "email": "abc123@gmail.com",
-   "books": [{"name": "Harry Potter"},{"name": "The Hobbit"},{"name": "The Batman"},{"name": "Scream"}]
-}
+books = [{"name": "Harry Potter"},{"name": "The Hobbit"},{"name": "The Batman"},{"name": "Scream"}]
+db.books.insertMany([{"name": "Harry Potter"},{"name": "The Hobbit"},{"name": "The Batman"},{"name": "Scream"}])
+db.users.update_one(
+    {"_id": ObjectId(flask_login.current_user.id)},
+    {
+        "$push": {"books": {"$each": books}}
+    }
+)
 
 @app.route('/chat',methods=['GET','POST'])
-def chat():
+def chat(): #get email for reciever from previous page
     return render_template('/chat.html')
 
 
 @app.route('/book_to_swap', methods=['GET','POST'])
 def choose_book():
-    #myBooks = flask_login.current_user.books
-    myBooks = user["books"]
+    myBooks = flask_login.current_user.data["books"]
     return render_template('book_to_swap.html', books = myBooks)
 
 @app.route('/send_swap/<bookname>', methods=['GET','POST'])
-def send_swap(bookname):
+def send_swap(bookid):
     if request.method == 'GET':
-        #book = db.books.find{"name": bookname} #replace with object_id later
-        for i in range(len(user["books"])):
-            if user["books"][i]["name"] == bookname:
-                return render_template('send_swap.html',book= user["books"][i])
-                #break
-        #book = user["books"][bookname]
-        #print("chicken",file=sys.stdout)
+        user = flask_login.current_user
+        #book = db.books.find({"name": bookname}) #replace with object_id later
+        myBooks = flask_login.current_user.data["books"]
+        for book in myBooks:
+            if ObjectId(book["_id"]) == ObjectId(bookid):
+                return render_template('send_swap.html',book= book)
         return render_template('send_swap.html')
     else:
         # send the request to the othe user
+        username = "raa"
+        reciever = locate_user(username=username) # get username from prev page
+        #db.request.insert_one({"sender": ObjectId(user.id),"bookAccept":book, "bookToGive":book})
         return redirect('/chat')
 
 ################## run server ##################

@@ -3,7 +3,7 @@
 <h1>Choose Book to Swap</h1>
 {% for book in books %}
 <div class="selectBook">
-     <a href="{{ url_for('send_swap', bookname=book.name)}}">
+     <a href="{{ url_for('send_swap', bookid=book.id)}}">
          <h3">{{book.name}}</h3>
      </a>
         <!--<img class="cover" src="{{book.url}}"/>-->
