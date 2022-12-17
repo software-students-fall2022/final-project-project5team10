@@ -1,8 +1,8 @@
 [![App CI](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml)
 
-# Book Exchange
+# Bookshares
 
-Book Exchange aims to make college textbooks more affordable through the exchange of used books.
+Bookshares aims to make college textbooks more affordable through the exchange of used books.
 
 ## How to Use
 
