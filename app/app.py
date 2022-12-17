@@ -79,8 +79,6 @@ def inject_user():
     # make the currently-logged-in user, if any, available to all templates as 'user'
     return dict(user=flask_login.current_user)
 
-
-
 ################## routes ##################
 # set up the routes
 @app.route('/')
@@ -181,6 +179,55 @@ def display_account():
     print(docs, file=sys.stderr)
 
     return render_template("account.html", username=user.data["username"], docs=docs)
+
+
+
+#----------------swap routes----------------#
+
+@app.route('/searchresults',methods=['GET','POST'])
+def show_books():
+    user =flask_login.current_user
+    books = db.books.find({"user_id": {"$ne": user.id}})
+    return render_template('/searchresults.html',books=books)
+
+@app.route('/book_for_sale<bookid>', methods=['GET','POST'])
+def for_sale(bookid):
+    print(bookid)
+    book = db.books.find_one({"_id":ObjectId(bookid)})
+    if request.method== 'GET':
+        return render_template('book_for_sale.html',book=book)
+    else:
+        #bookid = book["_id"]
+        return redirect(url_for('choose_book',otherbookid=book["_id"]))
+
+@app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
+def choose_book(otherbookid):
+    user =flask_login.current_user
+    myBooks = db.books.find({"user_id": user.id})
+    otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
+    return render_template('book_to_swap.html', books=myBooks, otherbook=otherbook)
+
+@app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET','POST'])
+def send_swap(bookid,otherbookid):
+    user = flask_login.current_user
+    if request.method == 'GET':
+        myBooks = db.books.find({"user_id": user.id})
+        for book in myBooks:
+            if ObjectId(book["_id"]) == ObjectId(bookid):
+                return render_template('send_swap.html',book=book,otherbookid=otherbookid)
+        return render_template('send_swap.html')
+    else:
+        if 'fcancel' in request.form:
+            #otherid = request.form.get('otherid')
+            return redirect(url_for('choose_book',otherbookid=otherbookid))
+        elif 'frequest' in request.form:
+            # send the request to the other user
+            otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
+            otheruserid = otherbook["user_id"]
+            username = db.users.find_one({"user_id": otheruserid})
+            #reciever = locate_user(username=username) # get username from prev page
+            db.requests.insert_one({"sender": ObjectId(user.id), "reciever": ObjectId(otheruserid), "booktoswap": ObjectId(bookid), "bookrequested": ObjectId(otherbookid)})
+            return redirect(url_for('chat'))
 
 ################## run server ##################
 if __name__=='__main__':
