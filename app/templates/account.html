@@ -1,3 +1,4 @@
+{% extends 'wrapper.html' %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -11,11 +12,11 @@
             {% block container %}
             <div class="books"></div>
             <div id="buttons">
-                <p id="name">{{userName}}</p>
+                <h2 id="name">Welcome, {{username}}!</h2>
                 <form>
                     <button
                         type="submit"
-                        formaction="{{ url_for('test')}}"
+                        formaction="{{ url_for('add_book')}}"
                         class="block"
                     >
                         Add book to sell
@@ -25,7 +26,7 @@
                 <form>
                     <button
                         type="submit"
-                        formaction="{{ url_for('test')}}"
+                        formaction="{{ url_for('view_chat')}}"
                         class="block"
                     >
                         View Chat
@@ -33,10 +34,10 @@
                 </form>
             </div>
             <br />
-            <p id="booksForSaleTitle">Books for sale</p>
+            <h2 id="booksForSaleTitle">Books for sale</h2>
             <div class="grid-container">
-                {% for book in books %}
-                <div class="grid-item"><a href="/">book</a></div>
+                {% for doc in docs %}
+                <div class="grid-item"><a href="/">{{doc.title}}</a></div>
                 {%endfor%}
             </div>
             {% endblock %}
@@ -44,4 +45,3 @@
     </body>
 </html>
 
-{% endblock %}

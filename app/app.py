@@ -176,8 +176,9 @@ def view_chat():
 @flask_login.login_required
 def display_account():
     user =flask_login.current_user
-    docs = db.books.find({}, {"user_id": user.id})
-    print(docs)
+    docs = db.books.find({"user_id": user.id})
+    print(user.id, file=sys.stderr)
+    print(docs, file=sys.stderr)
 
     return render_template("account.html", username=user.data["username"], docs=docs)
 
