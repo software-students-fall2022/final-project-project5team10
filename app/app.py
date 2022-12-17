@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
+from flask_socketio import SocketIO, send 
 
 import pymongo
 import datetime
@@ -14,6 +15,7 @@ from werkzeug.security import check_password_hash
 ################## setup ##################
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # set up flask-login for user authentication
 login_manager = flask_login.LoginManager()
@@ -141,6 +143,15 @@ def logout():
     flask_login.logout_user()
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
+
+# live chat between users
+@socketio.on('message')
+def handle_message(message):
+    print("Received message: " + message)
+    if message != "User connected!":
+        send(message,broadcast=True)
+
+
 ################## run server ##################
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=3000)
