@@ -1,15 +1,15 @@
-{% extends 'index.html' %}
+{% extends 'wrapper.html' %}
 {% block container %}
 
 <div class="bookInfo">
     <img alt="Photo of Book">
-    <h2>$XX</h2>
+    <h2>${{book.price}}</h2>
     <div class="bookDetails">
         <h2>Book Info:</h2>
-        <h3>Title: {{book.name}}</h3>
-        <h3>Edition:</h3>
-        <h3>Publisher:</h3>
-        <h3>Condition:</h3>
+        <h3>Title: {{book.title}}</h3>
+        <h3>Edition: {{book.edition}}</h3>
+        <h3>Publisher: {{book.publisher}}</h3>
+        <h3>Condition: {{book.condition}}</h3>
     </div>
     <!--Send/Cancel Request-->
         <form id="cancelrequest" method="POST" action="/book_to_swap">
