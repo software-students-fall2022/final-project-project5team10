@@ -2,7 +2,6 @@
 {% block container %}
 <!DOCTYPE html>
 <html lang="en">
-
     <head>
         <meta charset="UTF-8">
         <title></title>
@@ -10,6 +9,11 @@
     </head>
     <body>
         <section class="content">
+            <div class="grid-container">
+                {% for doc in docs %}
+                <div class="grid-item"><a href="/">{{doc.title}}</a></div>
+                {%endfor%}
+            </div>
         </section>
     </body>
 </html> 

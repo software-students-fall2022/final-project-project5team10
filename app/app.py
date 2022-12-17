@@ -89,7 +89,8 @@ def authenticate():
 @app.route('/home')
 @flask_login.login_required
 def home():
-    return render_template("home.html")
+    docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}})
+    return render_template("home.html", docs=docs)
 
 # route to handle the submission of the login form
 @app.route('/signup', methods=['POST'])
