@@ -1,0 +1,64 @@
+main {
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#homepage-title {
+    flex-basis: 100%;
+    text-align: center;
+}
+
+/***************** Search Form *****************/
+
+.search-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-basis: 100%;
+}
+
+#search-bar {
+    flex-basis: 100%;
+    text-align: center;
+}
+
+#filter-buttons {
+    flex-basis: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    max-width: 75%;
+}
+
+#filter-buttons.hidden {
+    display: none;
+}
+
+/* #filter-buttons > input {
+
+} */
+
+/* #filter-button-reveal {
+    
+} */
+
+
+#submit-search {
+    background-color: black;
+}
+
+#submit-search:hover {
+    background-color: green;
+}
+
+
+/***************** Other Books *****************/
+.grid-container {
+    flex-basis: 100%;
+}
+
+
+/***************** SPECIAL CLASSES *****************/
+
+.hidden {
+    display: none;
+}

@@ -99,9 +99,16 @@ def authenticate():
     #Route for the login page
     return render_template("login.html", message = "Please login or sign up!")
 
-@app.route('/home')
+@app.route('/home', methods=['GET','POST'])
 @flask_login.login_required
 def home():
+    if request.method == 'POST':
+        query = request.form['query']
+
+        books = db.books.find({'title' : query})
+
+        return render_template('search_results.html', books=books)
+
     '''
     find all the books currently on sale by other users
     '''
