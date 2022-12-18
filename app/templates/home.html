@@ -11,6 +11,7 @@
         <section class="content">
             <div class="grid-container">
                 {% for doc in docs %}
+                <img src = "data:image/png;base64, {{doc.image_base64}}" width="500" height="500" />
                 <div class="grid-item"><a href="/">{{doc.title}}</a></div>
                 {%endfor%}
             </div>

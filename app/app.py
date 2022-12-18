@@ -6,11 +6,16 @@ import pymongo
 import datetime
 from bson.objectid import ObjectId
 import sys, os
+import codecs
+import gridfs
 
 # modules useful for user authentication
 import flask_login
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
+
+# Allowed file types for upload 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 ################## setup ##################
 app = Flask(__name__)
@@ -24,6 +29,8 @@ login_manager.init_app(app)
 
 client = pymongo.MongoClient(host='db', port=27017)
 db = client["project5"]
+
+grid_fs = gridfs.GridFS(db)
 
 # a class to represent a user
 class User(flask_login.UserMixin):
@@ -57,8 +64,14 @@ def locate_user(user_id=None, username=None):
     # else
     return None
     
-
     
+def allowed_file(filename):
+    '''
+    check for allowed extensions
+    '''
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -163,6 +176,28 @@ def add_book():
         book["conditon"] = request.form['fcondition']
         book["price"] = float(request.form['fprice'])
 
+        if 'file' not in request.files:
+            pass
+
+        # upload book image onto database
+        file = request.files['file']
+
+        if file and allowed_file((file.filename)):
+            filename = secure_filename(file.filename)
+            user = flask_login.current_user
+            name = str(user.id) +"_" + str(filename) # unique file name: user id + filename
+            id = grid_fs.put(file, filename = name)
+            query = {
+                "user": user.id, 
+                "book_name": book["title"],
+                "img_id": id
+            }
+            book["image"] = id # add gridfs id to file 
+            image = grid_fs.get(id)
+            base64_data = codecs.encode(image.read(), 'base64')
+            image = base64_data.decode('utf-8')
+            book['image_base64'] = image 
+            db.images.insert_one(query)
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
