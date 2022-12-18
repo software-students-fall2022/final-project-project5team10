@@ -187,7 +187,7 @@ def add_book():
             pass
 
         # upload book image onto database
-        file = request.files['filename']
+        file = request.files['file']
 
         if file and allowed_file((file.filename)):
             filename = secure_filename(file.filename)
