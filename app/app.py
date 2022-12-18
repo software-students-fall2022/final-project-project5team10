@@ -317,30 +317,18 @@ def book_info(bookid):
     route to show the selected book that is for sale on the home page 
     '''
     book = db.books.find_one({"_id": ObjectId(bookid)})
+
     # conditional rendering: present options to edit/delete on page only if user owns the book
-    if request.method== 'GET':
-        return render_template('book_info.html',book=book)
-    is_owner = False
     user = flask_login.current_user
-    if book["user_id"] == user.id:
-        is_owner = True
+    is_owner = book["user_id"] == user.id
+
     if request.method == 'GET':
-        return render_template('book_for_sale.html', book=book, is_owner=is_owner)
+        return render_template('book_info.html', book=book, is_owner=is_owner)
+
     if request.method == 'POST':
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
         return redirect(url_for('choose_book', otherbookid=book["_id"]))
-
-
-# curent user's books
-@app.route('/book_for_sale/<bookid>', methods=['GET'])
-@flask_login.login_required
-def for_sale(bookid):
-    '''
-    route to show the selected book that is for sale on the home page
-    '''
-    book = db.books.find_one({"_id":ObjectId(bookid)})
-    return render_template('book_for_sale.html',book=book)
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
@@ -355,6 +343,18 @@ def choose_book(otherbookid):
     myBooks = db.books.find({"user_id": user.id})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     return render_template('book_to_swap.html', books=myBooks, otherbook=otherbook)
+
+
+# # curent user's books
+# @app.route('/book_for_sale/<bookid>', methods=['GET'])
+# @flask_login.login_required
+# def for_sale(bookid):
+#     '''
+#     route to show the selected book that is for sale on the home page
+#     '''
+#     book = db.books.find_one({"_id":ObjectId(bookid)})
+#     return render_template('book_for_sale.html',book=book)
+
 
 
 
