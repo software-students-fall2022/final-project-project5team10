@@ -125,8 +125,14 @@ def home():
     '''
     find all the books currently on sale by other users
     '''
-    docs = db.books.find({"user_id": {"$ne": flask_login.current_user.id}}
-                         )  # return all the book documents from the books collection that do not have the current user's id
+    # return all the book documents from the books collection that do not have the current user's id
+    # and are able to be swapped
+    docs = db.books.find(
+        {
+            "user_id": {"$ne": flask_login.current_user.id},
+            'status' : 'swappable'
+        }
+    )
     # render the home template with those documents
     return render_template("home.html", docs=docs)
 
@@ -200,7 +206,7 @@ def login():
     if user and check_password_hash(user.data['password'], password):
         flask_login.login_user(user)  # log in the user using flask-login
         # flash('Welcome back, {}!'.format(user.data['email'])) # flash can be used to pass a special message to the template we are about to render
-        return render_template("home.html")
+        return redirect("/home")
     return render_template("login.html", message="Username or Password is incorrect")
 
 @app.route('/logout')
@@ -233,15 +239,16 @@ def add_book():
 
     # POST REQUEST FROM FORM
     if request.method == "POST":
+        # TODO - input validation
         book = {}
-        book["title"] = request.form['ftitle']
+        book["title"]     = request.form['ftitle']
         book["publisher"] = request.form['fpublisher']
-        book["user_id"] = user.id
-        book["edition"] = request.form['fedition']
+        book["user_id"]   = user.id
+        book["edition"]   = request.form['fedition']
         book["condition"] = request.form['fcondition']
-        book["price"] = float(request.form['fprice'])
-
-        # use gridfs to save uploaded image to database
+        book["price"]     = float(request.form['fprice'])
+        book["status"]    = 'swappable'
+ 
 
         # if file is not in requests, add book into the books collection and
         # render account page
@@ -344,7 +351,16 @@ def choose_book(otherbookid):
     user = flask_login.current_user
     myBooks = db.books.find({"user_id": user.id})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
-    return render_template('book_to_swap.html', books=myBooks, otherbook=otherbook)
+    otheruser = db.users.find_one({'_id' : ObjectId(otherbook['user_id'])})
+    print('otherbookid:', otherbookid, file=sys.stderr)
+    print('otheruserid', ObjectId(otherbook['user_id']), file=sys.stderr)
+    print('otheruser', otheruser, file=sys.stderr)
+    print('selfuser', user.id, file=sys.stderr)
+    print('selfuserOID', ObjectId(user.id), file=sys.stderr)
+    return render_template('book_to_swap.html', 
+                            books=myBooks, 
+                            otherbook=otherbook, 
+                            swapper_name=otheruser['username'])
 
 
 # # curent user's books
@@ -373,7 +389,12 @@ def display_account():
     to the current user's id 
     '''
     user = flask_login.current_user
-    docs = db.books.find({"user_id": user.id})
+    docs = db.books.find(
+        {
+            "user_id": user.id,
+            'status' : 'swappable'
+        }
+    )
     # render the account template with the user's username and the books they have up for sale
     return render_template("account.html", username=user.data["username"], docs=docs)
 
@@ -396,15 +417,43 @@ def send_swap(bookid, otherbookid):
     if request.method == 'GET':
         book = db.books.find_one({"_id": ObjectId(bookid)})
         return render_template('send_swap.html', book=book, otherbookid=otherbookid)
+
+    # run when user chooses to either make swap or cancel    
     if request.method == 'POST':
         # the user chooses not to send the request for this book
         if 'fcancel' in request.form:
             return redirect(url_for('choose_book', otherbookid=otherbookid))
         # the user sends the request to the other user
         elif 'fsend' in request.form:
-            make_request(user,bookid,otherbookid)
+            update_book_status(bookid, 'pending', otherbookid, 'pending')
+            make_request(user, bookid, otherbookid)
             return redirect('/home')
-            #return redirect(url_for('chat'))
+
+
+### updates book statuses
+# possible statuses are:
+#   'swappable' - when a user lists a book on their account,
+#                listed to be swapped
+#   'pending'  - when two users have requested to swap, 
+#                but the swap has not yet been done in real life
+def update_book_status(book_id_sender, status_sender, book_id_reciever, status_reciever):
+    db.books.find_one_and_update(
+        {
+            '_id' : ObjectId(book_id_sender)
+        },
+        {
+            '$set' : {'status' : status_sender}
+        }
+    )
+    db.books.find_one_and_update(
+        {
+            '_id' : ObjectId(book_id_reciever)
+        },
+        {
+            '$set' : {'status' : status_reciever}
+        }
+    )
+
 
 def make_request(user, bookid, otherbookid):
     '''
