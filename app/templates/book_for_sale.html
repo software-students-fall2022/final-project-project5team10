@@ -11,6 +11,7 @@
         <h3>Publisher: {{book.publisher}}</h3>
         <h3>Condition: {{book.condition}}</h3>
     </div>
+    
     {% if is_owner %}
     <form id="delbook" method="GET" action="{{ url_for('delete_book', bookid=book._id) }}">
         <input type="submit" name="delbookbtn" value="Delete Book Listing">

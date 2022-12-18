@@ -1,14 +1,4 @@
 {% extends 'wrapper.html' %}
-
-{% block css %}
-<link
-  rel="stylesheet"
-  href="../static/css/swap.css"
-  href="{{ url_for('static', filename='css/swap.css') }}"
-/>
-{% endblock %}
-
-
 {% block container %}
 
 <div class="bookInfo">
@@ -21,14 +11,12 @@
         <h3>Publisher: {{book.publisher}}</h3>
         <h3>Condition: {{book.condition}}</h3>
     </div>
-    <!--Send/Cancel Request-->
+    <!--choose this book to swap-->
     <div>
-        <form id="cancelrequest" method="POST">
-            <input type="submit" name="fcancel" value="Cancel">
-        </form>
-        <form id="sendrequest" method="POST">
-            <input type="submit" name="fsend" value="Send Request to Swap">
+        <form id="requestswap" method="POST">
+            <input type="submit" name="request" value="Request to Swap">
         </form>
     </div>
 </div>
+
 {% endblock %}

@@ -309,12 +309,21 @@ def edit_book(bookid):
 
 
 
+#----------------swap routes----------------#
+# books from other users
+# @app.route('/book_info<bookid>', methods=['GET','POST'])
+# def book_info(bookid):
+#    '''
+#    route to show the selected book that is for sale on the home page 
+#    '''
+#    book = db.books.find_one({"_id":ObjectId(bookid)})
+#    if request.method== 'GET':
+#        return render_template('book_info.html',book=book)
 
+# ----------------swap routes----------------#
 
-    # ----------------swap routes----------------#
-
-    # @app.route('/my_book_for_sale<bookid>', methods=['GET', 'POST'])
-    # @flask_login.login_required
+# @app.route('/my_book_for_sale<bookid>', methods=['GET', 'POST'])
+# @flask_login.login_required
 
 
 @app.route('/book_for_sale<bookid>', methods=['GET', 'POST'])
@@ -337,7 +346,17 @@ def for_sale(bookid):
         return redirect(url_for('choose_book', otherbookid=book["_id"]))
 
 
-@app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
+# curent user's books
+@app.route('/book_for_sale<bookid>', methods=['GET'])
+@flask_login.login_required
+def for_sale(bookid):
+    '''
+    route to show the selected book that is for sale on the home page
+    '''
+    book = db.books.find_one({"_id":ObjectId(bookid)})
+    return render_template('book_for_sale.html',book=book)
+
+@app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
 @flask_login.login_required
 def choose_book(otherbookid):
     '''
@@ -371,10 +390,9 @@ def send_swap(bookid, otherbookid):
             return redirect(url_for('choose_book', otherbookid=otherbookid))
         # the user sends the request to the other user
         elif 'fsend' in request.form:
-            make_request(user, bookid, otherbookid)
-            return redirect('/')
-            # return redirect(url_for('chat'))
-
+            make_request(user,bookid,otherbookid)
+            return redirect('/home')
+            #return redirect(url_for('chat'))
 
 def make_request(user, bookid, otherbookid):
     '''
@@ -396,7 +414,7 @@ def make_request(user, bookid, otherbookid):
 # ----------------------------------------#
 
 
-@app.route('/swap_requests', methods=['GET'])
+@app.route('/swap_requests', methods=['GET','POST'])
 @flask_login.login_required
 def view_swap_requests():
     """
@@ -419,9 +437,11 @@ def view_swap_requests():
     return render_template('swap_requests.html', swapreqs=swapreqs)
 
 
-# accept/decline request
-@app.route('/view_swap/<mybookid>/<otherbookid>')
-def view_swap(mybookid, otherbookid):
+
+#accept/decline request
+@app.route('/view_swap/<mybookid>/<otherbookid>', methods=['GET','POST'])
+@flask_login.login_required
+def view_swap(mybookid,otherbookid):
     """
     route that allows the user to view a specific swap request
     @param mybookid: id of the current user's book (that would be given from swap)
@@ -429,8 +449,31 @@ def view_swap(mybookid, otherbookid):
     """
     mybook = db.books.find_one({"_id": ObjectId(mybookid)})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
-    return render_template("view_swap.html", mybook=mybook, otherbook=otherbook)
-
+    
+    if request.method == 'GET':
+        return render_template("view_swap.html", mybook=mybook, otherbook=otherbook)
+    if request.method == 'POST':
+        # approve swap
+        if 'fapprove' in request.form:
+            # remove all requests containing either of these books
+            db.requests.delete_many({"bookrequested": ObjectId(mybookid)})
+            db.requests.delete_many({"booktoswap": ObjectId(mybookid)})
+            db.requests.delete_many({ "booktoswap": ObjectId(otherbookid)})
+            db.requests.delete_many({ "bookrequested": ObjectId(otherbookid)})
+            # remove books from database
+            db.books.delete_one({"_id": ObjectId(mybookid)})
+            db.books.delete_one({"_id": ObjectId(otherbookid)})
+            #flash('Request has been Approved!')
+            return redirect(url_for('view_swap_requests'))
+        # decline swap
+        if 'fdecline' in request.form:
+            # remove this request from the database
+            db.requests.delete_one(
+                { "$and": [ {"bookrequested": ObjectId(mybookid)},
+                { "booktoswap": ObjectId(otherbookid)} ] }
+            )
+            #flash('Request has been Declined')
+            return redirect(url_for('view_swap_requests'))   
 
 ################## run server ##################
 if __name__ == '__main__':
