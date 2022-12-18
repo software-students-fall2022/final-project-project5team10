@@ -102,7 +102,19 @@ def inject_user():
     return dict(user=flask_login.current_user)
 
 
+#======================================================#
+#                     helper functions                 #
+#======================================================#
 
+def isfloat(num):
+    '''
+    function checks if a string isfloat or not 
+    '''
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
 #======================================================#
 #                     main routes                      #
@@ -118,15 +130,28 @@ def authenticate():
 def home():
     if request.method == 'POST':
         query = request.form['query']
-
-        books = db.books.find({'title': query})
+        doc = {}
+        if query != "":
+            doc['title'] = query
+        if request.form['edition'] != "":
+            doc['edition'] = request.form['edition']
+        if request.form['publisher'] != "":
+            doc['publisher'] = request.form['publisher']
+        if request.form['condition'] != "":
+            doc['condition'] = request.form['condition']
+        min_price = request.form['price-min']
+        max_price = request.form['price-max']
+        if isfloat(min_price) and isfloat(max_price):
+            if min_price <= max_price:
+                doc['price'] = {'price':{'$ge': min_price, '$le': max_price }}
+        
+        books = db.books.find(doc)
         return render_template('search_results.html', books=books)
 
     '''
     find all the books currently on sale by other users
     '''
-    docs = db.books.find({"user_id": {"$ne": flask_login.current_user.id}}
-                         )  # return all the book documents from the books collection that do not have the current user's id
+    docs = db.books.find({"user_id": {"$ne": flask_login.current_user.id}})  # return all the book documents from the books collection that do not have the current user's id
     # render the home template with those documents
     return render_template("home.html", docs=docs)
 
@@ -200,7 +225,7 @@ def login():
     if user and check_password_hash(user.data['password'], password):
         flask_login.login_user(user)  # log in the user using flask-login
         # flash('Welcome back, {}!'.format(user.data['email'])) # flash can be used to pass a special message to the template we are about to render
-        return render_template("home.html")
+        return redirect(url_for('home'))
     return render_template("login.html", message="Username or Password is incorrect")
 
 @app.route('/logout')
