@@ -14,16 +14,23 @@ main {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    flex-basis: 100%;
 }
 
 #search-bar {
     flex-basis: 100%;
+    text-align: center;
 }
 
 #filter-buttons {
     flex-basis: 100%;
     display: flex;
     justify-content: space-evenly;
+    max-width: 75%;
+}
+
+#filter-buttons.hidden {
+    display: none;
 }
 
 /* #filter-buttons > input {
@@ -43,6 +50,11 @@ main {
     background-color: green;
 }
 
+
+/***************** Other Books *****************/
+.grid-container {
+    flex-basis: 100%;
+}
 
 
 /***************** SPECIAL CLASSES *****************/
