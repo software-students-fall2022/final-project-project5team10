@@ -27,7 +27,7 @@
             <br>
             <br>
             {% if doc["metadata"] %}
-            <img class= 'thumbnail' src="{{ doc["metadata"]["volumeInfo"]["imageLinks"]["thumbnail"] }}" width="250" height="250">
+            <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
             {% endif %}
             </a>
         </div>

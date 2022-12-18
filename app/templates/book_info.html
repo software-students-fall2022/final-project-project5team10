@@ -10,6 +10,9 @@
         <h3>Edition: {{book.edition}}</h3>
         <h3>Publisher: {{book.publisher}}</h3>
         <h3>Condition: {{book.condition}}</h3>
+        <h3>Average Rating: {{book.metadata.volumeInfo.averageRating}}, {{book.metadata.volumeInfo.ratingsCount}} reviews</h3>
+        <h3>Page Count: {{book.metadata.volumeInfo.pageCount}}</h3>
+        <h3>Description: {{book.metadata.volumeInfo.description}}</h3>
     </div>
     
     {% if is_owner %}

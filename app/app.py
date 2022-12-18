@@ -245,7 +245,7 @@ def add_book():
         google_api_response = requests.get("https://www.googleapis.com/books/v1/volumes?q=" +
         book["title"] + "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
         # print(google_api_response,file=sys.stderr)
-        print(google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"], file=sys.stderr)
+        # print(google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"], file=sys.stderr)
         response = google_api_response["items"][0]
         book["metadata"] = response
 
