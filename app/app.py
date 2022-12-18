@@ -259,6 +259,9 @@ def display_account():
 
 #----------------swap routes----------------#
 
+# @app.route('/my_book_for_sale<bookid>', methods=['GET', 'POST'])
+# @flask_login.login_required
+
 @app.route('/book_for_sale<bookid>', methods=['GET','POST'])
 @flask_login.login_required
 def for_sale(bookid):
@@ -266,8 +269,13 @@ def for_sale(bookid):
     route to show the selected book that is for sale on the home page 
     '''
     book = db.books.find_one({"_id":ObjectId(bookid)})
+    # conditional rendering: present options to edit/delete on page only if user owns the book
+    is_owner = False
+    user = flask_login.current_user
+    if book["user_id"] == user.id:
+        is_owner = True
     if request.method== 'GET':
-        return render_template('book_for_sale.html',book=book)
+        return render_template('book_for_sale.html',book=book, is_owner=is_owner)
     if request.method == 'POST':
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
