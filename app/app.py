@@ -289,16 +289,27 @@ def display_account():
 @flask_login.login_required
 def delete_book(bookid):
     '''
-    delete book from database given a bookid
+    delete book from database given a book_id
     '''
-    book = db.books.delete_one({"_id": ObjectId(bookid)})
-    print("deleted book with id: " + str(bookid), file=sys.stdout)
+    db.books.delete_one({"_id": ObjectId(bookid)})
+    # print("deleted book with id: " + str(bookid), file=sys.stderr)
     return redirect(url_for('display_account'))
 
 
-# @app.route('/edit/<bookid>')
-# @flask_login.login_required
-# def edit_book(bookid):
+@app.route('/edit/<bookid>',methods=['GET'])
+@flask_login.login_required
+def edit_book(bookid):
+    '''
+    record existing attributes of book and pass them to template
+    as existing field values after removing book from db
+    '''
+    book_record = db.books.find_one({"_id": ObjectId(bookid)})
+    db.books.delete_one({"_id": ObjectId(bookid)})
+    return render_template('edit_book.html', book=book_record)
+
+
+
+
 
     # ----------------swap routes----------------#
 
