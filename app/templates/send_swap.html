@@ -22,11 +22,13 @@
         <h3>Condition: {{book.condition}}</h3>
     </div>
     <!--Send/Cancel Request-->
+    <div>
         <form id="cancelrequest" method="POST">
             <input type="submit" name="fcancel" value="Cancel">
         </form>
         <form id="sendrequest" method="POST">
             <input type="submit" name="fsend" value="Send Request to Swap">
         </form>
+    </div>
 </div>
 {% endblock %}
