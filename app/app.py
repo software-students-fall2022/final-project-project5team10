@@ -2,13 +2,11 @@ from flask import Flask, jsonify, render_template, request, redirect, flash, url
 from werkzeug.utils import secure_filename
 
 import pymongo
-import time
-import datetime
+import time, datetime
 from bson.objectid import ObjectId
-import sys
-import os
-import codecs
-import gridfs
+import codecs, gridfs
+
+import sys, os
 
 # modules useful for user authentication
 import flask_login
@@ -18,6 +16,9 @@ from werkzeug.security import check_password_hash
 # Allowed file types for upload
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
+
+
+
 ################## setup ##################
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -26,16 +27,12 @@ app.secret_key = os.urandom(24)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-################## routes ##################
-
 client = pymongo.MongoClient(host='db', port=27017)
 db = client["project5"]
 
 grid_fs = gridfs.GridFS(db)
 
 # a class to represent a user
-
-
 class User(flask_login.UserMixin):
     # inheriting from the UserMixin class gives this blank class default implementations of the necessary methods that flask-login requires all User objects to have
     # see some discussion of this here: https://stackoverflow.com/questions/63231163/what-is-the-usermixin-in-flask
@@ -96,9 +93,12 @@ def inject_user():
     # make the currently-logged-in user, if any, available to all templates as 'user'
     return dict(user=flask_login.current_user)
 
-################## routes ##################
-# set up the routes
 
+
+
+
+
+################## routes ##################
 
 @app.route('/')
 def authenticate():
@@ -131,9 +131,8 @@ def home():
 def signupPage():
     return render_template("signup.html")
 
+
 # route to handle the submission of the login form
-
-
 @app.route('/signup', methods=['POST'])
 def signup():
     '''
@@ -169,9 +168,8 @@ def signup():
         flask_login.login_user(user)  # log in the user using flask-login
         return redirect(url_for('home'))
 
+
 # route to handle the submission of the login form
-
-
 @app.route('/login', methods=['POST'])
 def login():
     '''
@@ -309,31 +307,22 @@ def edit_book(bookid):
 
 
 
-#----------------swap routes----------------#
-# books from other users
-@app.route('/book_info<bookid>', methods=['GET','POST'])
-def book_info(bookid):
-    '''
-    route to show the selected book that is for sale on the home page 
-    '''
-    book = db.books.find_one({"_id":ObjectId(bookid)})
-    if request.method== 'GET':
-        return render_template('book_info.html',book=book)
-
 # ----------------swap routes----------------#
 
 # @app.route('/my_book_for_sale<bookid>', methods=['GET', 'POST'])
 # @flask_login.login_required
 
 
-@app.route('/book_for_sale<bookid>', methods=['GET', 'POST'])
+@app.route('/book_info<bookid>', methods=['GET', 'POST'])
 @flask_login.login_required
-def for_sale(bookid):
+def book_info(bookid):
     '''
     route to show the selected book that is for sale on the home page 
     '''
     book = db.books.find_one({"_id": ObjectId(bookid)})
     # conditional rendering: present options to edit/delete on page only if user owns the book
+    if request.method== 'GET':
+        return render_template('book_info.html',book=book)
     is_owner = False
     user = flask_login.current_user
     if book["user_id"] == user.id:
@@ -344,6 +333,17 @@ def for_sale(bookid):
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
         return redirect(url_for('choose_book', otherbookid=book["_id"]))
+
+
+# curent user's books
+@app.route('/book_for_sale<bookid>', methods=['GET'])
+@flask_login.login_required
+def for_sale(bookid):
+    '''
+    route to show the selected book that is for sale on the home page
+    '''
+    book = db.books.find_one({"_id":ObjectId(bookid)})
+    return render_template('book_for_sale.html',book=book)
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
