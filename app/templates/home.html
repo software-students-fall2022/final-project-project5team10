@@ -12,7 +12,7 @@
             <div class="grid-container">
                 {% for doc in docs %}
                 <img src = "data:image/png;base64, {{doc.image_base64}}" width="500" height="500" />
-                <div class="grid-item"><a href="/">{{doc.title}}</a></div>
+                <div class="grid-item"><a href="{{ url_for('for_sale', bookid=doc._id)}}">{{doc.title}}</a></div>
                 {%endfor%}
             </div>
         </section>

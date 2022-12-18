@@ -1,16 +1,14 @@
 {% extends 'wrapper.html' %}
 {% block container %}
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-    <link rel="stylesheet" href="../static/css/styles.css"/>
-</head>
+
 <h1>Choose Book to Swap</h1>
 {% for book in books %}
 <div class="selectBook">
+    <img src = "data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
      <a href="{{ url_for('send_swap', bookid=book._id, otherbookid=otherbook._id)}}">
          <h3>{{book.title}}</h3>
      </a>
 </div>
+
 {% endfor %}
 {% endblock %}

@@ -220,13 +220,8 @@ def display_account():
 
 #----------------swap routes----------------#
 
-@app.route('/searchresults',methods=['GET','POST'])
-def show_books():
-    user =flask_login.current_user
-    books = db.books.find({"user_id": {"$ne": user.id}})
-    return render_template('/searchresults.html',books=books)
-
 @app.route('/book_for_sale<bookid>', methods=['GET','POST'])
+@flask_login.login_required
 def for_sale(bookid):
     print(bookid)
     book = db.books.find_one({"_id":ObjectId(bookid)})
@@ -237,13 +232,17 @@ def for_sale(bookid):
         return redirect(url_for('choose_book',otherbookid=book["_id"]))
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
+@flask_login.login_required
 def choose_book(otherbookid):
     user =flask_login.current_user
     myBooks = db.books.find({"user_id": user.id})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     return render_template('book_to_swap.html', books=myBooks, otherbook=otherbook)
 
+#-----------Send Swap Request--------------#
+
 @app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET','POST'])
+@flask_login.login_required
 def send_swap(bookid,otherbookid):
     user = flask_login.current_user
     if request.method == 'GET':
@@ -254,16 +253,50 @@ def send_swap(bookid,otherbookid):
         return render_template('send_swap.html')
     else:
         if 'fcancel' in request.form:
-            #otherid = request.form.get('otherid')
             return redirect(url_for('choose_book',otherbookid=otherbookid))
-        elif 'frequest' in request.form:
+        elif 'fsend' in request.form:
             # send the request to the other user
-            otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
-            otheruserid = otherbook["user_id"]
-            username = db.users.find_one({"user_id": otheruserid})
-            #reciever = locate_user(username=username) # get username from prev page
-            db.requests.insert_one({"sender": ObjectId(user.id), "reciever": ObjectId(otheruserid), "booktoswap": ObjectId(bookid), "bookrequested": ObjectId(otherbookid)})
-            return redirect(url_for('chat'))
+            make_request(user,bookid,otherbookid)
+            return redirect('/')
+            #return redirect(url_for('chat'))
+
+def make_request(user,bookid,otherbookid):
+    otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
+    otheruserid = otherbook["user_id"]
+    #username = db.users.find_one({"user_id": otheruserid})
+    db.requests.insert_one({
+        "sender": ObjectId(user.id), 
+        "reciever": ObjectId(otheruserid),
+        "booktoswap": ObjectId(bookid),
+        "bookrequested": ObjectId(otherbookid)
+        })
+
+#----------------------------------------#
+
+@app.route('/swap_requests', methods=['GET'])
+@flask_login.login_required
+def view_swap_requests():
+    user = flask_login.current_user
+    requests = db.requests.find({"reciever": ObjectId(user.id)}).sort("_id",-1)
+    swapreqs = []
+    # create an array of books to be swapped
+    for req in requests:
+        mybookid = req["bookrequested"]
+        swapreqid = req["booktoswap"]
+        mybook= db.books.find_one({"_id": ObjectId(mybookid)})
+        booktoswap= db.books.find_one({"_id": ObjectId(swapreqid)})
+        swapreqs.append({"b1": mybook, "b2": booktoswap})
+    return render_template('swap_requests.html', swapreqs=swapreqs)
+
+
+#accept/decline request
+@app.route('/view_swap/<mybookid>/<swapreqid>')
+def view_swap(mybookid,swapreqid):
+    #user = flask_login.current_user
+    mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+    swapreq = db.books.find_one({"_id": ObjectId(swapreqid)})
+    return render_template("view_swap.html", mybook=mybook, swapreq=swapreq)
+    
 
 ################## run server ##################
 if __name__=='__main__':
