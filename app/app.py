@@ -346,16 +346,6 @@ def for_sale(bookid):
         return redirect(url_for('choose_book', otherbookid=book["_id"]))
 
 
-# curent user's books
-@app.route('/book_for_sale<bookid>', methods=['GET'])
-@flask_login.login_required
-def for_sale(bookid):
-    '''
-    route to show the selected book that is for sale on the home page
-    '''
-    book = db.books.find_one({"_id":ObjectId(bookid)})
-    return render_template('book_for_sale.html',book=book)
-
 @app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
 @flask_login.login_required
 def choose_book(otherbookid):
