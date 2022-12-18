@@ -3,4 +3,4 @@ flask_login
 werkzeug
 pymongo
 datetime
-flask_socketio
+

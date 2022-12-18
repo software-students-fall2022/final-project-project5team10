@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
-from flask_socketio import SocketIO, send, emit 
+from flask_socketio import SocketIO, send, join_room, leave_room 
 
 import pymongo
 import time
@@ -16,7 +16,10 @@ from werkzeug.security import check_password_hash
 ################## setup ##################
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+################## flask_socketio setup ##################
 socketio = SocketIO(app, cors_allowed_origins="*")
+ROOMS = ['lounge','news','games','coding']
 
 # set up flask-login for user authentication
 login_manager = flask_login.LoginManager()
@@ -86,7 +89,7 @@ def inject_user():
 @app.route('/')
 def authenticate():
     #Route for the home page
-    return render_template("login.html", message = "Please login or sign up!")
+    return render_template("login.html", message = "Please login or sign up!", rooms = ROOMS)
 
 @app.route('/home')
 @flask_login.login_required
@@ -136,7 +139,6 @@ def login():
     if user and check_password_hash(user.data['password'], password):
         flask_login.login_user(user) # log in the user using flask-login
         # flash('Welcome back, {}!'.format(user.data['email'])) # flash can be used to pass a special message to the template we are about to render
-
         return redirect(url_for('home'))
     
     return render_template("login.html", message = "Incorrect Username or Password or Account Does Not Exist.")
@@ -168,7 +170,7 @@ def add_book():
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
-### live chat between users ###
+###------------------- live chat between users ---------------------------###
 @app.route('/chat', methods = ["GET","POST"])
 # @flask_login.login_required
 # @socketio.on('view-chat')
@@ -180,8 +182,22 @@ def chat():
 def message(data):
     # print(f"\n\n{data}\n\n")
     timestamp = time.strftime('%b-%d %I:%M%p', time.localtime())
+    # room=data["room"]
     send({'msg': data['msg'], 'username': data['username'], 'timestamp':timestamp})
 
+# @socketio.on('join')
+# def join(data):
+#     join_room(data['room'])
+#     send({'msg': data['username']+" has joined the "+ data['room'] + " room."},
+#     room=data['room'])
+
+# @socketio.on('leave')
+# def leave(data):
+#     leave_room(data['room'])
+#     send({'msg': data['username']+" has left the "+ data['room'] + " room."},
+#     room=data['room'])
+
+#---------------------------------------------------------------------------#
 @app.route('/account')
 @flask_login.login_required
 def display_account():
@@ -191,8 +207,6 @@ def display_account():
     print(docs, file=sys.stderr)
 
     return render_template("account.html", username=user.data["username"], docs=docs)
-
-
 
 #----------------swap routes----------------#
 
