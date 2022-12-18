@@ -19,11 +19,17 @@
     </form>
     <br />
     
-    <h2 id="booksForSaleTitle">Books for sale</h2>
+    <h2 id="booksForSaleTitle">Books for Sale</h2>
     <div class="grid-container">
         {% for doc in docs %}
         <div class="grid-item">
-            <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}</a>
+            <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}
+            <br>
+            <br>
+            {% if doc["metadata"] %}
+            <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
+            {% endif %}
+            </a>
         </div>
         {%endfor%}
     </div>
