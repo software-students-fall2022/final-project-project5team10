@@ -1,4 +1,14 @@
 {% extends 'wrapper.html' %}
+
+{% block css %}
+<link
+  rel="stylesheet"
+  href="../static/css/swap.css"
+  href="{{ url_for('static', filename='css/swap.css') }}"
+/>
+{% endblock %}
+
+
 {% block container %}
 
 <div class="bookInfo">

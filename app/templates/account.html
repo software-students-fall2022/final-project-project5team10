@@ -1,47 +1,43 @@
 {% extends 'wrapper.html' %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title></title>
-        <link rel="stylesheet" href="../static/css/account.css" />
-    </head>
 
-    <body>
-        <section class="content">
-            {% block container %}
-            <div class="books"></div>
-            <div id="buttons">
-                <h2 id="name">Welcome, {{username}}!</h2>
-                <form>
-                    <button
-                        type="submit"
-                        formaction="{{ url_for('add_book')}}"
-                        class="block"
-                    >
-                        Add book to sell
-                    </button>
-                </form>
-                <br />
-                <form>
-                    <button
-                        type="submit"
-                        formaction="{{ url_for('view_chat')}}"
-                        class="block"
-                    >
-                        View Chat
-                    </button>
-                </form>
-            </div>
-            <br />
-            <h2 id="booksForSaleTitle">Books for sale</h2>
-            <div class="grid-container">
-                {% for doc in docs %}
-                <div class="grid-item"><a href="/">{{doc.title}}</a></div>
-                {%endfor%}
-            </div>
-            {% endblock %}
-        </section>
-    </body>
-</html>
+{% block css %}
+<link
+  rel="stylesheet"
+  href="../static/css/account.css"
+  href="{{ url_for('static', filename='css/account.css') }}"
+/>
+{% endblock %}
 
+
+{% block container %}
+<div class="books"></div>
+<div id="buttons">
+    <h2 id="name">Welcome, {{username}}!</h2>
+    <form>
+        <button
+            type="submit"
+            formaction="{{ url_for('add_book')}}"
+            class="block"
+        >
+            Add book to sell
+        </button>
+    </form>
+    <br />
+    <form>
+        <button
+            type="submit"
+            formaction="{{ url_for('view_chat')}}"
+            class="block"
+        >
+            View Chat
+        </button>
+    </form>
+</div>
+<br />
+<h2 id="booksForSaleTitle">Books for sale</h2>
+<div class="grid-container">
+    {% for doc in docs %}
+    <div class="grid-item"><a href="/">{{doc.title}}</a></div>
+    {%endfor%}
+</div>
+{% endblock %}

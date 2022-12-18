@@ -86,9 +86,11 @@ def authenticate():
     #Route for the home page
     return render_template("login.html", message = "Please login or sign up!")
 
-@app.route('/home')
+@app.route('/home', methods=['GET','POST'])
 @flask_login.login_required
 def home():
+    if request.method == 'POST':
+
     docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}})
     return render_template("home.html", docs=docs)
 
@@ -185,11 +187,11 @@ def display_account():
 
 #----------------swap routes----------------#
 
-@app.route('/searchresults',methods=['GET','POST'])
+@app.route('/search_results',methods=['GET','POST'])
 def show_books():
-    user =flask_login.current_user
+    user = flask_login.current_user
     books = db.books.find({"user_id": {"$ne": user.id}})
-    return render_template('/searchresults.html',books=books)
+    return render_template('/search_results.html',books=books)
 
 @app.route('/book_for_sale<bookid>', methods=['GET','POST'])
 def for_sale(bookid):

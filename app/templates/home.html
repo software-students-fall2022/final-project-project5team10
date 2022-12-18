@@ -1,21 +1,20 @@
 {% extends 'wrapper.html' %}
-{% block container %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-        <link rel="stylesheet" href="../static/css/styles.css"/>
-    </head>
-    <body>
-        <section class="content">
-            <div class="grid-container">
-                {% for doc in docs %}
-                <div class="grid-item"><a href="/">{{doc.title}}</a></div>
-                {%endfor%}
-            </div>
-        </section>
-    </body>
-</html> 
 
+{% block css %}
+{% endblock %}
+
+
+{% block container %}
+<!-- Header -->
+<h1>EXPLORE A WIDE COLLECTION OF BOOKS</h1>
+
+<!-- Search bar -->
+<form method='POST' action="{{url_for('home')}}"></form>
+
+<!-- Everyone else's books -->
+<div class="grid-container">
+    {% for doc in docs %}
+    <div class="grid-item"><a href="/">{{doc.title}}</a></div>
+    {%endfor%}
+</div>
 {% endblock %}
