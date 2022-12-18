@@ -1,24 +1,33 @@
+#======================================================#
+#                        imports                       #
+#======================================================#
+
+# flask
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
 
+# mongodb
 import pymongo
-import time
-import datetime
+import time, datetime
 from bson.objectid import ObjectId
-import sys
-import os
-import codecs
-import gridfs
+import codecs, gridfs
 
-# modules useful for user authentication
+# user authentication
 import flask_login
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
-# Allowed file types for upload
+# testing
+import sys, os
+
+# allowed file types for upload
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-################## setup ##################
+
+
+#======================================================#
+#                        setup                         #
+#======================================================#
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -26,16 +35,12 @@ app.secret_key = os.urandom(24)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-################## routes ##################
-
 client = pymongo.MongoClient(host='db', port=27017)
 db = client["project5"]
 
 grid_fs = gridfs.GridFS(db)
 
 # a class to represent a user
-
-
 class User(flask_login.UserMixin):
     # inheriting from the UserMixin class gives this blank class default implementations of the necessary methods that flask-login requires all User objects to have
     # see some discussion of this here: https://stackoverflow.com/questions/63231163/what-is-the-usermixin-in-flask
@@ -96,17 +101,17 @@ def inject_user():
     # make the currently-logged-in user, if any, available to all templates as 'user'
     return dict(user=flask_login.current_user)
 
-################## routes ##################
-# set up the routes
 
+
+
+#======================================================#
+#                     main routes                      #
+#======================================================#
 
 @app.route('/')
 def authenticate():
     # Route for the home page
     return render_template("login.html")
-    # Route for the login page
-    return render_template("login.html", message="Please login or sign up!")
-
 
 @app.route('/home', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -115,7 +120,6 @@ def home():
         query = request.form['query']
 
         books = db.books.find({'title': query})
-
         return render_template('search_results.html', books=books)
 
     '''
@@ -127,13 +131,19 @@ def home():
     return render_template("home.html", docs=docs)
 
 
+
+
+#======================================================#
+#                   signup/register                    #
+#======================================================#
+
+
 @app.route('/signupPage', methods=['GET'])
 def signupPage():
     return render_template("signup.html")
 
+
 # route to handle the submission of the login form
-
-
 @app.route('/signup', methods=['POST'])
 def signup():
     '''
@@ -169,9 +179,8 @@ def signup():
         flask_login.login_user(user)  # log in the user using flask-login
         return redirect(url_for('home'))
 
+
 # route to handle the submission of the login form
-
-
 @app.route('/login', methods=['POST'])
 def login():
     '''
@@ -192,9 +201,6 @@ def login():
         return render_template("home.html")
     return render_template("login.html", message="Username or Password is incorrect")
 
-# route to logout a user
-
-
 @app.route('/logout')
 def logout():
     '''
@@ -203,6 +209,13 @@ def logout():
     flask_login.logout_user()
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
+
+
+
+
+#======================================================#
+#                      book CRUD                       #
+#======================================================#
 
 
 @app.route('/add_book', methods=["GET", "POST"])
@@ -263,26 +276,16 @@ def add_book():
         return redirect(url_for('display_account'))
 
 
-@app.route('/view_chat')
+@app.route('/edit/<bookid>',methods=['GET'])
 @flask_login.login_required
-def view_chat():
+def edit_book(bookid):
     '''
-    TODO: to be implemented 
+    record existing attributes of book and pass them to template
+    as existing field values after removing book from db
     '''
-    pass
-
-
-@app.route('/account')
-@flask_login.login_required
-def display_account():
-    '''
-    display all the documents with the user_id field set
-    to the current user's id 
-    '''
-    user = flask_login.current_user
-    docs = db.books.find({"user_id": user.id})
-    # render the account template with the user's username and the books they have up for sale
-    return render_template("account.html", username=user.data["username"], docs=docs)
+    book_record = db.books.find_one({"_id": ObjectId(bookid)})
+    db.books.delete_one({"_id": ObjectId(bookid)})
+    return render_template('edit_book.html', book=book_record)
 
 
 @app.route('/delete/<bookid>', methods=['GET'])
@@ -296,50 +299,32 @@ def delete_book(bookid):
     return redirect(url_for('display_account'))
 
 
-@app.route('/edit/<bookid>',methods=['GET'])
-@flask_login.login_required
-def edit_book(bookid):
-    '''
-    record existing attributes of book and pass them to template
-    as existing field values after removing book from db
-    '''
-    book_record = db.books.find_one({"_id": ObjectId(bookid)})
-    db.books.delete_one({"_id": ObjectId(bookid)})
-    return render_template('edit_book.html', book=book_record)
 
 
 
-#----------------swap routes----------------#
-# books from other users
-# @app.route('/book_info<bookid>', methods=['GET','POST'])
-# def book_info(bookid):
-#    '''
-#    route to show the selected book that is for sale on the home page 
-#    '''
-#    book = db.books.find_one({"_id":ObjectId(bookid)})
-#    if request.method== 'GET':
-#        return render_template('book_info.html',book=book)
-
-# ----------------swap routes----------------#
+#======================================================#
+#                     book viewing                     #
+#======================================================#
 
 # @app.route('/my_book_for_sale<bookid>', methods=['GET', 'POST'])
 # @flask_login.login_required
 
 
-@app.route('/book_for_sale<bookid>', methods=['GET', 'POST'])
+@app.route('/book_info/<bookid>', methods=['GET', 'POST'])
 @flask_login.login_required
-def for_sale(bookid):
+def book_info(bookid):
     '''
     route to show the selected book that is for sale on the home page 
     '''
     book = db.books.find_one({"_id": ObjectId(bookid)})
+
     # conditional rendering: present options to edit/delete on page only if user owns the book
-    is_owner = False
     user = flask_login.current_user
-    if book["user_id"] == user.id:
-        is_owner = True
+    is_owner = book["user_id"] == user.id
+
     if request.method == 'GET':
-        return render_template('book_for_sale.html', book=book, is_owner=is_owner)
+        return render_template('book_info.html', book=book, is_owner=is_owner)
+
     if request.method == 'POST':
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
@@ -359,8 +344,59 @@ def choose_book(otherbookid):
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     return render_template('book_to_swap.html', books=myBooks, otherbook=otherbook)
 
-# -----------Send Swap Request--------------#
 
+# # curent user's books
+# @app.route('/book_for_sale/<bookid>', methods=['GET'])
+# @flask_login.login_required
+# def for_sale(bookid):
+#     '''
+#     route to show the selected book that is for sale on the home page
+#     '''
+#     book = db.books.find_one({"_id":ObjectId(bookid)})
+#     return render_template('book_for_sale.html',book=book)
+
+
+
+
+
+#======================================================#
+#                         chat                         #
+#======================================================#
+
+@app.route('/view_chat')
+@flask_login.login_required
+def view_chat():
+    '''
+    TODO: to be implemented 
+    '''
+    pass
+
+
+
+
+#======================================================#
+#                        account                       #
+#======================================================#
+
+
+@app.route('/account')
+@flask_login.login_required
+def display_account():
+    '''
+    display all the documents with the user_id field set
+    to the current user's id 
+    '''
+    user = flask_login.current_user
+    docs = db.books.find({"user_id": user.id})
+    # render the account template with the user's username and the books they have up for sale
+    return render_template("account.html", username=user.data["username"], docs=docs)
+
+
+
+
+#======================================================#
+#                     swap routes                      #
+#======================================================#
 
 @app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -400,8 +436,6 @@ def make_request(user, bookid, otherbookid):
         "booktoswap": ObjectId(bookid),  # book the current user has
         "bookrequested": ObjectId(otherbookid)  # book the current user wants
     })
-
-# ----------------------------------------#
 
 
 @app.route('/swap_requests', methods=['GET','POST'])
@@ -465,6 +499,11 @@ def view_swap(mybookid,otherbookid):
             #flash('Request has been Declined')
             return redirect(url_for('view_swap_requests'))   
 
-################## run server ##################
+
+
+
+#======================================================#
+#                         run                          #
+#======================================================#
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=3000)
