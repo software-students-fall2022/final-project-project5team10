@@ -352,11 +352,6 @@ def choose_book(otherbookid):
     myBooks = db.books.find({"user_id": user.id})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     otheruser = db.users.find_one({'_id' : ObjectId(otherbook['user_id'])})
-    print('otherbookid:', otherbookid, file=sys.stderr)
-    print('otheruserid', ObjectId(otherbook['user_id']), file=sys.stderr)
-    print('otheruser', otheruser, file=sys.stderr)
-    print('selfuser', user.id, file=sys.stderr)
-    print('selfuserOID', ObjectId(user.id), file=sys.stderr)
     return render_template('book_to_swap.html', 
                             books=myBooks, 
                             otherbook=otherbook, 
