@@ -7,6 +7,8 @@
     <a href="{{ url_for('view_swap', mybookid=req.b1._id, swapreqid=req.b2._id)}}">
          <h3>{{req.b1.title}} / {{req.b2.title}}</h3>
     </a>
+    <img src = "data:image/png;base64, {{req.b1.image_base64}}" width="500" height="500" />
+    <img src = "data:image/png;base64, {{req.b2.image_base64}}" width="500" height="500" />
 </div>
 
 {% endfor %}
