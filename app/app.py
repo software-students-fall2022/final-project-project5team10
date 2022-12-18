@@ -54,7 +54,7 @@ def locate_user(user_id=None, username=None):
         # loop up by user_id
         criteria = {"_id": ObjectId(user_id)}
     else:
-        # loop up by email
+        # loop up by username
         criteria = {"username": username}
     doc = db.users.find_one(criteria) # find a user with this username
     if doc: 
@@ -96,26 +96,32 @@ def inject_user():
 # set up the routes
 @app.route('/')
 def authenticate():
-    #Route for the home page
+    #Route for the login page
     return render_template("login.html", message = "Please login or sign up!")
 
 @app.route('/home')
 @flask_login.login_required
 def home():
-    docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}})
-    return render_template("home.html", docs=docs)
+    '''
+    find all the books currently on sale by other users
+    '''
+    docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}}) # return all the book documents from the books collection that do not have the current user's id 
+    return render_template("home.html", docs=docs) # render the home template with those documents
 
 # route to handle the submission of the login form
 @app.route('/signup', methods=['POST'])
 def signup():
+    '''
+    route to sign up a new user.
+    '''
     # grab the data from the form submission
     username = request.form['fusername']
     password = request.form['fpassword']
-    if username == "" or password == "" or username.isspace():
+    if username == "" or password == "" or username.isspace(): # check if the user entered nothing for the username or email and display an input error message accordingly 
         return render_template("login.html", message = "Invalid username or password")
     hashed_password = generate_password_hash(password) # generate a hashed password to store - don't store the original
     
-    # check whether an account with this email already exists... don't allow duplicates
+    # check whether an account with this username already exists... don't allow duplicates
     if locate_user(username = username):
         # flash('An account for {} already exists.  Please log in.'.format(username))
         return render_template("login.html", message = "This username already exists.")
@@ -130,16 +136,19 @@ def signup():
             "password": hashed_password,
         })
         flask_login.login_user(user) # log in the user using flask-login
-        # flash('Thanks for joining, {}!'.format(user.data['username'])) # flash can be used to pass a special message to the template we are about to render
         return redirect(url_for('home'))
-    # else
     return 'Signup failed'
 
 # route to handle the submission of the login form
 @app.route('/login', methods=['POST'])
 def login():
+    '''
+    route that logs in a registered user 
+    '''
+    # get username and password from form 
     username = request.form['fusername']
     password = request.form['fpassword']
+    # check for empty input or spaces in the username; display an error message accordingly 
     if username == "" or password == "" or username.isspace():
         return render_template("login.html", message = "Invalid username or password")
     user = locate_user(username=username) # load up any existing user with this email address from the database
@@ -155,6 +164,9 @@ def login():
 # route to logout a user
 @app.route('/logout')
 def logout():
+    '''
+    route to end the current user's session 
+    '''
     flask_login.logout_user()
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
@@ -162,6 +174,10 @@ def logout():
 @app.route('/add_book', methods=["GET", "POST"])
 @flask_login.login_required
 def add_book():
+    '''
+    route that adds a book to the books collection with the user_id 
+    field set to the current user's id 
+    '''
     user =flask_login.current_user
     if request.method == "GET":
         return render_template("add_book.html")
@@ -176,44 +192,56 @@ def add_book():
         book["conditon"] = request.form['fcondition']
         book["price"] = float(request.form['fprice'])
 
-        if 'file' not in request.files:
-            pass
+        # use gridfs to save uploaded image to database 
 
-        # upload book image onto database
+        # if file is not in requests, add book into the books collection and 
+        # render account page 
+        if 'file' not in request.files:
+            db.books.insert_one(book)
+            return redirect(url_for('display_account'))
+
+        # get uploaded file 
         file = request.files['file']
 
-        if file and allowed_file((file.filename)):
+        if file and allowed_file((file.filename)): # check for allowed extensions
             filename = secure_filename(file.filename)
             user = flask_login.current_user
             name = str(user.id) +"_" + str(filename) # unique file name: user id + filename
-            id = grid_fs.put(file, filename = name)
+            id = grid_fs.put(file, filename = name) # upload file in chunks into the db using grid_fs
+            # document to be inserted into the images collection 
             query = {
                 "user": user.id, 
                 "book_name": book["title"],
                 "img_id": id
             }
-            book["image"] = id # add gridfs id to file 
+            book["image"] = id # add gridfs id to the image field of the book document to be queried into the books collection
+            # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html 
             image = grid_fs.get(id)
             base64_data = codecs.encode(image.read(), 'base64')
             image = base64_data.decode('utf-8')
             book['image_base64'] = image 
-            db.images.insert_one(query)
+            db.images.insert_one(query) # add the image query into the images collection 
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
 @app.route('/view_chat')
 @flask_login.login_required
 def view_chat():
+    '''
+    TODO: to be implemented 
+    '''
     pass
 
 @app.route('/account')
 @flask_login.login_required
 def display_account():
+    '''
+    display all the documents with the user_id field set
+    to the current user's id 
+    '''
     user =flask_login.current_user
     docs = db.books.find({"user_id": user.id})
-    print(user.id, file=sys.stderr)
-    print(docs, file=sys.stderr)
-
+    # render the account template with the user's username and the books they have up for sale
     return render_template("account.html", username=user.data["username"], docs=docs)
 
 
