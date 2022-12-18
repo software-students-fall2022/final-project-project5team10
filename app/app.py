@@ -152,6 +152,7 @@ def signup():
     # grab the data from the form submission
     username = request.form['fusername']
     password = request.form['fpassword']
+    email    = request.form['femail']
     if len(username) < 6 or len(password) < 6:
         return render_template('signup.html', crederror="Username or password must be at least 6 characters")
     # generate a hashed password to store - don't store the original
@@ -174,6 +175,7 @@ def signup():
         user = User({
             "_id": user_id,
             "username": username,
+            "email"   : email,
             "password": hashed_password,
         })
         flask_login.login_user(user)  # log in the user using flask-login
