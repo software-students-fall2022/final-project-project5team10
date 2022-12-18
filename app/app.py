@@ -103,6 +103,11 @@ def authenticate():
 @flask_login.login_required
 def home():
     if request.method == 'POST':
+        query = request.form['query']
+
+        books = db.books.find({'title' : query})
+
+        return render_template('search_results.html', books=books)
 
     docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}})
     return render_template("home.html", docs=docs)
@@ -182,7 +187,7 @@ def add_book():
             pass
 
         # upload book image onto database
-        file = request.files['file']
+        file = request.files['filename']
 
         if file and allowed_file((file.filename)):
             filename = secure_filename(file.filename)

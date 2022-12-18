@@ -9,7 +9,10 @@
 <h1>EXPLORE A WIDE COLLECTION OF BOOKS</h1>
 
 <!-- Search bar -->
-<form method='POST' action="{{url_for('home')}}"></form>
+<form method='POST' action="{{url_for('home')}}">
+    <input type="text" name="query">
+    <input type="submit" value="Search">
+</form>
 
 <!-- Everyone else's books -->
 <div class="grid-container">
