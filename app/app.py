@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
-from flask_socketio import SocketIO, send, join_room, leave_room 
 
 import pymongo
 import time
@@ -16,10 +15,6 @@ from werkzeug.security import check_password_hash
 ################## setup ##################
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-
-################## flask_socketio setup ##################
-socketio = SocketIO(app, cors_allowed_origins="*")
-ROOMS = ['lounge','news','games','coding']
 
 # set up flask-login for user authentication
 login_manager = flask_login.LoginManager()
@@ -56,13 +51,11 @@ def locate_user(user_id=None, username=None):
         criteria = {"username": username}
     doc = db.users.find_one(criteria) # find a user with this username
     if doc: 
-                # return a user object representing this user
+        # return a user object representing this user
         user = User(doc)
         return user
     # else
     return None
-    
-
     
 
 @login_manager.user_loader
@@ -89,7 +82,7 @@ def inject_user():
 @app.route('/')
 def authenticate():
     #Route for the home page
-    return render_template("login.html", message = "Please login or sign up!", rooms = ROOMS)
+    return render_template("login.html")
 
 @app.route('/home')
 @flask_login.login_required
@@ -97,20 +90,27 @@ def home():
     docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}})
     return render_template("home.html", docs=docs)
 
+@app.route('/signupPage', methods=['GET'])
+def signupPage():
+    return render_template("signup.html")
+
 # route to handle the submission of the login form
 @app.route('/signup', methods=['POST'])
 def signup():
     # grab the data from the form submission
     username = request.form['fusername']
     password = request.form['fpassword']
-    if username == "" or password == "" or username.isspace():
-        return render_template("login.html", message = "Invalid username or password")
+    if len(username)<6 or len(password)<6:
+        return render_template('signup.html', crederror = "Username or password must be at least 6 characters")
     hashed_password = generate_password_hash(password) # generate a hashed password to store - don't store the original
     
+    #check if there is a space in username
+    if username.isspace() :
+        return render_template('signup.html', blankerror = "Username or password cannot contain spaces")
     # check whether an account with this email already exists... don't allow duplicates
     if locate_user(username = username):
         # flash('An account for {} already exists.  Please log in.'.format(username))
-        return render_template("login.html", message = "This username already exists.")
+        return render_template('signup.html', unerror = "This username already exists.")
 
     # create a new document in the database for this new user
     user_id = db.users.insert_one({"username": username, "password": hashed_password}).inserted_id # hash the password and save it to the database
@@ -124,8 +124,6 @@ def signup():
         flask_login.login_user(user) # log in the user using flask-login
         # flash('Thanks for joining, {}!'.format(user.data['username'])) # flash can be used to pass a special message to the template we are about to render
         return redirect(url_for('home'))
-    # else
-    return 'Signup failed'
 
 # route to handle the submission of the login form
 @app.route('/login', methods=['POST'])
@@ -133,15 +131,14 @@ def login():
     username = request.form['fusername']
     password = request.form['fpassword']
     if username == "" or password == "" or username.isspace():
-        return render_template("login.html", message = "Invalid username or password")
+        return render_template("login.html",message="Username or Password is incorrect")
     user = locate_user(username=username) # load up any existing user with this email address from the database
     # check whether the password the user entered matches the hashed password in the database
     if user and check_password_hash(user.data['password'], password):
         flask_login.login_user(user) # log in the user using flask-login
         # flash('Welcome back, {}!'.format(user.data['email'])) # flash can be used to pass a special message to the template we are about to render
-        return redirect(url_for('home'))
-    
-    return render_template("login.html", message = "Incorrect Username or Password or Account Does Not Exist.")
+        return render_template("home.html")
+    return render_template("login.html",message="Username or Password is incorrect")
 
 # route to logout a user
 @app.route('/logout')
@@ -170,34 +167,6 @@ def add_book():
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
-###------------------- live chat between users ---------------------------###
-@app.route('/chat', methods = ["GET","POST"])
-# @flask_login.login_required
-# @socketio.on('view-chat')
-def chat():
-    #pass along username
-    return render_template('chat.html', username = flask_login.current_user)
-
-@socketio.on('message')
-def message(data):
-    # print(f"\n\n{data}\n\n")
-    timestamp = time.strftime('%b-%d %I:%M%p', time.localtime())
-    # room=data["room"]
-    send({'msg': data['msg'], 'username': data['username'], 'timestamp':timestamp})
-
-# @socketio.on('join')
-# def join(data):
-#     join_room(data['room'])
-#     send({'msg': data['username']+" has joined the "+ data['room'] + " room."},
-#     room=data['room'])
-
-# @socketio.on('leave')
-# def leave(data):
-#     leave_room(data['room'])
-#     send({'msg': data['username']+" has left the "+ data['room'] + " room."},
-#     room=data['room'])
-
-#---------------------------------------------------------------------------#
 @app.route('/account')
 @flask_login.login_required
 def display_account():
@@ -257,5 +226,4 @@ def send_swap(bookid,otherbookid):
 
 ################## run server ##################
 if __name__=='__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
-    # app.run(host='0.0.0.0',debug=True, port=3000)
+    app.run(host='0.0.0.0',debug=True, port=3000)

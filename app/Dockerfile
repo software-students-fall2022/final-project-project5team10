@@ -11,7 +11,6 @@ ADD . .
 
 # pip install requirements
 RUN pip install --upgrade pip
-RUN pip install flask-socketio==5.2.0
 RUN pip install -r requirements.txt
 
 # run web app
