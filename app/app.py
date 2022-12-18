@@ -129,8 +129,10 @@ def authenticate():
 @flask_login.login_required
 def home():
     if request.method == 'POST':
+        # make the criteria dictionary to be passed onto the dictionary
         query = request.form['query']
         doc = {}
+        doc["user_id"] = {"$ne": flask_login.current_user.id}
         if query != "":
             doc['title'] = query
         if request.form['edition'] != "":
@@ -141,11 +143,17 @@ def home():
             doc['condition'] = request.form['condition']
         min_price = request.form['price-min']
         max_price = request.form['price-max']
+        # check if the user enters floats for both min price and max price
         if isfloat(min_price) and isfloat(max_price):
             if min_price <= max_price:
-                doc['price'] = {'price':{'$ge': min_price, '$le': max_price }}
-        
-        books = db.books.find(doc)
+                doc['price'] = {'$gte': float(min_price), '$lte': float(max_price) }
+        elif isfloat(min_price): # in the case the user only inputs a min price
+            doc['price'] = {'$gte': float(min_price)}
+        elif isfloat(max_price): # in the case the user inputs only a max price
+            doc['price'] = {'$lte': float(max_price) }
+
+        books = db.books.find(dict(doc))
+        # print(doc, file=sys.stderr)
         return render_template('search_results.html', books=books)
 
     '''
