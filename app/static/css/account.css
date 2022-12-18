@@ -2,9 +2,17 @@
     text-align: center;
     font-size: 300%;
     text-decoration: underline;
+    margin: auto;
+    max-width: fit-content;
 }
 
+#buttons {
+    margin: auto;
+    max-width: fit-content;
+}
 #booksForSaleTitle {
+    margin: auto;
+    max-width: fit-content;
     text-align: center;
     font-size: 150%;
 }

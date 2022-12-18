@@ -1,15 +1,10 @@
-{% extends 'wrapper.html' %}
-
-{% block css %}
+{% extends 'wrapper.html' %} {% block css %}
 <link
-  rel="stylesheet"
-  href="../static/css/account.css"
-  href="{{ url_for('static', filename='css/account.css') }}"
+    rel="stylesheet"
+    href="../static/css/account.css"
+    href="{{ url_for('static', filename='css/account.css') }}"
 />
-{% endblock %}
-
-
-{% block container %}
+{% endblock %} {% block container %}
 <div class="books"></div>
 <div id="buttons">
     <h2 id="name">Welcome, {{username}}!</h2>
@@ -32,12 +27,13 @@
             View Chat
         </button>
     </form>
+    <h2 id="booksForSaleTitle">Books for sale</h2>
+    <div class="grid-container">
+        {% for doc in docs %}
+        <div class="grid-item"><a href="/">{{doc.title}}</a></div>
+        {%endfor%}
+    </div>
 </div>
 <br />
-<h2 id="booksForSaleTitle">Books for sale</h2>
-<div class="grid-container">
-    {% for doc in docs %}
-    <div class="grid-item"><a href="/">{{doc.title}}</a></div>
-    {%endfor%}
-</div>
+
 {% endblock %}
