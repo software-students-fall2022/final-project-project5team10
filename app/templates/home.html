@@ -6,42 +6,47 @@
     href="../static/css/home.css"
     href="{{ url_for('static', filename='css/home.css') }}"
 />
+<link rel="stylesheet" href="../static/css/reset.css">
 <link 
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
 />
+<link href='https://fonts.googleapis.com/css?family=Cormorant Garamond' rel='stylesheet'>
 {% endblock %}
 
 
 {% block container %}
-<!-- Header -->
-<h1 id="homepage-title">EXPLORE A WIDE COLLECTION OF BOOKS</h1>
+<body>
+    <!-- Header -->
+    <img id="home-img" src="../static/images/homepage.jpg">
+    <h1 id="homepage-title">EXPLORE A WIDE COLLECTION OF BOOKS 
+    </br>FOR SALE AND TRADE</h1>
 
-<!-- Search bar -->
-<form method='POST' action="{{url_for('home')}}" class="search-form">
-    <div id="search-bar">
-        <input type="text" name="query" placeholder="Search book titles">
-        <button type="submit" id="submit-search"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <!-- Search bar -->
+    <form method='POST' action="{{url_for('home')}}" class="search-form">
+        <div id="search-bar">
+            <input type="text" name="query" placeholder="Search book titles">
+            <button type="submit" id="submit-search"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+
+        <div class="hidden" id="filter-buttons">
+            <input type="text" name="price-min">
+            <input type="text" name="price-max">
+            <input type="text" name="edition">
+            <input type="text" name="publisher">
+        </div>
+    </form>
+
+    <!-- Button to reveal filters -->
+    <button type="submit" id="filter-button-reveal">Filters</button>
+
+    <!-- Everyone else's books -->
+    <div class="grid-container">
+        {% for doc in docs %}
+        <div class="grid-item"><a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}</a></div>
+        {%endfor%}
     </div>
-
-    <div class="hidden" id="filter-buttons">
-        <input type="text" name="price-min">
-        <input type="text" name="price-max">
-        <input type="text" name="edition">
-        <input type="text" name="publisher">
-    </div>
-</form>
-
-<!-- Button to reveal filters -->
-<button type="submit" id="filter-button-reveal">Filters</button>
-
-<!-- Everyone else's books -->
-<div class="grid-container">
-    {% for doc in docs %}
-    <div class="grid-item"><a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}</a></div>
-    {%endfor%}
-</div>
-
+</body>
 
 
 <script>

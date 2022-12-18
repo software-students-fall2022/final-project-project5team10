@@ -1,10 +1,22 @@
+:root{
+  --lpurple:#E6E6FA;
+  --mpurple: #5E2BFF;
+  --darkpurple: #8F00FF;
+  --purple: #8B80F9;
+  --lgreen: #4C4C4C;
+}
+
 h1
 {
-  font-family: "Abel";
+  font-size: 44px;
+  font-weight: bold;
+  font-family: 'Cormorant Garamond';
 }
 body {
+  font-size: 24px;
+  font-family: 'Roboto', sans-serif;
   margin: 10;
-  background-color: #e4d5b7; 
+  background-color: var(--lpurple); 
   /* 
   BEIGE TO MAKE A BIT DARKER THAN WHITE,
   NOT A FINAL COLOR   
@@ -44,58 +56,59 @@ main {
 }
 
 /* Layout Template */
-nav {
-  padding: 0.5rem 0;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: rgb(29, 5, 29);
-  color: white;
-  border-bottom: solid #EBEBEB 1px;
-  box-shadow: 0 0 2rem rgb(0 0 0 / 10%);
+.padded{
+  display: flex;
+  width:100%;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding:1px;
+  
 }
 
+label{
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow:hidden;
+}
+
+.nav-container {
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem;
+  position: fixed;
+  min-height: 125px;
+  max-height: 155px;
+  top:0;
+  left:0;
+  width: 100%;
+  background-color: var(--purple);
+  color: var(--lpurple);
+  box-shadow: 0 0 2rem rgb(0 0 0 / 10%);
+}
+.nav-icon{
+  font-size: 1.3rem;
+}
+.nav-title{
+  margin-left:1rem;
+}
+.right-nav{
+  margin-right: 1rem;
+}
 .nav-link, .nav-link:hover, .nav-link:active {
-  color: white;
+  color: var(-lpurple);
   text-decoration: none;
 }
 
-
-.nav-content {
-  /* display: flex;
-  justify-content: space-between;
-  align-items: center; */
-  flex-wrap: nowrap;
+.nav-link:hover{
+  color:var(--mpurple);
 }
-
-.padded {
-  width: 85%;
-  max-width: 75rem;
-  margin-left: auto;
-  margin-right: auto;
+.nav-title:hover{
+  color:var(--lpurple);
 }
 
 
-.nav-icon {
-  font-size: 2rem !important;
-}
 
-.nav-right{
-  display: flex;
-  justify-content: space-between;
-  align-items: right;
-}
 
-.nav-left{
-    display: flex;
-    justify-content: space-between;
-    align-items: left;
-  }
-/* Typography */
-h1 {
-  font-size: 1.8rem;
-  font-family: sans-serif;
-}
 

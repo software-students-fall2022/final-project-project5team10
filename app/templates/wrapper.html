@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block css %}
     {% endblock %}
+    <link rel="stylesheet" href="../static/css/reset.css">
     <link
       rel="stylesheet"
       href="../static/css/wrapper.css"
@@ -13,29 +14,32 @@
     />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abel">
   </head>
   
   <body>
     <div class="container">
       <header>
-        <nav>
-          <div class="padded">
-              <a class="nav-link" href="{{ url_for('home')}}">
-                <h1>Bookshares</h1>
-              </a>
-              <a class="nav-link" href="{{ url_for('display_account')}}">
-                <span class="material-symbols-outlined nav-icon">person</span>
-              </a>
-              <a class="nav-link" href="{{ url_for('logout')}}">
-                <span class="material-symbols-outlined nav-icon">logout</span>
-              </a>
+        <div class="nav-container">
+            <a class="nav-title" href="{{ url_for('home')}}">
+              <h1 id="title">BookShare</h1>
+            </a>
+            <div class="right-nav">
+              <label for="view-account" title="My Account">
+                <a class="nav-link" href="{{ url_for('display_account')}}">
+                  <span class="material-symbols-outlined nav-icon">person</span>
+                </a>
+              </label>
+              <label for="logout" title="Logout">
+                <a class="nav-link" href="{{ url_for('logout')}}">
+                  <span class="material-symbols-outlined nav-icon">logout</span>
+                </a>
+              </label>
           </div>
-        </nav>
+        </div>
       </header>
-    </div>
     <main>
       {% block container %} {% endblock %}
     </main>
   </body>
+
 </html>
