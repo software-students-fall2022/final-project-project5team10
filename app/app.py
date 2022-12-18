@@ -311,14 +311,14 @@ def edit_book(bookid):
 
 #----------------swap routes----------------#
 # books from other users
-# @app.route('/book_info<bookid>', methods=['GET','POST'])
-# def book_info(bookid):
-#    '''
-#    route to show the selected book that is for sale on the home page 
-#    '''
-#    book = db.books.find_one({"_id":ObjectId(bookid)})
-#    if request.method== 'GET':
-#        return render_template('book_info.html',book=book)
+@app.route('/book_info<bookid>', methods=['GET','POST'])
+def book_info(bookid):
+    '''
+    route to show the selected book that is for sale on the home page 
+    '''
+    book = db.books.find_one({"_id":ObjectId(bookid)})
+    if request.method== 'GET':
+        return render_template('book_info.html',book=book)
 
 # ----------------swap routes----------------#
 
