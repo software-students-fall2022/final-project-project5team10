@@ -2,34 +2,33 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
-  <link
-  rel="stylesheet"
-  href="../static/css/login.css"
-  href="{{ url_for('static', filename='css/login.css') }}"
-  >
-
+  <link rel="stylesheet" href="../static/css/reset.css">
+  <link rel="stylesheet" href="../static/css/login.css">
 </head>
+
 <body>
-<div class="login">
-  <form method="POST">
-    <h1>Welcome!</h1>
-    <h2>{{message}}</h2>
-    <div class="content">
-      <div class="input-field">
-        <input type="username" placeholder="Username" name = "fusername">
+<div class="login-form-container">
+  <form method="POST" class="login-form" id="login-form">
+    <p class="form-header">Sign in</p>
+      <div>
+        <input class="login-form-input" type="text" name="fusername" placeholder="Username" value="">
       </div>
-      <div class="input-field">
-        <input type="password" placeholder="Password" name = "fpassword">
-    <div class="action">
-      <button type = "submit" formaction="{{ url_for('login')}}">Log in</button>
-    </div>
-    <div class="action">
-      <button type = "submit" formaction="{{ url_for('signup')}}">Sign Up</button>
-    </div>
-  </form>
-</div>
+      <div>
+        <input class="login-form-input" type="password" name="fpassword" placeholder="Password" value="">
+        {% if message %}
+          <p class="login-form-error">{{ message }}</p>
+        {% endif %}
+      </div>
+      <div>
+        <input class="submit" type="submit" formaction="{{ url_for('login')}}" value="Login">
+      </div>
+      <div>
+        <p class="signup-question">Don't have an account?</p>
+        <p class="signup"><a href="{{ url_for('signupPage') }}">Sign up</a></p>
+      </div>
+    </form>
+  </div>
 </body>
+
 </html>

@@ -1,22 +1,60 @@
 {% extends 'wrapper.html' %}
+
+{% block css %}
+<link
+    rel="stylesheet"
+    href="../static/css/home.css"
+    href="{{ url_for('static', filename='css/home.css') }}"
+/>
+<link 
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
+{% endblock %}
+
+
 {% block container %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-        <link rel="stylesheet" href="../static/css/styles.css"/>
-    </head>
-    <body>
-        <section class="content">
-            <div class="grid-container">
-                {% for doc in docs %}
-                <img src = "data:image/png;base64, {{doc.image_base64}}" width="500" height="500" />
-                <div class="grid-item"><a href="{{ url_for('for_sale', bookid=doc._id)}}">{{doc.title}}</a></div>
-                {%endfor%}
-            </div>
-        </section>
-    </body>
-</html> 
+<!-- Header -->
+<h1 id="homepage-title">EXPLORE A WIDE COLLECTION OF BOOKS</h1>
+
+<!-- Search bar -->
+<form method='POST' action="{{url_for('home')}}" class="search-form">
+    <div id="search-bar">
+        <input type="text" name="query" placeholder="Search book titles">
+        <button type="submit" id="submit-search"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+
+    <div class="hidden" id="filter-buttons">
+        <input type="text" name="price-min">
+        <input type="text" name="price-max">
+        <input type="text" name="edition">
+        <input type="text" name="publisher">
+    </div>
+</form>
+
+<!-- Button to reveal filters -->
+<button type="submit" id="filter-button-reveal">Filters</button>
+
+<!-- Everyone else's books -->
+<div class="grid-container">
+    {% for doc in docs %}
+    <div class="grid-item"><a href="/">{{doc.title}}</a></div>
+    {%endfor%}
+</div>
+
+
+
+<script>
+
+    const button = document.querySelector('#filter-button-reveal')
+    button.addEventListener('click', (event) => {
+        event.preventDefault();
+        
+        document.querySelector('#filter-buttons')
+                .classList
+                .remove('hidden');
+    });
+
+</script>
 
 {% endblock %}

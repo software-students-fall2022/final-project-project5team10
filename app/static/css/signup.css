@@ -6,26 +6,25 @@
     --lgreen: #4C4C4C;
 }
 
-
 body{
   font-size: 24px;
   font-family: 'Roboto', sans-serif;
 }
 
-.login-form-container{
+.signup-form-container{
     display:flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index:1000;
     background-color: var(--darkpurple);
-    min-height: 100vh;
     top:0;
     left:0;
     width:100vw;
+    min-height: 100vh;
 }
 
-.login-form{
+.signup-form{
     min-height: 35rem;
     display:flex;
     flex-direction:column;
@@ -47,7 +46,7 @@ body{
     margin-bottom: 5rem;
 }
 
-.login-form-input{
+.signup-form-input{
     font-size: 1.5rem;
     color: rgb(38, 50, 56);
     font-weight: 700;
@@ -62,23 +61,23 @@ body{
     text-align: center;
 }
 
-.login-form-input{
-    font-size: 1.5rem;
-    color: rgb(38, 50, 56);
-    font-weight: 700;
-    letter-spacing: 1px;
-    background-color: rgba(136, 126, 126, 0.04);
-    border-radius: 1rem;
-    box-sizing: border-box;
-    border-color: 2px solid rgba(0, 0, 0, 0.02);
-    margin-bottom: 50px;
-    outline:none;
-    padding:10px 20px;
-    text-align: center;
-}
-
-.login-form-input::placeholder{
+.signup-form-input::placeholder{
     color: rgb(150, 150, 150);
+}
+
+.signup-form-input{
+    font-size: 1.5rem;
+    color: rgb(38, 50, 56);
+    font-weight: 700;
+    letter-spacing: 1px;
+    background-color: rgba(136, 126, 126, 0.04);
+    border-radius: 1rem;
+    box-sizing: border-box;
+    border-color: 2px solid rgba(0, 0, 0, 0.02);
+    margin-bottom: 50px;
+    outline:none;
+    padding:10px 20px;
+    text-align: center;
 }
 
 .submit{
@@ -101,15 +100,14 @@ body{
 }
 .signup{
     margin-top:3px;
-    font-weight:bold;
     font-size: 0.88rem;
 }
 
-.login-form-input:focus{
+.signup-form-input:focus{
     border:2px solid rgba(0,0,0,0.14) !important;
 }
 
-.login-form-error{
+.signup-form-error{
     margin-bottom:10px;
     margin-top:-25px;
     text-align: center;

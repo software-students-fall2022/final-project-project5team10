@@ -4,6 +4,12 @@ h1
 }
 body {
   margin: 10;
+  background-color: #e4d5b7; 
+  /* 
+  BEIGE TO MAKE A BIT DARKER THAN WHITE,
+  NOT A FINAL COLOR   
+  */
+  
   /* border: 10px solid; */
 }
   
@@ -34,6 +40,7 @@ footer {
 main {
   margin-top: 8rem;
   margin-bottom: 3.5rem;
+  display: flex;
 }
 
 /* Layout Template */

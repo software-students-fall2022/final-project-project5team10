@@ -14,4 +14,4 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # run web app
-CMD flask run -h 0.0.0.0 -p 3000
+CMD flask run -h 0.0.0.0 -p 3000s
