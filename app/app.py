@@ -1,9 +1,9 @@
-
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
-from flask_socketio import SocketIO, send 
+from flask_socketio import SocketIO, send, emit 
 
 import pymongo
+import time
 import datetime
 from bson.objectid import ObjectId
 import sys, os
@@ -168,18 +168,19 @@ def add_book():
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
-# live chat between users
+### live chat between users ###
 @app.route('/chat', methods = ["GET","POST"])
 # @flask_login.login_required
 # @socketio.on('view-chat')
 def chat():
-    return render_template('chat.html')
+    #pass along username
+    return render_template('chat.html', username = flask_login.current_user)
 
 @socketio.on('message')
 def message(data):
-    print(f"\n\n{data}\n\n")
-    send(data)
-
+    # print(f"\n\n{data}\n\n")
+    timestamp = time.strftime('%b-%d %I:%M%p', time.localtime())
+    send({'msg': data['msg'], 'username': data['username'], 'timestamp':timestamp})
 
 @app.route('/account')
 @flask_login.login_required
@@ -242,5 +243,5 @@ def send_swap(bookid,otherbookid):
 
 ################## run server ##################
 if __name__=='__main__':
-    socketio.run(app, debug=True)
-    app.run(host='0.0.0.0',debug=True, port=3000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    # app.run(host='0.0.0.0',debug=True, port=3000)
