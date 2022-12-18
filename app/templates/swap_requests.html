@@ -5,9 +5,11 @@
 {% for req in swapreqs %}
 <div>
     <a href="{{ url_for('view_swap', mybookid=req.mybook._id, otherbookid=req.otherbook._id)}}">
-         <h3>{{req.mybook.title}} / {{req.otherbook.title}}</h3>
+         <h2>Trade Request</h2>
     </a>
+    <h3> Trade {{req.mybook.title}} </h3>
     <img src = "data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
+    <h3> For {{req.otherbook.title}} </h3>
     <img src = "data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
 </div>
 

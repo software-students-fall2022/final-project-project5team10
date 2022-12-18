@@ -258,20 +258,29 @@ def display_account():
     return render_template("account.html", username=user.data["username"], docs=docs)
 
 #----------------swap routes----------------#
-
-@app.route('/book_for_sale<bookid>', methods=['GET','POST'])
-@flask_login.login_required
-def for_sale(bookid):
+# books from other users
+@app.route('/book_info<bookid>', methods=['GET','POST'])
+def book_info(bookid):
     '''
     route to show the selected book that is for sale on the home page 
     '''
     book = db.books.find_one({"_id":ObjectId(bookid)})
     if request.method== 'GET':
-        return render_template('book_for_sale.html',book=book)
+        return render_template('book_info.html',book=book)
     if request.method == 'POST':
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
         return redirect(url_for('choose_book',otherbookid=book["_id"]))
+
+# curent user's books
+@app.route('/book_for_sale<bookid>', methods=['GET'])
+@flask_login.login_required
+def for_sale(bookid):
+    '''
+    route to show the selected book that is for sale on the home page
+    '''
+    book = db.books.find_one({"_id":ObjectId(bookid)})
+    return render_template('book_for_sale.html',book=book)
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
 @flask_login.login_required
