@@ -54,7 +54,7 @@ def locate_user(user_id=None, username=None):
         # loop up by user_id
         criteria = {"_id": ObjectId(user_id)}
     else:
-        # loop up by email
+        # loop up by username
         criteria = {"username": username}
     doc = db.users.find_one(criteria) # find a user with this username
     if doc: 
@@ -96,7 +96,7 @@ def inject_user():
 # set up the routes
 @app.route('/')
 def authenticate():
-    #Route for the home page
+    #Route for the login page
     return render_template("login.html", message = "Please login or sign up!")
 
 @app.route('/home', methods=['GET','POST'])
@@ -109,20 +109,26 @@ def home():
 
         return render_template('search_results.html', books=books)
 
-    docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}})
-    return render_template("home.html", docs=docs)
+    '''
+    find all the books currently on sale by other users
+    '''
+    docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}}) # return all the book documents from the books collection that do not have the current user's id 
+    return render_template("home.html", docs=docs) # render the home template with those documents
 
 # route to handle the submission of the login form
 @app.route('/signup', methods=['POST'])
 def signup():
+    '''
+    route to sign up a new user.
+    '''
     # grab the data from the form submission
     username = request.form['fusername']
     password = request.form['fpassword']
-    if username == "" or password == "" or username.isspace():
+    if username == "" or password == "" or username.isspace(): # check if the user entered nothing for the username or email and display an input error message accordingly 
         return render_template("login.html", message = "Invalid username or password")
     hashed_password = generate_password_hash(password) # generate a hashed password to store - don't store the original
     
-    # check whether an account with this email already exists... don't allow duplicates
+    # check whether an account with this username already exists... don't allow duplicates
     if locate_user(username = username):
         # flash('An account for {} already exists.  Please log in.'.format(username))
         return render_template("login.html", message = "This username already exists.")
@@ -137,16 +143,19 @@ def signup():
             "password": hashed_password,
         })
         flask_login.login_user(user) # log in the user using flask-login
-        # flash('Thanks for joining, {}!'.format(user.data['username'])) # flash can be used to pass a special message to the template we are about to render
         return redirect(url_for('home'))
-    # else
     return 'Signup failed'
 
 # route to handle the submission of the login form
 @app.route('/login', methods=['POST'])
 def login():
+    '''
+    route that logs in a registered user 
+    '''
+    # get username and password from form 
     username = request.form['fusername']
     password = request.form['fpassword']
+    # check for empty input or spaces in the username; display an error message accordingly 
     if username == "" or password == "" or username.isspace():
         return render_template("login.html", message = "Invalid username or password")
     user = locate_user(username=username) # load up any existing user with this email address from the database
@@ -162,6 +171,9 @@ def login():
 # route to logout a user
 @app.route('/logout')
 def logout():
+    '''
+    route to end the current user's session 
+    '''
     flask_login.logout_user()
     # flash('You have been logged out.  Bye bye!') # pass a special message to the template
     return redirect(url_for('authenticate'))
@@ -169,6 +181,10 @@ def logout():
 @app.route('/add_book', methods=["GET", "POST"])
 @flask_login.login_required
 def add_book():
+    '''
+    route that adds a book to the books collection with the user_id 
+    field set to the current user's id 
+    '''
     user =flask_login.current_user
     if request.method == "GET":
         return render_template("add_book.html")
@@ -183,94 +199,164 @@ def add_book():
         book["conditon"] = request.form['fcondition']
         book["price"] = float(request.form['fprice'])
 
-        if 'file' not in request.files:
-            pass
+        # use gridfs to save uploaded image to database 
 
-        # upload book image onto database
+        # if file is not in requests, add book into the books collection and 
+        # render account page 
+        if 'file' not in request.files:
+            db.books.insert_one(book)
+            return redirect(url_for('display_account'))
+
+        # get uploaded file 
         file = request.files['file']
 
-        if file and allowed_file((file.filename)):
+        if file and allowed_file((file.filename)): # check for allowed extensions
             filename = secure_filename(file.filename)
             user = flask_login.current_user
             name = str(user.id) +"_" + str(filename) # unique file name: user id + filename
-            id = grid_fs.put(file, filename = name)
+            id = grid_fs.put(file, filename = name) # upload file in chunks into the db using grid_fs
+            # document to be inserted into the images collection 
             query = {
                 "user": user.id, 
                 "book_name": book["title"],
                 "img_id": id
             }
-            book["image"] = id # add gridfs id to file 
+            book["image"] = id # add gridfs id to the image field of the book document to be queried into the books collection
+            # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html 
             image = grid_fs.get(id)
             base64_data = codecs.encode(image.read(), 'base64')
             image = base64_data.decode('utf-8')
             book['image_base64'] = image 
-            db.images.insert_one(query)
+            db.images.insert_one(query) # add the image query into the images collection 
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
 @app.route('/view_chat')
 @flask_login.login_required
 def view_chat():
+    '''
+    TODO: to be implemented 
+    '''
     pass
 
 @app.route('/account')
 @flask_login.login_required
 def display_account():
+    '''
+    display all the documents with the user_id field set
+    to the current user's id 
+    '''
     user =flask_login.current_user
     docs = db.books.find({"user_id": user.id})
-    print(user.id, file=sys.stderr)
-    print(docs, file=sys.stderr)
-
+    # render the account template with the user's username and the books they have up for sale
     return render_template("account.html", username=user.data["username"], docs=docs)
 
 
 
 #----------------swap routes----------------#
 
-@app.route('/search_results',methods=['GET','POST'])
-def show_books():
-    user = flask_login.current_user
-    books = db.books.find({"user_id": {"$ne": user.id}})
-    return render_template('/search_results.html',books=books)
-
 @app.route('/book_for_sale<bookid>', methods=['GET','POST'])
+@flask_login.login_required
 def for_sale(bookid):
-    print(bookid)
+    '''
+    route to show the selected book that is for sale on the home page 
+    '''
     book = db.books.find_one({"_id":ObjectId(bookid)})
     if request.method== 'GET':
         return render_template('book_for_sale.html',book=book)
-    else:
-        #bookid = book["_id"]
+    if request.method == 'POST':
+        # the user requests to swap one of their books for this book
+        # redirects to a list of the current users books to choose for the swap
         return redirect(url_for('choose_book',otherbookid=book["_id"]))
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET','POST'])
+@flask_login.login_required
 def choose_book(otherbookid):
+    '''
+    route that shows all the user's books and allows them to choose one 
+    to swap for the book they want (links to send_swap for the chosen book)
+    @param otherbookid: id of the other user's book
+    '''
     user =flask_login.current_user
     myBooks = db.books.find({"user_id": user.id})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     return render_template('book_to_swap.html', books=myBooks, otherbook=otherbook)
 
+#-----------Send Swap Request--------------#
+
 @app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET','POST'])
+@flask_login.login_required
 def send_swap(bookid,otherbookid):
+    '''
+    route that shows the information of the user's book they want to swap for another 
+    @param bookid: id of current user's book
+    @param otherbookid: id of the other user's book
+    '''
     user = flask_login.current_user
     if request.method == 'GET':
-        myBooks = db.books.find({"user_id": user.id})
-        for book in myBooks:
-            if ObjectId(book["_id"]) == ObjectId(bookid):
-                return render_template('send_swap.html',book=book,otherbookid=otherbookid)
-        return render_template('send_swap.html')
-    else:
+        book = db.books.find_one({"_id": ObjectId(bookid)})
+        return render_template('send_swap.html',book=book,otherbookid=otherbookid)
+    if request.method == 'POST':
+        # the user chooses not to send the request for this book 
         if 'fcancel' in request.form:
-            #otherid = request.form.get('otherid')
             return redirect(url_for('choose_book',otherbookid=otherbookid))
-        elif 'frequest' in request.form:
-            # send the request to the other user
-            otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
-            otheruserid = otherbook["user_id"]
-            username = db.users.find_one({"user_id": otheruserid})
-            #reciever = locate_user(username=username) # get username from prev page
-            db.requests.insert_one({"sender": ObjectId(user.id), "reciever": ObjectId(otheruserid), "booktoswap": ObjectId(bookid), "bookrequested": ObjectId(otherbookid)})
-            return redirect(url_for('chat'))
+        # the user sends the request to the other user
+        elif 'fsend' in request.form:
+            make_request(user,bookid,otherbookid)
+            return redirect('/')
+            #return redirect(url_for('chat'))
+
+def make_request(user,bookid,otherbookid):
+    '''
+    current user sends the swap request to the other user 
+    @param user: the current user
+    @param bookid: id of current user's book
+    @param otherbookid: id of the other user's book
+    '''
+    otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
+    otheruserid = otherbook["user_id"]
+    # add request to the database (will be displayed on recievers swap requests page)
+    db.requests.insert_one({
+        "sender": ObjectId(user.id), # current user
+        "reciever": ObjectId(otheruserid), # other user
+        "booktoswap": ObjectId(bookid), # book the current user has
+        "bookrequested": ObjectId(otherbookid) # book the current user wants
+        })
+
+#----------------------------------------#
+
+@app.route('/swap_requests', methods=['GET'])
+@flask_login.login_required
+def view_swap_requests():
+    """
+    route that allows the user to see all of their recieved swap requests
+    """
+    user = flask_login.current_user
+    requests = db.requests.find({"reciever": ObjectId(user.id)}).sort("_id",-1)
+    # create an array of swap requests
+    swapreqs = []
+    for req in requests:
+        mybookid = req["bookrequested"]
+        otherbookid = req["booktoswap"]
+        mybook= db.books.find_one({"_id": ObjectId(mybookid)}) # book the current user has
+        otherbook= db.books.find_one({"_id": ObjectId(otherbookid)}) # book other user wants
+        swapreqs.append({"mybook": mybook, "otherbook": otherbook})
+    # display all requests
+    return render_template('swap_requests.html', swapreqs=swapreqs)
+
+
+#accept/decline request
+@app.route('/view_swap/<mybookid>/<otherbookid>')
+def view_swap(mybookid,otherbookid):
+    """
+    route that allows the user to view a specific swap request
+    @param mybookid: id of the current user's book (that would be given from swap)
+    @param otherbookid: id of the other user's book (that would be recieved from swap)
+    """
+    mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+    otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
+    return render_template("view_swap.html", mybook=mybook, otherbook=otherbook)
+    
 
 ################## run server ##################
 if __name__=='__main__':

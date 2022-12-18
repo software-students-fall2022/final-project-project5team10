@@ -1,0 +1,15 @@
+{% extends 'wrapper.html' %}
+{% block container %}
+
+<h1>Swap Requests</h1>
+{% for req in swapreqs %}
+<div>
+    <a href="{{ url_for('view_swap', mybookid=req.mybook._id, otherbookid=req.otherbook._id)}}">
+         <h3>{{req.mybook.title}} / {{req.otherbook.title}}</h3>
+    </a>
+    <img src = "data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
+    <img src = "data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
+</div>
+
+{% endfor %}
+{% endblock %}
