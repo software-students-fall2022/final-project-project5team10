@@ -232,7 +232,7 @@ def add_book():
         # render account page
         if 'file' not in request.files:
             db.books.insert_one(book)
-            return redirect(url_for('display_account'))
+
 
         # get uploaded file
         file = request.files['file']
