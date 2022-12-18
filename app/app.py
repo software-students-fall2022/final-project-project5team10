@@ -1,8 +1,8 @@
-
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
 
 import pymongo
+import time
 import datetime
 from bson.objectid import ObjectId
 import sys, os
@@ -58,7 +58,7 @@ def locate_user(user_id=None, username=None):
         criteria = {"username": username}
     doc = db.users.find_one(criteria) # find a user with this username
     if doc: 
-                # return a user object representing this user
+        # return a user object representing this user
         user = User(doc)
         return user
     # else
@@ -96,6 +96,8 @@ def inject_user():
 # set up the routes
 @app.route('/')
 def authenticate():
+    #Route for the home page
+    return render_template("login.html")
     #Route for the login page
     return render_template("login.html", message = "Please login or sign up!")
 
@@ -115,6 +117,10 @@ def home():
     docs = db.books.find({"user_id":{"$ne": flask_login.current_user.id}}) # return all the book documents from the books collection that do not have the current user's id 
     return render_template("home.html", docs=docs) # render the home template with those documents
 
+@app.route('/signupPage', methods=['GET'])
+def signupPage():
+    return render_template("signup.html")
+
 # route to handle the submission of the login form
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -124,14 +130,17 @@ def signup():
     # grab the data from the form submission
     username = request.form['fusername']
     password = request.form['fpassword']
-    if username == "" or password == "" or username.isspace(): # check if the user entered nothing for the username or email and display an input error message accordingly 
-        return render_template("login.html", message = "Invalid username or password")
+    if len(username)<6 or len(password)<6:
+        return render_template('signup.html', crederror = "Username or password must be at least 6 characters")
     hashed_password = generate_password_hash(password) # generate a hashed password to store - don't store the original
     
-    # check whether an account with this username already exists... don't allow duplicates
+    #check if there is a space in username
+    if username.isspace() :
+        return render_template('signup.html', blankerror = "Username or password cannot contain spaces")
+    # check whether an account with this email already exists... don't allow duplicates
     if locate_user(username = username):
         # flash('An account for {} already exists.  Please log in.'.format(username))
-        return render_template("login.html", message = "This username already exists.")
+        return render_template('signup.html', unerror = "This username already exists.")
 
     # create a new document in the database for this new user
     user_id = db.users.insert_one({"username": username, "password": hashed_password}).inserted_id # hash the password and save it to the database
@@ -144,7 +153,6 @@ def signup():
         })
         flask_login.login_user(user) # log in the user using flask-login
         return redirect(url_for('home'))
-    return 'Signup failed'
 
 # route to handle the submission of the login form
 @app.route('/login', methods=['POST'])
@@ -157,16 +165,14 @@ def login():
     password = request.form['fpassword']
     # check for empty input or spaces in the username; display an error message accordingly 
     if username == "" or password == "" or username.isspace():
-        return render_template("login.html", message = "Invalid username or password")
+        return render_template("login.html",message="Username or Password is incorrect")
     user = locate_user(username=username) # load up any existing user with this email address from the database
     # check whether the password the user entered matches the hashed password in the database
     if user and check_password_hash(user.data['password'], password):
         flask_login.login_user(user) # log in the user using flask-login
         # flash('Welcome back, {}!'.format(user.data['email'])) # flash can be used to pass a special message to the template we are about to render
-
-        return redirect(url_for('home'))
-    
-    return render_template("login.html", message = "Incorrect Username or Password or Account Does Not Exist.")
+        return render_template("home.html")
+    return render_template("login.html",message="Username or Password is incorrect")
 
 # route to logout a user
 @app.route('/logout')
@@ -250,8 +256,6 @@ def display_account():
     docs = db.books.find({"user_id": user.id})
     # render the account template with the user's username and the books they have up for sale
     return render_template("account.html", username=user.data["username"], docs=docs)
-
-
 
 #----------------swap routes----------------#
 
