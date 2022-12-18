@@ -18,15 +18,7 @@
         </button>
     </form>
     <br />
-    <form>
-        <button
-            type="submit"
-            formaction="{{ url_for('view_chat')}}"
-            class="block"
-        >
-            View Chat
-        </button>
-    </form>
+    
     <h2 id="booksForSaleTitle">Books for sale</h2>
     <div class="grid-container">
         {% for doc in docs %}
