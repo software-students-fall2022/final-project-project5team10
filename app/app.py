@@ -38,8 +38,9 @@ app.secret_key = os.urandom(24)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-client = pymongo.MongoClient(host='db', port=27017)
-db = client["project5"]
+
+client = pymongo.MongoClient("mongodb://team10:EqM2PLtVjNyv3JUk@ac-i0x99nf-shard-00-00.jtrjkpd.mongodb.net:27017,ac-i0x99nf-shard-00-01.jtrjkpd.mongodb.net:27017,ac-i0x99nf-shard-00-02.jtrjkpd.mongodb.net:27017/?ssl=true&replicaSet=atlas-8i6mtc-shard-0&authSource=admin&retryWrites=true&w=majority")
+db = client["PROJECT5"]
 
 grid_fs = gridfs.GridFS(db)
 
@@ -282,7 +283,7 @@ def logout():
 
 
 @app.route('/add_book', methods=["GET", "POST"])
-@flask_login.login_required
+# @flask_login.login_required
 def add_book():
     '''
     route that adds a book to the books collection with the user_id 
@@ -359,7 +360,7 @@ def add_book():
 
 
 @app.route('/edit/<bookid>', methods=['GET'])
-@flask_login.login_required
+# @flask_login.login_required
 def edit_book(bookid):
     '''
     record existing attributes of book and pass them to template
@@ -373,7 +374,7 @@ def edit_book(bookid):
 
 
 @app.route('/delete/<bookid>', methods=['GET'])
-@flask_login.login_required
+# @flask_login.login_required
 def delete_book(bookid):
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
@@ -389,7 +390,7 @@ def delete_book(bookid):
 # ======================================================#
 
 @app.route('/book_info/<bookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def book_info(bookid):
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
@@ -437,7 +438,7 @@ def choose_book(otherbookid):
 
 
 @app.route('/account')
-@flask_login.login_required
+# @flask_login.login_required
 def display_account():
     '''
     display all the documents with the user_id field set
@@ -465,7 +466,7 @@ def display_account():
 # ======================================================#
 
 @app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def send_swap(bookid, otherbookid):
     '''
     route that shows the information of the user's book they want to swap for another 
@@ -535,7 +536,7 @@ def make_request(user, bookid, otherbookid):
 
 
 @app.route('/swap_requests', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def view_swap_requests():
     """
     route that allows the user to see all of their recieved swap requests
@@ -569,7 +570,7 @@ def view_swap_requests():
 
 # accept/decline request
 @app.route('/view_swap/<mybookid>/<otherbookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def view_swap(mybookid, otherbookid):
     """
     route that allows the user to view a specific swap request
