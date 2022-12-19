@@ -56,25 +56,41 @@ class User(flask_login.UserMixin):
         self.data = data  # all user data from the database is stored within the data field
 
 
-def locate_user(user_id=None, username=None):
+def locate_user(user_id=None, username=None, testing=False, col=False):
     '''
     Return a User object for the user with the given id or email address, or None if no such user exists.
     @param user_id: the user_id of the user to locate
     @param username: the username of the user to locate
     '''
-    if user_id:
-        # loop up by user_id
-        criteria = {"_id": ObjectId(user_id)}
+    if not testing:
+        if user_id:
+            # loop up by user_id
+            criteria = {"_id": ObjectId(user_id)}
+        else:
+            # loop up by username
+            criteria = {"username": username}
+        doc = db.users.find_one(criteria)  # find a user with this username
+        if doc:
+            # return a user object representing this user
+            user = User(doc)
+            return user
+        # else
+        return None
     else:
-        # loop up by username
-        criteria = {"username": username}
-    doc = db.users.find_one(criteria)  # find a user with this username
-    if doc:
-        # return a user object representing this user
-        user = User(doc)
-        return user
-    # else
-    return None
+        if user_id:
+            # loop up by user_id
+            criteria = {"_id": ObjectId(user_id)}
+        else:
+            # loop up by username
+            criteria = {"username": username}
+        doc = col.find_one(criteria)  # find a user with this username
+        if doc:
+            # return a user object representing this user
+            user = User(doc)
+            return user
+        # else
+        return None
+        
 
 
 def allowed_file(filename):

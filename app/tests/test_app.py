@@ -250,11 +250,18 @@ def test_update_book_status():
     assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b48")})["status"] == "pending"
     # receiverBookObj status changed from pending to swappable
     assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b49")})["status"] == "swappable"
-
+    collection.drop()
 #------------------------------------SET UP---------------------------------------------
-# def test_locate_user():
-#     result=locate_user('5fa1c587ae2ac23e9c46510f','username')
-#     assert result==None
+def test_locate_user():
+    user1 = app.User({'_id': ObjectId("542c2b97bac0595474108b50")})
+    collection.insert_one(
+        {
+            '_id': ObjectId("542c2b97bac0595474108b50"),
+            "username": "username"
+        }
+    )
+    result = locate_user('542c2b97bac0595474108b50','username', testing=True, col=collection)
+    assert result==user1
 
 # def test_user_loader():
 #     result=user_loader('1234')
