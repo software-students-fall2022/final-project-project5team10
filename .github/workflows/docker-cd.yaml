@@ -35,7 +35,7 @@ jobs:
             file: ./app/Dockerfile
             context: ./app
             push: true
-            tag: sarahaltowaity1/bookshare:latest
+            tags: sarahaltowaity1/bookshare:latest
 
   deploy:
     runs-on: ubuntu-latest
