@@ -1,28 +1,29 @@
 {% extends 'wrapper.html' %}
 {% block container %}
 
-<h1>Swap Requests</h1>
-{% for req in swapreqs %}
-<div>
-    <a href="{{ url_for('view_swap', mybookid=req.mybook._id, otherbookid=req.otherbook._id)}}">
-         <h2>Trade Request</h2>
-    </a>
+<h1 id="trade-request-title">My Trade Requests</h1>
+<div id="trade-request-container">
+    {% for req in swapreqs %}
+        <div id="trade-request-item">
+            <a href="{{ url_for('view_swap', mybookid=req.mybook._id, otherbookid=req.otherbook._id)}}">
+                <h2 id="view-trade">View Trade Request</h2>
+            </a>
 
-    <h3> Trade {{req.otheruser.username}}'s {{req.mybook.title}} </h3>
-    {% if req.mybook.image_exists %}
-        <img src="data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
-    {% else %}
-        <img src="../static/images/default.jpeg"/>
-    {% endif %}
+            <h3> Get {{req.otheruser.username}}'s {{req.mybook.title}} </h3>
+            {% if req.mybook.image_exists %}
+                <img src="data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
+            {% else %}
+                <img src="../static/images/default.jpeg"/>
+            {% endif %}
 
-    <h3> For Your {{req.otherbook.title}} </h3>
+            <h3> For Your {{req.otherbook.title}} </h3>
 
-    {% if req.otherbook.image_exists %}
-        <img src="data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
-    {% else %}
-        <img src="../static/images/default.jpeg"/>
-    {% endif %}
+            {% if req.otherbook.image_exists %}
+                <img src="data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
+            {% else %}
+                <img src="../static/images/default.jpeg"/>
+            {% endif %}
+        </div>
+    {% endfor %}
 </div>
-
-{% endfor %}
 {% endblock %}
