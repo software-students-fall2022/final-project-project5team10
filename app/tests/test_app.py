@@ -1,9 +1,9 @@
 import pytest
 import random
 import string
-from app import app
+import app
 import flask_login
-import mongomock
+#import mongomock
 
 
 #ROUTE: route handler for request to '/'
@@ -153,3 +153,14 @@ def test_login_badRequest(flask_app):
     response=flask_app.post(url)
     assert response.status_code==400
 
+#--------------------------------------HELPER FUNCTIONS------------------------------------------
+def test_isfloat_true():
+   assert app.isfloat(1.4) is True
+ 
+def test_isfloat_false():
+   assert app.isfloat('num') is False
+ 
+# test allowed file
+def test_allowed_file():
+  test_file = "writing.png"
+  assert app.allowed_file(test_file) is True
