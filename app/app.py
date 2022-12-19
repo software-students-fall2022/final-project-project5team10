@@ -568,7 +568,6 @@ def view_swap(mybookid, otherbookid):
             # remove books from database
             db.books.delete_one({"_id": ObjectId(mybookid)})
             db.books.delete_one({"_id": ObjectId(otherbookid)})
-            #flash('Request has been Approved!')
             return redirect(url_for('view_swap_requests'))
         # decline swap
         if 'fdecline' in request.form:
@@ -578,7 +577,6 @@ def view_swap(mybookid, otherbookid):
                           {"booktoswap": ObjectId(otherbookid)}]}
             )
             update_book_status(mybookid, 'swappable', otherbookid, 'swappable')
-            #flash('Request has been Declined')
             return redirect(url_for('view_swap_requests'))
 
 
