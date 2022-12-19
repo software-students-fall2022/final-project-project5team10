@@ -53,7 +53,7 @@
             <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}
                 <br>
                 <br>
-            {% if doc["metadata"] %}
+            {% if doc.metadata.volumeInfo.imageLinks %}
             <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
             {% elif doc.image_exists %}
                 <img src="data:image/png;base64, {{doc.image_base64}}" width="500" height="500" />

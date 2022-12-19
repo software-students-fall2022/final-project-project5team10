@@ -11,57 +11,48 @@
 
 {% block container %}
 
-<form method="POST" enctype="multipart/form-data">
-    <h1>Editing Book</h1> 
-    <h2>Book Information</h2> 
-    <h3>Title</h3>
-    <input type="text" placeholder="Title" name ="ftitle"
-    value="{{book.title}}">
-    <h3>Publisher</h3>
-    <input type="text" placeholder="Publisher" name ="fpublisher"
-    value="{{book.publisher}}"">
-    <h3>Edition</h3>
-    <input type="text" placeholder="Edition" name ="fedition"
-    value="{{book.edition}}" >
-    <h3>Condition</h3>
-    <select name="fcondition" id="fconditon">
-        {% if "new" == book.condition %}
-        <option selected="selected" 
-        value="New">New</option>
-        {% else %}
-        <option value="New">New</option>
-        {% endif %}
+<h1 id="edit-title">Edit Listing</h1>
+<div class="add-book-form">
+    <form class="edit-form" method="POST" enctype="multipart/form-data"> 
+        <input type="text" placeholder="Title" name ="ftitle"
+        value="{{book.title}}">
+        <input type="text" placeholder="Publisher" name ="fpublisher"
+        value="{{book.publisher}}"">
+        <input type="text" placeholder="Edition" name ="fedition"
+        value="{{book.edition}}" >
+        <select name="fcondition" id="fconditon">
+            {% if "new" == book.condition %}
+            <option selected="selected" 
+            value="New">New</option>
+            {% else %}
+            <option value="New">New</option>
+            {% endif %}
 
-        {% if "Lightly Used" == book.condition %}
-        <option selected="selected"
-        value="Lightly Used">Lightly Used</option>
-        {% else %}
-        <option value="Lightly Used">Lightly Used</option>
-        {% endif %}
+            {% if "Lightly Used" == book.condition %}
+            <option selected="selected"
+            value="Lightly Used">Lightly Used</option>
+            {% else %}
+            <option value="Lightly Used">Lightly Used</option>
+            {% endif %}
 
-        {% if "Heavily Used" == book.condition %}
-        <option selected="selected"
-        value="Heavily Used">Heavily Used</option>
-        {% else %}
-        <option value="Heavily Used Used">Heavily Used</option>
-        {% endif %}
+            {% if "Heavily Used" == book.condition %}
+            <option selected="selected"
+            value="Heavily Used">Heavily Used</option>
+            {% else %}
+            <option value="Heavily Used Used">Heavily Used</option>
+            {% endif %}
 
-        {% if "Damaged" == book.condition %}
-        <option selected="selected"
-        value="Damaged">Damaged</option>
-        {% else %}
-        <option value="Damaged">Damaged</option>
-        {% endif %}
+            {% if "Damaged" == book.condition %}
+            <option selected="selected"
+            value="Damaged">Damaged</option>
+            {% else %}
+            <option value="Damaged">Damaged</option>
+            {% endif %}
 
-    </select>
-<!--     
-    <h2>Price Information</h2>
-    <h3> Price</h3>
-    <p>$</p> <input type="number" step="0.05" name="fprice" value="{{book.price}}"> -->
-    
-    <h3>Upload Images</h3>
-    <input type= "file" id="book_image" name="file">
-    <button type = "submit" formaction="{{ url_for('add_book')}}">Submit</button>
-</form>
-
+        </select>
+        
+        <input type= "file" id="book_image" name="file">
+        <button type = "submit" formaction="{{ url_for('add_book')}}">Submit</button>
+    </form>
+</div>
 {% endblock %}
