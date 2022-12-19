@@ -120,6 +120,25 @@ def isfloat(num):
     except ValueError:
         return False
 
+def findBookCollByQuery(reqForm, col=db.books):
+    # make the criteria dictionary to be passed onto the dictionary
+        doc = {}
+        query = reqForm['query']
+        if flask_login.current_user.is_authenticated:
+            doc["user_id"] = {"$ne": flask_login.current_user.id}
+        else:
+            doc["user_id"] = {"$ne": "542c2b97bac0595474108b51" }
+        if query != "":
+            doc['title'] = query
+        if reqForm['edition'] != "":
+            doc['edition'] = reqForm['edition']
+        if reqForm['publisher'] != "":
+            doc['publisher'] = reqForm['publisher']
+        if reqForm['condition'] != "":
+            doc['condition'] = reqForm['condition']
+        
+        return col.find(dict(doc))
+            
 
 # ======================================================#
 #                     main routes                      #
@@ -138,19 +157,22 @@ def home():
         if flask_login.current_user.is_anonymous:
             return render_template("login.html")
         # make the criteria dictionary to be passed onto the dictionary
-        query = request.form['query']
-        doc = {}
-        doc["user_id"] = {"$ne": flask_login.current_user.id}
-        if query != "":
-            doc['title'] = query
-        if request.form['edition'] != "":
-            doc['edition'] = request.form['edition']
-        if request.form['publisher'] != "":
-            doc['publisher'] = request.form['publisher']
-        if request.form['condition'] != "":
-            doc['condition'] = request.form['condition']
+        # query = request.form['query']
+        # doc = {}
+        # doc["user_id"] = {"$ne": flask_login.current_user.id}
+        # if query != "":
+        #     doc['title'] = query
+        # if request.form['edition'] != "":
+        #     doc['edition'] = request.form['edition']
+        # if request.form['publisher'] != "":
+        #     doc['publisher'] = request.form['publisher']
+        # if request.form['condition'] != "":
+        #     doc['condition'] = request.form['condition']
 
-        books = db.books.find(dict(doc))
+
+        # books = db.books.find(dict(doc))
+        books = findBookCollByQuery(request.form)
+
         return render_template('search_results.html', books=books)
 
     '''
@@ -304,7 +326,7 @@ def add_book():
         # book["metadata"] = response
         # book["status"]   = 'swappable'
         # book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
-        get_and_insert_metadata(book)
+        book = get_and_insert_metadata(book)
         if 'file' in request.files:  # check for allowed extensions
             file = request.files['file']
             if allowed_file((file.filename)):
@@ -612,6 +634,8 @@ def get_and_insert_metadata(bookObj):
     bookObj["status"] = 'swappable'
     # a boolean to indicate whether an image has been uplaoded to form, initially set to False
     bookObj['image_exists'] = False
+    
+    return bookObj
 
 
 # ======================================================#

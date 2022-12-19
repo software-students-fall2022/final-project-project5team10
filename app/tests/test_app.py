@@ -215,6 +215,18 @@ def test_get_and_insert_metadata():
     assert bookObj["status"] == "swappable"
     assert bookObj["image_exists"] == False
 
+def test_find_book_coll_by_query():
+    reqForm = {
+        "query": "info present",
+        "title": "Pride and Prejudice",
+        "edition": "3",
+        "publisher": "Pendant",
+        "condition": "New"
+    }
+    books = app.findBookCollByQuery(reqForm, col=collection)
+    assert books is not None
+    
+
 
 
 def test_update_book_status():
