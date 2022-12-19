@@ -244,7 +244,7 @@ def test_update_book_status():
     insertArr = [senderBookObj, receiverBookObj]
     collection.insert_many(insertArr)
 
-    app.update_book_status('542c2b97bac0595474108b48', 'pending', '542c2b97bac0595474108b49', 'swappable', testing=True, col=collection )
+    app.update_book_status('542c2b97bac0595474108b48', 'pending', '542c2b97bac0595474108b49', 'swappable', col=collection )
 
     # senderBookObj status changed from swappable to pending
     assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b48")})["status"] == "pending"
@@ -262,6 +262,7 @@ def test_locate_user():
     )
     result = locate_user('542c2b97bac0595474108b50','username', testing=True, col=collection)
     assert result==user1
+    collection.drop()
 
 # def test_user_loader():
 #     result=user_loader('1234')

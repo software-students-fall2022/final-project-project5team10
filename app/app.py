@@ -487,40 +487,22 @@ def send_swap(bookid, otherbookid):
 #                listed to be swapped
 #   'pending'  - when two users have requested to swap, 
 #                but the swap has not yet been done in real life
-def update_book_status(book_id_sender, status_sender, book_id_reciever, status_reciever, testing=False, col=False):
-    if not testing:
-        db.books.find_one_and_update(
-            {
-                '_id' : ObjectId(book_id_sender)
-            },
-            {
-                '$set' : {'status' : status_sender}
-            }
-        )
-        db.books.find_one_and_update(
-            {
-                '_id' : ObjectId(book_id_reciever)
-            },
-            {
-                '$set' : {'status' : status_reciever}
-            }
-        )
-    else:
-        col.find_one_and_update(
-            {
-                '_id' : ObjectId(book_id_sender)
-            },
-            {
-                '$set' : {'status' : status_sender}
-            }
-        )
-        col.find_one_and_update(
-            {
-                '_id' : ObjectId(book_id_reciever)
-            },
-            {
-                '$set' : {'status' : status_reciever}
-            }
+def update_book_status(book_id_sender, status_sender, book_id_reciever, status_reciever, col=db.books):
+    col.find_one_and_update(
+        {
+            '_id' : ObjectId(book_id_sender)
+        },
+        {
+            '$set' : {'status' : status_sender}
+        }
+    )
+    col.find_one_and_update(
+        {
+            '_id' : ObjectId(book_id_reciever)
+        },
+        {
+            '$set' : {'status' : status_reciever}
+        }
     )
 
 
