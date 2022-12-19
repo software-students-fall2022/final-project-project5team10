@@ -1,10 +1,15 @@
-{% extends 'wrapper.html' %} {% block css %}
+{% extends 'wrapper.html' %} 
+
+{% block css %}
 <link
     rel="stylesheet"
     href="../static/css/account.css"
     href="{{ url_for('static', filename='css/account.css') }}"
 />
-{% endblock %} {% block container %}
+{% endblock %} 
+
+
+{% block container %}
 <div class="books"></div>
 <div id="buttons">
     <h2 id="name">Welcome, {{username}}!</h2>
