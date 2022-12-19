@@ -123,7 +123,7 @@ def isfloat(num):
 
 
 # ======================================================#
-#                     main routes                      #
+#                     main routes                       #
 # ======================================================#
 
 @app.route('/')
@@ -166,7 +166,14 @@ def home():
     '''
     find all the books currently on sale by other users
     '''
-    docs = db.books.find({"user_id": {"$ne": flask_login.current_user.id}})  # return all the book documents from the books collection that do not have the current user's id
+    # return all the book documents from the books collection that do not have the current user's id
+    # and are able to be swapped
+    docs = db.books.find(
+        {
+            "user_id": {"$ne": flask_login.current_user.id},
+            'status' : 'swappable'
+        }
+    )
     # render the home template with those documents
     return render_template("home.html", docs=docs)
 
@@ -270,25 +277,29 @@ def add_book():
 
     # POST REQUEST FROM FORM
     if request.method == "POST":
+        # TODO - input validation
         book = {}
-        book["title"] = request.form['ftitle']
+        book["title"]     = request.form['ftitle']
         book["publisher"] = request.form['fpublisher']
-        book["user_id"] = user.id
-        book["edition"] = request.form['fedition']
+        book["user_id"]   = user.id
+        book["edition"]   = request.form['fedition']
         book["condition"] = request.form['fcondition']
         # book["price"] = '{:4.2f}'.format(float(request.form['fprice']))
 
         # get metadata from google books
 
-        google_api_response = requests.get("https://www.googleapis.com/books/v1/volumes?q=" +
-        book["title"] + "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
+        google_api_response = requests.get( "https://www.googleapis.com/books/v1/volumes?q=" +
+                                            book["title"] + 
+                                            "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
+
         # print(google_api_response,file=sys.stderr)
         # print(google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"], file=sys.stderr)
+
         response = google_api_response["items"][0]
         book["metadata"] = response
+        book["status"]   = 'swappable'
         book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
 
-        # use gridfs to save uploaded image to database
 
         # if file is not in requests, add book into the books collection and
         # render account page
@@ -389,7 +400,11 @@ def choose_book(otherbookid):
     user = flask_login.current_user
     myBooks = db.books.find({"user_id": user.id})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
-    return render_template('book_to_swap.html', books=myBooks, otherbook=otherbook)
+    otheruser = db.users.find_one({'_id' : ObjectId(otherbook['user_id'])})
+    return render_template('book_to_swap.html', 
+                            books=myBooks, 
+                            otherbook=otherbook, 
+                            swapper_name=otheruser['username'])
 
 
 # # curent user's books
@@ -401,19 +416,6 @@ def choose_book(otherbookid):
 #     '''
 #     book = db.books.find_one({"_id":ObjectId(bookid)})
 #     return render_template('book_for_sale.html',book=book)
-
-
-# ======================================================#
-#                         chat                         #
-# ======================================================#
-
-@app.route('/view_chat')
-@flask_login.login_required
-def view_chat():
-    '''
-    TODO: to be implemented 
-    '''
-    pass
 
 
 # ======================================================#
@@ -430,7 +432,12 @@ def display_account():
     '''
 
     user = flask_login.current_user
-    docs = db.books.find({"user_id": user.id})
+    docs = db.books.find(
+        {
+            "user_id": user.id,
+            'status' : 'swappable'
+        }
+    )
 
     # responseArr = []
     # for item in docs:
@@ -461,15 +468,42 @@ def send_swap(bookid, otherbookid):
     if request.method == 'GET':
         book = db.books.find_one({"_id": ObjectId(bookid)})
         return render_template('send_swap.html', book=book, otherbookid=otherbookid)
+
+    # run when user chooses to either make swap or cancel    
     if request.method == 'POST':
         # the user chooses not to send the request for this book
         if 'fcancel' in request.form:
             return redirect(url_for('choose_book', otherbookid=otherbookid))
         # the user sends the request to the other user
         elif 'fsend' in request.form:
+            update_book_status(bookid, 'pending', otherbookid, 'pending')
             make_request(user, bookid, otherbookid)
-            return redirect('/home')
-            # return redirect(url_for('chat'))
+            return redirect(url_for('home'))
+
+
+### updates book statuses
+# possible statuses are:
+#   'swappable' - when a user lists a book on their account,
+#                listed to be swapped
+#   'pending'  - when two users have requested to swap, 
+#                but the swap has not yet been done in real life
+def update_book_status(book_id_sender, status_sender, book_id_reciever, status_reciever):
+    db.books.find_one_and_update(
+        {
+            '_id' : ObjectId(book_id_sender)
+        },
+        {
+            '$set' : {'status' : status_sender}
+        }
+    )
+    db.books.find_one_and_update(
+        {
+            '_id' : ObjectId(book_id_reciever)
+        },
+        {
+            '$set' : {'status' : status_reciever}
+        }
+    )
 
 
 def make_request(user, bookid, otherbookid):
