@@ -148,16 +148,6 @@ def home():
             doc['publisher'] = request.form['publisher']
         if request.form['condition'] != "":
             doc['condition'] = request.form['condition']
-        # min_price = request.form['price-min']
-        # max_price = request.form['price-max']
-        # # check if the user enters floats for both min price and max price
-        # if isfloat(min_price) and isfloat(max_price):
-        #     if min_price <= max_price:
-        #         doc['price'] = {'$gte': float(min_price), '$lte': float(max_price) }
-        # elif isfloat(min_price): # in the case the user only inputs a min price
-        #     doc['price'] = {'$gte': float(min_price)}
-        # elif isfloat(max_price): # in the case the user inputs only a max price
-        #     doc['price'] = {'$lte': float(max_price) }
 
         books = db.books.find(dict(doc))
         # print(doc, file=sys.stderr)
@@ -284,7 +274,6 @@ def add_book():
         book["user_id"]   = user.id
         book["edition"]   = request.form['fedition']
         book["condition"] = request.form['fcondition']
-        # book["price"] = '{:4.2f}'.format(float(request.form['fprice']))
 
         # get metadata from google books
 
@@ -344,6 +333,9 @@ def edit_book(bookid):
     record existing attributes of book and pass them to template
     as existing field values after removing book from db
     '''
+
+
+
     book_record = db.books.find_one({"_id": ObjectId(bookid)})
     db.books.delete_one({"_id": ObjectId(bookid)})
     return render_template('edit_book.html', book=book_record)
@@ -386,7 +378,19 @@ def book_info(bookid):
     if request.method == 'POST':
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
-        return redirect(url_for('choose_book', otherbookid=book["_id"]))
+        if 'swap' in request.form:
+            return redirect(url_for('choose_book', otherbookid=book["_id"]))
+        else:
+            if 'cancel' in request.form:
+                # update request
+                # update status of books in db 
+                flash('Trade has been canceled')
+            else:
+                # update request
+                # delete books
+                flash('Trade has been verified')
+            return redirect(url_for('display_account'))
+
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
@@ -432,10 +436,17 @@ def display_account():
     '''
 
     user = flask_login.current_user
-    docs = db.books.find(
+    docs_swappable = db.books.find(
         {
             "user_id": user.id,
             'status' : 'swappable'
+        }
+    )
+
+    docs_pending = db.books.find(
+        {
+            "user_id": user.id,
+            'status' : 'pending'
         }
     )
 
@@ -449,7 +460,10 @@ def display_account():
     # docs2 = db.books.find({"user_id": user.id})
 
     # render the account template with the user's username and the books they have up for sale
-    return render_template("account.html", username=user.data["username"], docs=docs)
+    return render_template("account.html", 
+                            username=user.data["username"], 
+                            docs_swappable=docs_swappable,
+                            docs_pending=docs_pending)
 
 
 # ======================================================#
@@ -517,10 +531,12 @@ def make_request(user, bookid, otherbookid):
     otheruserid = otherbook["user_id"]
     # add request to the database (will be displayed on recievers swap requests page)
     db.requests.insert_one({
-        "sender": ObjectId(user.id),  # current user
-        "reciever": ObjectId(otheruserid),  # other user
-        "booktoswap": ObjectId(bookid),  # book the current user has
-        "bookrequested": ObjectId(otherbookid)  # book the current user wants
+        "sender"            : ObjectId(user.id),      # current user
+        "reciever"          : ObjectId(otheruserid),  # other user
+        "booktoswap"        : ObjectId(bookid),       # book the current user has
+        "bookrequested"     : ObjectId(otherbookid),  # book the current user wants
+        'verified_sender'   : False, # indicates whether the sender has verified the trade occurred
+        'verified_reciever' : False  # indicates whether the reciever has verified the trade occurred
     })
 
 

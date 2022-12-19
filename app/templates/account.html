@@ -24,9 +24,40 @@
     </form>
     <br />
     
-    <h2 id="booksForSaleTitle">Books for Sale</h2>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+
+
+    <h2 id="booksForSaleTitle">Books for Trade</h2>
     <div class="grid-container">
-        {% for doc in docs %}
+        {% for doc in docs_swappable %}
+        <div class="grid-item">
+            <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}
+                <br>
+                <br>
+            {% if doc["metadata"] %}
+            <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
+            {% elif doc.image_exists %}
+                <img src="data:image/png;base64, {{doc.image_base64}}" width="500" height="500" />
+            {%else%}
+                <img src="../static/images/default.jpeg"/>
+            {% endif %}
+            </a>
+        </div>
+        {%endfor%}
+    </div>
+    
+    <h2 id="booksForSaleTitle">Pending Books</h2>
+    <div class="grid-container">
+        {% for doc in docs_pending %}
         <div class="grid-item">
             <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}
             <br>

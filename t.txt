@@ -1,0 +1,23 @@
+```
+┌------------------------┐
+| CURRENT PROJECT STATUS |
+└------------------------┘
+
+pr? | person | branch                | feature
+====+========+=======================+=======================
+    | sarah  | <name>                | book classification for swapping
+-------------------------------------------------------------
+    | brian  | design                | designing site
+-------------------------------------------------------------
+    | misha/ | tests2                | testing  
+    | rachel |                       |
+-------------------------------------------------------------
+    | danilo | add-book-validation   | adding val to add_book, 
+                                       showing username with book listings on homepage,
+                                       can't edit when swappable,
+                                       change 'sell' to 'trade',
+                                       see books in 'pending',
+                                       verify swap occurred
+-------------------------------------------------------------
+    | bhavig | -                     | deployment
+```
