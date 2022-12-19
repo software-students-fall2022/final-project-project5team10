@@ -3,22 +3,25 @@
 
 <div class="bookInfo">
     {% if book.image_exists %}
-        <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
+    <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
     {% else %}
-        <img src="../static/images/default.jpeg"/>
+    <img src="../static/images/default.jpeg" />
     {% endif %}
     <!-- <h2>${{book.price}}</h2> -->
     <div class="bookDetails">
         <h2>Book Info:</h2>
         <h3>Title: {{book.title}}</h3>
         <h3>Edition: {{book.edition}}</h3>
-        {% if book.metadata.volumeInfo.authors %}
+        <h3>Publisher: {{book.publisher}}</h3>
+        <h3>Condition: {{book.condition}}</h3>
+        {% if book.metadata %}
         <h3>Author:
+            {% if book.metadata.volumeInfo.authors %}
             {% for author in book.metadata.volumeInfo.authors %}
             {{author}}
             {% endfor %}
+            {% endif %}
         </h3>
-        {% endif %}
         {% if book.metadata.volumeInfo.categories %}
         <h3>Category:
             {% for category in book.metadata.volumeInfo.categories %}
@@ -27,8 +30,6 @@
 
         </h3>
         {% endif %}
-        <h3>Publisher: {{book.publisher}}</h3>
-        <h3>Condition: {{book.condition}}</h3>
         {% if book.metadata.volumeInfo.averageRating %}
         <h3>Average Rating: {{book.metadata.volumeInfo.averageRating}}, {{book.metadata.volumeInfo.ratingsCount}}
             reviews</h3>
@@ -38,6 +39,7 @@
         {% endif %}
         {% if book.metadata.volumeInfo.description %}
         <h3>Description: {{book.metadata.volumeInfo.description}}</h3>
+        {% endif %}
         {% endif %}
     </div>
 
