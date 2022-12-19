@@ -178,20 +178,10 @@ def test_add_book_notAuthorized(flask_app):
     response=flask_app.get(url)
     assert response.status_code==401
 
-def test_view_chat_notAuthorized(flask_app):
-    url='/view_chat'
-    response=flask_app.get(url)
-    assert response.status_code==401
-
 def test_account_notAuthorized(flask_app):
     url='/account'
     response=flask_app.get(url)
     assert response.status_code==401
-
-def test_book_for_sale_noID(flask_app):
-    url='/book_for_sale'
-    response=flask_app.get(url)
-    assert response.status_code==404
 
 def test_book_to_swap_notID(flask_app):
     url='/book_to_swap'
