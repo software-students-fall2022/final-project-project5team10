@@ -45,19 +45,47 @@ def test_signupPage(flask_app):
 #ROUTE: route handler for Post request to '/signup'
 def test_signup(flask_app):
     url='/signup'
-    username=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    password=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    email=''.join(random.choices(string.ascii_uppercase+string.digits,k=4)) + "@gmail.com"
-    response=flask_app.post(url ,data=dict(fusername=username,fpassword=password,femail="email.com"))
+    username=''.join(random.choices(string.ascii_uppercase+string.digits,k=10))
+    password=''.join(random.choices(string.ascii_uppercase+string.digits,k=10))
+    email=''.join(random.choices(string.ascii_uppercase+string.digits,k=10)) + "@gmail.com"
+    response=flask_app.post(url ,data=dict(fusername=username,fpassword=password,femail=email))
+    assert response.status_code==302
+
+
+def test_signup_empty(flask_app):
+    url='/signup'
+    email=''.join(random.choices(string.ascii_uppercase+string.digits,k=10)) + "@gmail.com"
+    response=flask_app.post(url ,data=dict(fusername="",fpassword="password",femail=email))
+    assert response.status_code==200
+    response=flask_app.post(url ,data=dict(fusername="username",fpassword="",femail=email))
     assert response.status_code==200
 
+def test_signup_space(flask_app):
+    url='/signup'
+    email=''.join(random.choices(string.ascii_uppercase+string.digits,k=10)) + "@gmail.com"
+    response=flask_app.post(url ,data=dict(fusername="test space",fpassword="password",femail=email))
+    assert response.status_code==200
+
+
+
 #ROUTE: route handler for Post request to '/login' with invalid input
-def test_login(flask_app):
+def test_login_empty(flask_app):
     url='/login'
     username=""
     password=""
     response=flask_app.post(url,data=dict(fusername=username,fpassword=password))
     assert response.status_code==200
+
+def test_login_with_space(flask_app):
+    url='login'
+    response=flask_app.post(url,data=dict(fusername="test space", fpassword="password"))
+    assert response.status_code==302
+
+def test_login(flask_app):
+    url='login'
+    response=flask_app.post(url,data=dict(fusername="test", fpassword="password"))
+    assert response.status_code==200
+
 #ROUTE: route handler for request to '/logout'
 def test_logout(flask_app):
     url='/logout'
