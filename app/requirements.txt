@@ -4,4 +4,4 @@ werkzeug
 pymongo
 datetime
 requests
-
+python-dotenv
