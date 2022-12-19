@@ -44,8 +44,6 @@ db = client["project5"]
 grid_fs = gridfs.GridFS(db)
 
 # a class to represent a user
-
-
 class User(flask_login.UserMixin):
     # inheriting from the UserMixin class gives this blank class default implementations of the necessary methods that flask-login requires all User objects to have
     # see some discussion of this here: https://stackoverflow.com/questions/63231163/what-is-the-usermixin-in-flask
@@ -100,7 +98,6 @@ def user_loader(user_id):
 
 # set up any context processors
 # context processors allow us to make selected variables or functions available from within all templates
-
 @app.context_processor
 def inject_user():
     # make the currently-logged-in user, if any, available to all templates as 'user'
@@ -122,9 +119,9 @@ def isfloat(num):
         return False
 
 
-# ======================================================#
-#                     main routes                       #
-# ======================================================#
+#======================================================#
+#                     main routes                      #
+#======================================================#
 
 @app.route('/')
 def authenticate():
@@ -167,13 +164,13 @@ def home():
 
     for doc in docs:
         doc['owner'] = db.users.find_one({'_id' : ObjectId(doc['user_id'])})['username']
-    # render the home template with those documents
+
     return render_template("home.html", docs=docs)
 
 
-# ======================================================#
+#======================================================#
 #                   signup/register                    #
-# ======================================================#
+#======================================================#
 
 
 @app.route('/signupPage', methods=['GET'])
@@ -252,9 +249,9 @@ def logout():
     return redirect(url_for('authenticate'))
 
 
-# ======================================================#
+#======================================================#
 #                      book CRUD                       #
-# ======================================================#
+#======================================================#
 
 
 @app.route('/add_book', methods=["GET", "POST"])
@@ -271,7 +268,7 @@ def add_book():
     # POST REQUEST FROM FORM
     if request.method == "POST":
         # validate input
-        if request.form['ftitle'] == '':
+        if '' in [request.form['ftitle'], request.form['fpublisher'], request.form['fedition']]:
             flash('Please fill out all fields')
             return render_template('add_book.html',
                                     title     = request.form['ftitle'],
@@ -352,17 +349,12 @@ def delete_book(bookid):
     delete book from database given a book_id
     '''
     db.books.delete_one({"_id": ObjectId(bookid)})
-    # print("deleted book with id: " + str(bookid), file=sys.stderr)
     return redirect(url_for('display_account'))
 
 
-# ======================================================#
+#======================================================#
 #                     book viewing                     #
-# ======================================================#
-
-# @app.route('/my_book_for_sale<bookid>', methods=['GET', 'POST'])
-# @flask_login.login_required
-
+#======================================================#
 
 @app.route('/book_info/<bookid>', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -382,18 +374,7 @@ def book_info(bookid):
     if request.method == 'POST':
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
-        if 'swap' in request.form:
-            return redirect(url_for('choose_book', otherbookid=book["_id"]))
-        else:
-            if 'cancel' in request.form:
-                # update request
-                # update status of books in db 
-                flash('Trade has been canceled')
-            else:
-                # update request
-                # delete books
-                flash('Trade has been verified')
-            return redirect(url_for('display_account'))
+        return redirect(url_for('choose_book', otherbookid=book["_id"]))
 
 
 
@@ -415,20 +396,13 @@ def choose_book(otherbookid):
                             swapper_name=otheruser['username'])
 
 
-# # curent user's books
-# @app.route('/book_for_sale/<bookid>', methods=['GET'])
-# @flask_login.login_required
-# def for_sale(bookid):
-#     '''
-#     route to show the selected book that is for sale on the home page
-#     '''
-#     book = db.books.find_one({"_id":ObjectId(bookid)})
-#     return render_template('book_for_sale.html',book=book)
 
 
-# ======================================================#
+
+
+#======================================================#
 #                        account                       #
-# ======================================================#
+#======================================================#
 
 
 @app.route('/account')
@@ -454,14 +428,6 @@ def display_account():
         }
     )
 
-    # responseArr = []
-    # for item in docs:
-    #     google_api_response = requests.get("https://www.googleapis.com/books/v1/volumes?q=" +
-    #                                        item["title"] + "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
-    #     # print(google_api_response,file=sys.stderr)
-    # print(google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"], file=sys.stderr)
-    # response = google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"]
-    # docs2 = db.books.find({"user_id": user.id})
 
     # render the account template with the user's username and the books they have up for sale
     return render_template("account.html", 
@@ -470,9 +436,9 @@ def display_account():
                             docs_pending=docs_pending)
 
 
-# ======================================================#
+#======================================================#
 #                     swap routes                      #
-# ======================================================#
+#======================================================#
 
 @app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -539,8 +505,6 @@ def make_request(user, bookid, otherbookid):
         "reciever"          : ObjectId(otheruserid),  # other user
         "booktoswap"        : ObjectId(bookid),       # book the current user has
         "bookrequested"     : ObjectId(otherbookid),  # book the current user wants
-        'verified_sender'   : False, # indicates whether the sender has verified the trade occurred
-        'verified_reciever' : False  # indicates whether the reciever has verified the trade occurred
     })
 
 
@@ -604,7 +568,6 @@ def view_swap(mybookid, otherbookid):
             # remove books from database
             db.books.delete_one({"_id": ObjectId(mybookid)})
             db.books.delete_one({"_id": ObjectId(otherbookid)})
-            #flash('Request has been Approved!')
             return redirect(url_for('view_swap_requests'))
         # decline swap
         if 'fdecline' in request.form:
@@ -614,12 +577,11 @@ def view_swap(mybookid, otherbookid):
                           {"booktoswap": ObjectId(otherbookid)}]}
             )
             update_book_status(mybookid, 'swappable', otherbookid, 'swappable')
-            #flash('Request has been Declined')
             return redirect(url_for('view_swap_requests'))
 
 
-# ======================================================#
+#======================================================#
 #                         run                          #
-# ======================================================#
+#======================================================#
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=3000)
