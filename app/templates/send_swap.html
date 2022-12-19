@@ -1,38 +1,71 @@
-{% extends 'wrapper.html' %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Bookshare</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link href='https://fonts.googleapis.com/css?family=Cormorant Garamond' rel='stylesheet'>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/wrapper.css') }}"
+    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+  </head>
+  
+  <body>
+    <div class="container">
+        <header>
+            <div class="nav-container">
+                <a class="nav-title" href="{{ url_for('home')}}">
+                <h1 id="title">BookShare</h1>
+                </a>
+                <div class="right-nav">
+                <label for="view-account" title="My Account">
+                    <a class="nav-link" href="{{ url_for('display_account')}}">
+                    <span class="material-symbols-outlined nav-icon">person</span>
+                    </a>
+                </label>
+                <label for="logout" title="Logout">
+                    <a class="nav-link" href="{{ url_for('logout')}}">
+                    <span class="material-symbols-outlined nav-icon">logout</span>
+                    </a>
+                </label>
+            </div>
+            </div>
+        </header>
+    <main>
+        <br/>
+        <br/>
+        <div id="bookInfo">
+            <div id="bookInfo-details">
+                {% if book.image_exists %}
+                    <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default.jpeg') }}"/>
+                {% endif %}
+                <!-- <h2>${{book.price}}</h2> -->
+                <div id="bookDetails">
+                    <h3>Title: {{book.title}}</h3>
+                    <h3>Edition: {{book.edition}}</h3>
+                    <h3>Publisher: {{book.publisher}}</h3>
+                    <h3>Condition: {{book.condition}}</h3>
+                </div>
+            </div>
+            <!--Send/Cancel Request-->
+            <br/><br/><br/><br/>
+            <div id="bookInfo-buttons">
+                <form id="cancelrequest" method="POST">
+                    <input type="submit" name="fcancel" value="Cancel">
+                </form>
+                <form id="sendrequest" method="POST">
+                    <input type="submit" name="fsend" value="Send Request to Swap">
+                </form>
+            </div>
+        </div>
+    </main>
 
-{% block css %}
-<link
-  rel="stylesheet"
-  href="../static/css/swap.css"
-  href="{{ url_for('static', filename='css/swap.css') }}"
-/>
-{% endblock %}
+  </body>
 
-
-{% block container %}
-
-<div class="bookInfo">
-    {% if book.image_exists %}
-        <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
-    {% else %}
-        <img src="../static/images/default.jpeg"/>
-    {% endif %}
-    <!-- <h2>${{book.price}}</h2> -->
-    <div class="bookDetails">
-        <h2>Book Info:</h2>
-        <h3>Title: {{book.title}}</h3>
-        <h3>Edition: {{book.edition}}</h3>
-        <h3>Publisher: {{book.publisher}}</h3>
-        <h3>Condition: {{book.condition}}</h3>
-    </div>
-    <!--Send/Cancel Request-->
-    <div>
-        <form id="cancelrequest" method="POST">
-            <input type="submit" name="fcancel" value="Cancel">
-        </form>
-        <form id="sendrequest" method="POST">
-            <input type="submit" name="fsend" value="Send Request to Swap">
-        </form>
-    </div>
-</div>
-{% endblock %}
+</html>

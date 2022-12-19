@@ -129,3 +129,381 @@ label{
   cursor:pointer;
   color: var(--darkpurple);
 }
+
+
+/* *********************Swap Requests Page******************************* */
+#trade-request-title{
+  font-family:"Cormorant Garamond";
+    text-align: center;
+    font-size: 5rem;
+    font-weight: bold;
+    margin: auto;
+    max-width: fit-content;
+    padding-top:20px;
+    padding-bottom: 35px;
+}
+
+#trade-request-container{
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  grid-gap:2em;
+  background-color: var(--purple);
+  padding: 80px;
+  height: 600px;
+  overflow: auto;
+  height:100vh;
+  width: 100vw;
+}
+
+#trade-request-item>h3{
+  margin-top:10px;
+  margin-bottom:10px;
+}
+
+#trade-request-item{
+  background-color: var(--lpurple);
+  padding: 20px;
+  font-size: 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+#view-trade{
+  background-color: var(--darkpurple);
+  color: var(--lpurple);
+  border-radius: 2rem;
+}
+
+#view-trade:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color:var(--darkpurple);
+}
+
+/* ************************Book Details********************************* */
+
+#bookImg{
+  display: flex;
+  justify-content: center;
+  margin-left: auto;
+  margin-right:auto;
+}
+
+.bookDetails{
+  margin-top: 10%;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+.bookDetails>h3{
+  letter-spacing: 1.8px;
+  margin-bottom: 2px;
+  font-size: 1.3rem;
+}
+
+#delbook{
+  margin-left:auto;
+  margin-bottom:10px;
+  text-align: center;
+  margin-right:auto;
+  max-width:45%;
+  background-color: var(--darkpurple);
+  color:var(--lpurple);
+  border-radius: 2rem;
+}
+
+#delbook:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color:var(--darkpurple);
+}
+
+#editbook{
+  margin-left:auto;
+  margin-right:auto;
+  max-width:45%;
+  margin-bottom:10px;
+  text-align: center;
+  background-color: var(--darkpurple);
+  color:var(--lpurple);
+  border-radius: 2rem;
+}
+
+#editbook:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color:var(--darkpurple);
+}
+
+#requestswap{
+  margin-left:auto;
+  margin-right:auto;
+  max-width:45%;
+  margin-bottom:10px;
+  text-align: center;
+  background-color: var(--darkpurple);
+  color:var(--lpurple);
+  border-radius: 2rem;
+}
+
+#requestswap:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color:var(--darkpurple);
+}
+
+/* **************************Edit Form********************************* */
+#edit-title{
+  font-family:"Cormorant Garamond";
+  text-align: center;
+  font-size: 5rem;
+  font-weight: bold;
+  margin: auto;
+  max-width: fit-content;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.edit-book-form{
+  display:flex;
+  font-family: 'Cormorant Garamond';
+  justify-content: center;
+  flex-direction: column;
+  background-color: var(--purple);
+  height: 100vh;
+  width: 100vw;
+}
+.edit-book-form>form{
+  display:flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.edit-form>h2{
+  color:var(--lpurple);
+  margin-left: 8%;
+}
+
+.edit-form>input{
+  margin-left:auto;
+  margin-right:auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width:60vw;
+  background-color: var(--lpurple);
+  text-align: center;
+  padding-top:10px;
+  padding-bottom: 10px;
+}
+
+.edit-form>input:placeholder{
+  color: var(--gray);
+}
+
+.edit-form>select{
+  margin:auto;
+  width:60vw;
+  text-align: center;
+}
+
+.edit-form>button{
+  min-width: 40%;
+  border-radius: 2rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.4rem;
+  font-family: 'Roboto', sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--darkpurple);
+  color: var(--lpurple);
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.edit-form>button:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color: var(--black);
+}
+
+/* ********************Selecting Book to swap***************** */
+#select-title{
+  font-family:"Cormorant Garamond";
+  text-align: center;
+  font-size: 4.5rem;
+  font-weight: bold;
+  margin: auto;
+  max-width: fit-content;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+.trade-target-img{
+  margin-left: auto;
+  margin-right:auto;
+  align-items: center;
+  max-width: 40%;
+}
+.trade-target-img>h3{
+  font-size: 2rem;
+  letter-spacing: 1px;
+}
+.selectBook-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  grid-gap:2em;
+  background-color: var(--purple);
+  padding: 80px;
+  height: 600px;
+  overflow: auto;
+}
+
+.selectBook-item{
+  background-color: var(--lpurple);
+  padding: 20px;
+  font-size: 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+.selectBook-item>a{
+  font-size: 1.3rem;
+}
+.selectBook-item>a:hover{
+  cursor:pointer;
+  color: var(--darkpurple);
+}
+
+
+/* ***********************Confirm send trade******************* */
+
+#bookInfo{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left:auto;
+  margin-right:auto;
+  margin-top:15vh;
+  gap:10px;
+}
+
+#bookInfo-details{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: auto;
+  margin-right:auto;
+  max-width: 35vw;
+  max-height: 35vh;
+  gap:10px;
+}
+
+
+#bookDetails>h3{
+  font-size: 1rem;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 1px;
+}
+
+
+#cancelrequest{
+  max-width: 40%;
+  border-radius: 2rem;
+  text-align: center;
+  font-size: 1.4rem;
+  font-family: 'Roboto', sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--darkpurple);
+  color: var(--lpurple);
+  padding-bottom: 5px;
+  margin-top:20px;
+  margin-bottom:10px;
+}
+
+#sendrequest{
+  max-width: 40%;
+  border-radius: 2rem;
+  text-align: center;
+  font-size: 1.4rem;
+  font-family: 'Roboto', sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--darkpurple);
+  color: var(--lpurple);
+  padding-bottom: 5px;
+}
+
+#cancelrequest:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color: var(--darkpurple);
+}
+
+#sendrequest:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color: var(--darkpurple);
+}
+
+
+/* ******************************Confirm Trade******************************* */
+#tradeInfo{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left:auto;
+  margin-right:auto;
+  gap:10px;
+  margin-top:15vh;
+}
+
+#tradeInfo-details{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: auto;
+  margin-right:auto;
+  max-width: 35vw;
+  max-height: 35vh;
+  gap:10px;
+  margin-top:5vh;
+}
+
+#approve{
+  max-width: 40%;
+  border-radius: 2rem;
+  text-align: center;
+  font-size: 1.4rem;
+  font-family: 'Roboto', sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--darkpurple);
+  color: var(--lpurple);
+  padding-bottom: 5px;
+  margin-top:5vh;
+  margin-bottom:10px;
+}
+
+#decline{
+  max-width: 40%;
+  border-radius: 2rem;
+  text-align: center;
+  font-size: 1.4rem;
+  font-family: 'Roboto', sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--darkpurple);
+  color: var(--lpurple);
+  padding-bottom: 5px;
+}
+
+#approve:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color: var(--darkpurple);
+}
+
+#decline:hover{
+  cursor: pointer;
+  background-color: var(--lpurple);
+  color: var(--darkpurple);
+}

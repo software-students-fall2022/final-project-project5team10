@@ -83,7 +83,7 @@
         {% for doc in docs %}
             <div class="listing-item">
                 <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}</a>
-                {% if doc["metadata"] %}
+                {% if doc.metadata.volumeInfo.imageLinks %}
                 <br>
                 <br>
                 <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">

@@ -165,7 +165,6 @@ def home():
             doc['condition'] = request.form['condition']
 
         books = db.books.find(dict(doc))
-        # print(doc, file=sys.stderr)
         return render_template('search_results.html', books=books)
 
     '''
@@ -183,6 +182,7 @@ def home():
     for doc in docs:
         doc['owner'] = db.users.find_one({'_id' : ObjectId(doc['user_id'])})['username']
 
+    # print(doc, file=sys.stderr)
     return render_template("home.html", docs=docs)
 
 
@@ -314,6 +314,7 @@ def add_book():
         # print(google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"], file=sys.stderr)
 
         response = google_api_response["items"][0]
+        # print(response, file=sys.stderr)
         book["metadata"] = response
         book["status"]   = 'swappable'
         book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
@@ -451,19 +452,11 @@ def display_account():
         }
     )
 
-    docs_pending = db.books.find(
-        {
-            "user_id": user.id,
-            'status' : 'pending'
-        }
-    )
-
 
     # render the account template with the user's username and the books they have up for sale
     return render_template("account.html", 
                             username=user.data["username"], 
-                            docs_swappable=docs_swappable,
-                            docs_pending=docs_pending)
+                            docs_swappable=docs_swappable)
 
 
 #======================================================#
