@@ -1,6 +1,6 @@
-# ======================================================#
+#======================================================#
 #                        imports                       #
-# ======================================================#
+#======================================================#
 
 # flask
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
@@ -28,9 +28,9 @@ import os
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
-# ======================================================#
+#======================================================#
 #                        setup                         #
-# ======================================================#
+#======================================================#
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -148,16 +148,6 @@ def home():
             doc['publisher'] = request.form['publisher']
         if request.form['condition'] != "":
             doc['condition'] = request.form['condition']
-        # min_price = request.form['price-min']
-        # max_price = request.form['price-max']
-        # # check if the user enters floats for both min price and max price
-        # if isfloat(min_price) and isfloat(max_price):
-        #     if min_price <= max_price:
-        #         doc['price'] = {'$gte': float(min_price), '$lte': float(max_price) }
-        # elif isfloat(min_price): # in the case the user only inputs a min price
-        #     doc['price'] = {'$gte': float(min_price)}
-        # elif isfloat(max_price): # in the case the user inputs only a max price
-        #     doc['price'] = {'$lte': float(max_price) }
 
         books = db.books.find(dict(doc))
         # print(doc, file=sys.stderr)
@@ -168,12 +158,15 @@ def home():
     '''
     # return all the book documents from the books collection that do not have the current user's id
     # and are able to be swapped
-    docs = db.books.find(
+    docs = list(db.books.find(
         {
             "user_id": {"$ne": flask_login.current_user.id},
             'status' : 'swappable'
         }
-    )
+    ))
+
+    for doc in docs:
+        doc['owner'] = db.users.find_one({'_id' : ObjectId(doc['user_id'])})['username']
     # render the home template with those documents
     return render_template("home.html", docs=docs)
 
@@ -277,17 +270,25 @@ def add_book():
 
     # POST REQUEST FROM FORM
     if request.method == "POST":
-        # TODO - input validation
+        # validate input
+        if request.form['ftitle'] == '':
+            flash('Please fill out all fields')
+            return render_template('add_book.html',
+                                    title     = request.form['ftitle'],
+                                    publisher = request.form['fpublisher'],
+                                    edition   = request.form['fedition']
+                                  )
+
+
         book = {}
         book["title"]     = request.form['ftitle']
         book["publisher"] = request.form['fpublisher']
         book["user_id"]   = user.id
         book["edition"]   = request.form['fedition']
         book["condition"] = request.form['fcondition']
-        # book["price"] = '{:4.2f}'.format(float(request.form['fprice']))
+
 
         # get metadata from google books
-
         google_api_response = requests.get( "https://www.googleapis.com/books/v1/volumes?q=" +
                                             book["title"] + 
                                             "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
@@ -301,38 +302,33 @@ def add_book():
         book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
 
 
-        # if file is not in requests, add book into the books collection and
-        # render account page
-        if 'file' not in request.files:
-            db.books.insert_one(book)
-
-        # get uploaded file
-        file = request.files['file']
-
-        if file and allowed_file((file.filename)):  # check for allowed extensions
-            filename = secure_filename(file.filename)
-            user = flask_login.current_user
-            # unique file name: user id + filename
-            name = str(user.id) + "_" + str(filename)
-            # upload file in chunks into the db using grid_fs
-            id = grid_fs.put(file, filename=name)
-            # document to be inserted into the images collection
-            query = {
-                "user": user.id,
-                "book_name": book["title"],
-                "img_id": id
-            }
-            # add gridfs id to the image field of the book document to be queried into the books collection
-            book["image"] = id
-            # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
-            image = grid_fs.get(id)
-            base64_data = codecs.encode(image.read(), 'base64')
-            image = base64_data.decode('utf-8')
-            book['image_base64'] = image
-            # change the image_exists field to True once an image field is added to book document
-            book['image_exists'] = True
-            # add the image query into the images collection
-            db.images.insert_one(query)
+        if 'file' in request.files:  # check for allowed extensions
+            file = request.files['file']
+            if allowed_file((file.filename)):
+                filename = secure_filename(file.filename)
+                user = flask_login.current_user
+                # unique file name: user id + filename
+                name = str(user.id) + "_" + str(filename)
+                # upload file in chunks into the db using grid_fs
+                id = grid_fs.put(file, filename=name)
+                # document to be inserted into the images collection
+                query = {
+                    "user": user.id,
+                    "book_name": book["title"],
+                    "img_id": id
+                }
+                # add gridfs id to the image field of the book document to be queried into the books collection
+                book["image"] = id
+                # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
+                image = grid_fs.get(id)
+                base64_data = codecs.encode(image.read(), 'base64')
+                image = base64_data.decode('utf-8')
+                book['image_base64'] = image
+                # change the image_exists field to True once an image field is added to book document
+                book['image_exists'] = True
+                # add the image query into the images collection
+                db.images.insert_one(query)
+        
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
@@ -386,7 +382,19 @@ def book_info(bookid):
     if request.method == 'POST':
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
-        return redirect(url_for('choose_book', otherbookid=book["_id"]))
+        if 'swap' in request.form:
+            return redirect(url_for('choose_book', otherbookid=book["_id"]))
+        else:
+            if 'cancel' in request.form:
+                # update request
+                # update status of books in db 
+                flash('Trade has been canceled')
+            else:
+                # update request
+                # delete books
+                flash('Trade has been verified')
+            return redirect(url_for('display_account'))
+
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
@@ -398,7 +406,7 @@ def choose_book(otherbookid):
     @param otherbookid: id of the other user's book
     '''
     user = flask_login.current_user
-    myBooks = db.books.find({"user_id": user.id})
+    myBooks = db.books.find({"user_id": user.id, 'status': 'swappable'})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     otheruser = db.users.find_one({'_id' : ObjectId(otherbook['user_id'])})
     return render_template('book_to_swap.html', 
@@ -432,10 +440,17 @@ def display_account():
     '''
 
     user = flask_login.current_user
-    docs = db.books.find(
+    docs_swappable = db.books.find(
         {
             "user_id": user.id,
             'status' : 'swappable'
+        }
+    )
+
+    docs_pending = db.books.find(
+        {
+            "user_id": user.id,
+            'status' : 'pending'
         }
     )
 
@@ -449,7 +464,10 @@ def display_account():
     # docs2 = db.books.find({"user_id": user.id})
 
     # render the account template with the user's username and the books they have up for sale
-    return render_template("account.html", username=user.data["username"], docs=docs)
+    return render_template("account.html", 
+                            username=user.data["username"], 
+                            docs_swappable=docs_swappable,
+                            docs_pending=docs_pending)
 
 
 # ======================================================#
@@ -517,10 +535,12 @@ def make_request(user, bookid, otherbookid):
     otheruserid = otherbook["user_id"]
     # add request to the database (will be displayed on recievers swap requests page)
     db.requests.insert_one({
-        "sender": ObjectId(user.id),  # current user
-        "reciever": ObjectId(otheruserid),  # other user
-        "booktoswap": ObjectId(bookid),  # book the current user has
-        "bookrequested": ObjectId(otherbookid)  # book the current user wants
+        "sender"            : ObjectId(user.id),      # current user
+        "reciever"          : ObjectId(otheruserid),  # other user
+        "booktoswap"        : ObjectId(bookid),       # book the current user has
+        "bookrequested"     : ObjectId(otherbookid),  # book the current user wants
+        'verified_sender'   : False, # indicates whether the sender has verified the trade occurred
+        'verified_reciever' : False  # indicates whether the reciever has verified the trade occurred
     })
 
 
@@ -533,17 +553,25 @@ def view_swap_requests():
     user = flask_login.current_user
     requests = db.requests.find(
         {"reciever": ObjectId(user.id)}).sort("_id", -1)
+
     # create an array of swap requests
     swapreqs = []
+
     for req in requests:
         mybookid = req["bookrequested"]
         otherbookid = req["booktoswap"]
+
         # book the current user has
         mybook = db.books.find_one({"_id": ObjectId(mybookid)})
-        otherbook = db.books.find_one(
-            {"_id": ObjectId(otherbookid)})  # book other user wants
-        swapreqs.append({"mybook": mybook, "otherbook": otherbook})
-    # display all requests
+        # book other user wants
+        otherbook = db.books.find_one({"_id": otherbookid})  
+
+        swapreqs.append({
+                            "mybook"    : mybook,
+                            "otherbook" : otherbook,
+                            'otheruser' : db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+                        })
+
     return render_template('swap_requests.html', swapreqs=swapreqs)
 
 
@@ -560,7 +588,11 @@ def view_swap(mybookid, otherbookid):
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
 
     if request.method == 'GET':
-        return render_template("view_swap.html", mybook=mybook, otherbook=otherbook)
+        return render_template("view_swap.html", 
+                                mybook=mybook, 
+                                otherbook=otherbook, 
+                                otheruser=db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+                              )
     if request.method == 'POST':
         # approve swap
         if 'fapprove' in request.form:

@@ -19,18 +19,30 @@
             formaction="{{ url_for('add_book')}}"
             class="block"
         >
-            Add book to sell
+            Add book to trade
         </button>
     </form>
     <br />
     
-    <h2 id="booksForSaleTitle">My Books for Sale</h2>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class=flashes>
+            {% for message in messages %}
+            <h3>{{ message }}</h3>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+
+    <h2 id="booksForSaleTitle">My Books for Trade</h2>
     <div class="grid-container">
-        {% for doc in docs %}
+        {% for doc in docs_swappable %}
         <div class="grid-item">
             <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}
-            <br>
-            <br>
+                <br>
+                <br>
             {% if doc["metadata"] %}
             <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
             {% elif doc.image_exists %}
@@ -42,6 +54,16 @@
         </div>
         {%endfor%}
     </div>
+    
+    <form>
+        <button
+            type="submit"
+            formaction="{{ url_for('view_swap_requests')}}"
+            class="block"
+        >
+            View Swap Requests
+        </button>
+    </form>
 </div>
 <br />
 
