@@ -256,7 +256,9 @@ def test_locate_user():
             "username": "username"
         }
     )
-    result = locate_user('542c2b97bac0595474108b50','username', testing=True, col=collection)
+    result = locate_user('542c2b97bac0595474108b50','username', col=collection)
+    assert result==user1
+    result = locate_user(username='username', col=collection)
     assert result==user1
     collection.drop()
 
