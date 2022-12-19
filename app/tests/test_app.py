@@ -4,6 +4,9 @@ import string
 import app
 import flask_login
 import mongomock
+from app import locate_user
+from app import user_loader
+from app import inject_user
 
 client = mongomock.MongoClient()
 collection = client.db.collection
@@ -230,3 +233,18 @@ def test_isfloat_false():
 def test_allowed_file():
   test_file = "writing.png"
   assert app.allowed_file(test_file) is True
+
+
+#------------------------------------SET UP---------------------------------------------
+# def test_locate_user():
+#     result=locate_user('5fa1c587ae2ac23e9c46510f','username')
+#     assert result==None
+
+# def test_user_loader():
+#     result=user_loader('1234')
+#     assert result==None
+
+def test_inject_user():
+    result=inject_user()
+    assert type(result)==dict
+
