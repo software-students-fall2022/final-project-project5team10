@@ -7,11 +7,13 @@ EXPOSE 3000
 WORKDIR /app
 
 # copy current dir contents into image dir
-ADD . .
+ADD . /app
 
 # pip install requirements
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+
+COPY . .
 
 # run web app
 CMD flask run -h 0.0.0.0 -p 3000
