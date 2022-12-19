@@ -206,6 +206,15 @@ def test_allowed_file():
   test_file = "writing.png"
   assert app.allowed_file(test_file) is True
 
+def test_get_and_insert_metadata():
+    bookObj = {
+        "title": "To Kill a Mockingbird"
+    }
+    app.get_and_insert_metadata(bookObj)
+    assert bookObj["metadata"] is not None
+    assert bookObj["status"] == "swappable"
+    assert bookObj["image_exists"] == False
+
 
 
 def test_update_book_status():
