@@ -402,7 +402,7 @@ def choose_book(otherbookid):
     @param otherbookid: id of the other user's book
     '''
     user = flask_login.current_user
-    myBooks = db.books.find({"user_id": user.id})
+    myBooks = db.books.find({"user_id": user.id, 'status': 'swappable'})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     otheruser = db.users.find_one({'_id' : ObjectId(otherbook['user_id'])})
     return render_template('book_to_swap.html', 
@@ -549,17 +549,25 @@ def view_swap_requests():
     user = flask_login.current_user
     requests = db.requests.find(
         {"reciever": ObjectId(user.id)}).sort("_id", -1)
+
     # create an array of swap requests
     swapreqs = []
+
     for req in requests:
+        print(req, file=sys.stderr)
         mybookid = req["bookrequested"]
+        print(mybookid, file=sys.stderr)
+        
         otherbookid = req["booktoswap"]
+
         # book the current user has
         mybook = db.books.find_one({"_id": ObjectId(mybookid)})
-        otherbook = db.books.find_one(
-            {"_id": ObjectId(otherbookid)})  # book other user wants
+        print(mybook, file=sys.stderr)
+        # book other user wants
+        otherbook = db.books.find_one({"_id": otherbookid})  
+
         swapreqs.append({"mybook": mybook, "otherbook": otherbook})
-    # display all requests
+
     return render_template('swap_requests.html', swapreqs=swapreqs)
 
 
