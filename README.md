@@ -30,7 +30,7 @@ Users can register for an account. With an account, one can:
 [Docker Hub Image](https://hub.docker.com/r/sarahaltowaity1/bookshare)
 
 ## Digital Ocean
-
+[Deployed Link](https://bookshares-app-ap28r.ondigitalocean.app/)
 ## Authors
 
 [Sarah Al-Towaity](https://github.com/sarah-altowaity1) \
