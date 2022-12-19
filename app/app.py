@@ -1,6 +1,6 @@
-# ======================================================#
+#======================================================#
 #                        imports                       #
-# ======================================================#
+#======================================================#
 
 # flask
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
@@ -28,9 +28,9 @@ import os
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
-# ======================================================#
+#======================================================#
 #                        setup                         #
-# ======================================================#
+#======================================================#
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -44,8 +44,6 @@ db = client["project5"]
 grid_fs = gridfs.GridFS(db)
 
 # a class to represent a user
-
-
 class User(flask_login.UserMixin):
     # inheriting from the UserMixin class gives this blank class default implementations of the necessary methods that flask-login requires all User objects to have
     # see some discussion of this here: https://stackoverflow.com/questions/63231163/what-is-the-usermixin-in-flask
@@ -100,7 +98,6 @@ def user_loader(user_id):
 
 # set up any context processors
 # context processors allow us to make selected variables or functions available from within all templates
-
 @app.context_processor
 def inject_user():
     # make the currently-logged-in user, if any, available to all templates as 'user'
@@ -122,9 +119,9 @@ def isfloat(num):
         return False
 
 
-# ======================================================#
-#                     main routes                       #
-# ======================================================#
+#======================================================#
+#                     main routes                      #
+#======================================================#
 
 @app.route('/')
 def authenticate():
@@ -148,16 +145,6 @@ def home():
             doc['publisher'] = request.form['publisher']
         if request.form['condition'] != "":
             doc['condition'] = request.form['condition']
-        # min_price = request.form['price-min']
-        # max_price = request.form['price-max']
-        # # check if the user enters floats for both min price and max price
-        # if isfloat(min_price) and isfloat(max_price):
-        #     if min_price <= max_price:
-        #         doc['price'] = {'$gte': float(min_price), '$lte': float(max_price) }
-        # elif isfloat(min_price): # in the case the user only inputs a min price
-        #     doc['price'] = {'$gte': float(min_price)}
-        # elif isfloat(max_price): # in the case the user inputs only a max price
-        #     doc['price'] = {'$lte': float(max_price) }
 
         books = db.books.find(dict(doc))
         # print(doc, file=sys.stderr)
@@ -168,19 +155,22 @@ def home():
     '''
     # return all the book documents from the books collection that do not have the current user's id
     # and are able to be swapped
-    docs = db.books.find(
+    docs = list(db.books.find(
         {
             "user_id": {"$ne": flask_login.current_user.id},
             'status' : 'swappable'
         }
-    )
-    # render the home template with those documents
+    ))
+
+    for doc in docs:
+        doc['owner'] = db.users.find_one({'_id' : ObjectId(doc['user_id'])})['username']
+
     return render_template("home.html", docs=docs)
 
 
-# ======================================================#
+#======================================================#
 #                   signup/register                    #
-# ======================================================#
+#======================================================#
 
 
 @app.route('/signupPage', methods=['GET'])
@@ -259,9 +249,9 @@ def logout():
     return redirect(url_for('authenticate'))
 
 
-# ======================================================#
+#======================================================#
 #                      book CRUD                       #
-# ======================================================#
+#======================================================#
 
 
 @app.route('/add_book', methods=["GET", "POST"])
@@ -277,17 +267,25 @@ def add_book():
 
     # POST REQUEST FROM FORM
     if request.method == "POST":
-        # TODO - input validation
+        # validate input
+        if '' in [request.form['ftitle'], request.form['fpublisher'], request.form['fedition']]:
+            flash('Please fill out all fields')
+            return render_template('add_book.html',
+                                    title     = request.form['ftitle'],
+                                    publisher = request.form['fpublisher'],
+                                    edition   = request.form['fedition']
+                                  )
+
+
         book = {}
         book["title"]     = request.form['ftitle']
         book["publisher"] = request.form['fpublisher']
         book["user_id"]   = user.id
         book["edition"]   = request.form['fedition']
         book["condition"] = request.form['fcondition']
-        # book["price"] = '{:4.2f}'.format(float(request.form['fprice']))
+
 
         # get metadata from google books
-
         google_api_response = requests.get( "https://www.googleapis.com/books/v1/volumes?q=" +
                                             book["title"] + 
                                             "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
@@ -301,38 +299,33 @@ def add_book():
         book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
 
 
-        # if file is not in requests, add book into the books collection and
-        # render account page
-        if 'file' not in request.files:
-            db.books.insert_one(book)
-
-        # get uploaded file
-        file = request.files['file']
-
-        if file and allowed_file((file.filename)):  # check for allowed extensions
-            filename = secure_filename(file.filename)
-            user = flask_login.current_user
-            # unique file name: user id + filename
-            name = str(user.id) + "_" + str(filename)
-            # upload file in chunks into the db using grid_fs
-            id = grid_fs.put(file, filename=name)
-            # document to be inserted into the images collection
-            query = {
-                "user": user.id,
-                "book_name": book["title"],
-                "img_id": id
-            }
-            # add gridfs id to the image field of the book document to be queried into the books collection
-            book["image"] = id
-            # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
-            image = grid_fs.get(id)
-            base64_data = codecs.encode(image.read(), 'base64')
-            image = base64_data.decode('utf-8')
-            book['image_base64'] = image
-            # change the image_exists field to True once an image field is added to book document
-            book['image_exists'] = True
-            # add the image query into the images collection
-            db.images.insert_one(query)
+        if 'file' in request.files:  # check for allowed extensions
+            file = request.files['file']
+            if allowed_file((file.filename)):
+                filename = secure_filename(file.filename)
+                user = flask_login.current_user
+                # unique file name: user id + filename
+                name = str(user.id) + "_" + str(filename)
+                # upload file in chunks into the db using grid_fs
+                id = grid_fs.put(file, filename=name)
+                # document to be inserted into the images collection
+                query = {
+                    "user": user.id,
+                    "book_name": book["title"],
+                    "img_id": id
+                }
+                # add gridfs id to the image field of the book document to be queried into the books collection
+                book["image"] = id
+                # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
+                image = grid_fs.get(id)
+                base64_data = codecs.encode(image.read(), 'base64')
+                image = base64_data.decode('utf-8')
+                book['image_base64'] = image
+                # change the image_exists field to True once an image field is added to book document
+                book['image_exists'] = True
+                # add the image query into the images collection
+                db.images.insert_one(query)
+        
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
@@ -356,17 +349,12 @@ def delete_book(bookid):
     delete book from database given a book_id
     '''
     db.books.delete_one({"_id": ObjectId(bookid)})
-    # print("deleted book with id: " + str(bookid), file=sys.stderr)
     return redirect(url_for('display_account'))
 
 
-# ======================================================#
+#======================================================#
 #                     book viewing                     #
-# ======================================================#
-
-# @app.route('/my_book_for_sale<bookid>', methods=['GET', 'POST'])
-# @flask_login.login_required
-
+#======================================================#
 
 @app.route('/book_info/<bookid>', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -389,6 +377,7 @@ def book_info(bookid):
         return redirect(url_for('choose_book', otherbookid=book["_id"]))
 
 
+
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
 @flask_login.login_required
 def choose_book(otherbookid):
@@ -398,7 +387,7 @@ def choose_book(otherbookid):
     @param otherbookid: id of the other user's book
     '''
     user = flask_login.current_user
-    myBooks = db.books.find({"user_id": user.id})
+    myBooks = db.books.find({"user_id": user.id, 'status': 'swappable'})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
     otheruser = db.users.find_one({'_id' : ObjectId(otherbook['user_id'])})
     return render_template('book_to_swap.html', 
@@ -407,20 +396,13 @@ def choose_book(otherbookid):
                             swapper_name=otheruser['username'])
 
 
-# # curent user's books
-# @app.route('/book_for_sale/<bookid>', methods=['GET'])
-# @flask_login.login_required
-# def for_sale(bookid):
-#     '''
-#     route to show the selected book that is for sale on the home page
-#     '''
-#     book = db.books.find_one({"_id":ObjectId(bookid)})
-#     return render_template('book_for_sale.html',book=book)
 
 
-# ======================================================#
+
+
+#======================================================#
 #                        account                       #
-# ======================================================#
+#======================================================#
 
 
 @app.route('/account')
@@ -432,29 +414,31 @@ def display_account():
     '''
 
     user = flask_login.current_user
-    docs = db.books.find(
+    docs_swappable = db.books.find(
         {
             "user_id": user.id,
             'status' : 'swappable'
         }
     )
 
-    # responseArr = []
-    # for item in docs:
-    #     google_api_response = requests.get("https://www.googleapis.com/books/v1/volumes?q=" +
-    #                                        item["title"] + "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
-    #     # print(google_api_response,file=sys.stderr)
-    # print(google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"], file=sys.stderr)
-    # response = google_api_response["items"][0]["volumeInfo"]["imageLinks"]["thumbnail"]
-    # docs2 = db.books.find({"user_id": user.id})
+    docs_pending = db.books.find(
+        {
+            "user_id": user.id,
+            'status' : 'pending'
+        }
+    )
+
 
     # render the account template with the user's username and the books they have up for sale
-    return render_template("account.html", username=user.data["username"], docs=docs)
+    return render_template("account.html", 
+                            username=user.data["username"], 
+                            docs_swappable=docs_swappable,
+                            docs_pending=docs_pending)
 
 
-# ======================================================#
+#======================================================#
 #                     swap routes                      #
-# ======================================================#
+#======================================================#
 
 @app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -517,10 +501,10 @@ def make_request(user, bookid, otherbookid):
     otheruserid = otherbook["user_id"]
     # add request to the database (will be displayed on recievers swap requests page)
     db.requests.insert_one({
-        "sender": ObjectId(user.id),  # current user
-        "reciever": ObjectId(otheruserid),  # other user
-        "booktoswap": ObjectId(bookid),  # book the current user has
-        "bookrequested": ObjectId(otherbookid)  # book the current user wants
+        "sender"            : ObjectId(user.id),      # current user
+        "reciever"          : ObjectId(otheruserid),  # other user
+        "booktoswap"        : ObjectId(bookid),       # book the current user has
+        "bookrequested"     : ObjectId(otherbookid),  # book the current user wants
     })
 
 
@@ -533,17 +517,25 @@ def view_swap_requests():
     user = flask_login.current_user
     requests = db.requests.find(
         {"reciever": ObjectId(user.id)}).sort("_id", -1)
+
     # create an array of swap requests
     swapreqs = []
+
     for req in requests:
         mybookid = req["bookrequested"]
         otherbookid = req["booktoswap"]
+
         # book the current user has
         mybook = db.books.find_one({"_id": ObjectId(mybookid)})
-        otherbook = db.books.find_one(
-            {"_id": ObjectId(otherbookid)})  # book other user wants
-        swapreqs.append({"mybook": mybook, "otherbook": otherbook})
-    # display all requests
+        # book other user wants
+        otherbook = db.books.find_one({"_id": otherbookid})  
+
+        swapreqs.append({
+                            "mybook"    : mybook,
+                            "otherbook" : otherbook,
+                            'otheruser' : db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+                        })
+
     return render_template('swap_requests.html', swapreqs=swapreqs)
 
 
@@ -560,7 +552,11 @@ def view_swap(mybookid, otherbookid):
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
 
     if request.method == 'GET':
-        return render_template("view_swap.html", mybook=mybook, otherbook=otherbook)
+        return render_template("view_swap.html", 
+                                mybook=mybook, 
+                                otherbook=otherbook, 
+                                otheruser=db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+                              )
     if request.method == 'POST':
         # approve swap
         if 'fapprove' in request.form:
@@ -572,7 +568,6 @@ def view_swap(mybookid, otherbookid):
             # remove books from database
             db.books.delete_one({"_id": ObjectId(mybookid)})
             db.books.delete_one({"_id": ObjectId(otherbookid)})
-            #flash('Request has been Approved!')
             return redirect(url_for('view_swap_requests'))
         # decline swap
         if 'fdecline' in request.form:
@@ -581,12 +576,12 @@ def view_swap(mybookid, otherbookid):
                 {"$and": [{"bookrequested": ObjectId(mybookid)},
                           {"booktoswap": ObjectId(otherbookid)}]}
             )
-            #flash('Request has been Declined')
+            update_book_status(mybookid, 'swappable', otherbookid, 'swappable')
             return redirect(url_for('view_swap_requests'))
 
 
-# ======================================================#
+#======================================================#
 #                         run                          #
-# ======================================================#
+#======================================================#
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=3000)

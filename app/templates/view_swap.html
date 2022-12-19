@@ -2,13 +2,13 @@
 {% block container %}
 
 <div class="bookInfo">
-    <h1> Trade {{mybook.title}} </h3>
+    <h1> Trade {{otheruser.username}}'s {{mybook.title}} </h3>
+    <h1> Email: {{otheruser.email}}   </h1>
     {% if mybook.image_exists %}
         <img src="data:image/png;base64, {{mybook.image_base64}}" width="500" height="500" />
     {% else %}
         <img src="../static/images/default.jpeg"/>
     {% endif %}
-    <!-- <h2>${{mybook.price}}</h2> -->
     <div class="bookDetails">
         <h2>Book Info:</h2>
         <h3>Title: {{mybook.title}}</h3>
@@ -18,13 +18,12 @@
     </div>
 </div>
 <div class="bookInfo">
-    <h1> For {{otherbook.title}} </h1>
+    <h1> For Your {{otherbook.title}} </h1>
     {% if otherbook.image_exists %}
         <img src="data:image/png;base64, {{otherbook.image_base64}}" width="500" height="500" />
     {% else %}
         <img src="../static/images/default.jpeg"/>
     {% endif %}
-    <!-- <h2>${{otherbook.price}}</h2> -->
     <div class="bookDetails">
         <h2>Book Info:</h2>
         <h3>Title: {{otherbook.title}}</h3>

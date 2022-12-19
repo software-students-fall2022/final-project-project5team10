@@ -63,6 +63,7 @@
         {% endif %}
     </div>
 
+
     {% if is_owner %}
     <form id="delbook" method="GET" action="{{ url_for('delete_book', bookid=book._id) }}">
         <input type="submit" name="delbookbtn" value="Delete Book Listing">
@@ -74,7 +75,7 @@
     <!--choose this book to swap-->
     <div>
         <form id="requestswap" method="POST">
-            <input type="submit" name="request" value="Request to Swap">
+            <input type="submit" name="swap" value="Request to Swap">
         </form>
     </div>
     {% endif %}

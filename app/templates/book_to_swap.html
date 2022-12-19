@@ -4,7 +4,11 @@
 
 <h1>Swapping For</h1>
 <div>
+    {% if otherbook.image_exists %}
     <img src="data:image/png;base64, {{otherbook.image_base64}}" alt="book_you_are_swapping_for" width="500" height="500"/>
+    {% else %}
+    <img src="../static/images/default.jpeg"/>
+    {% endif %}
     <h3>Title: {{otherbook.title}}</h3>
     <h3>Swapper: {{swapper_name}}</h3>
 </div>
