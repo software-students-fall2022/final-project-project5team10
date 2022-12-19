@@ -12,15 +12,32 @@
 {% block container %}
 
 <form method="POST" enctype="multipart/form-data">
+
     <h1>Add Book to Sell</h1> 
+
     <h2>Book Information</h2> 
+
     <h3>Title</h3>
-    <input type="text" placeholder="Title" name ="ftitle"
-    >
+    {% if title %}
+    <input type="text" placeholder="Title" name ="ftitle" autocomplete="{{title}}">
+    {% else %}
+    <input type="text" placeholder="Title" name ="ftitle">
+    {% endif %}
+    
     <h3>Publisher</h3>
+    {% if publisher %}
+    <input type="text" placeholder="Publisher" name ="fpublisher" autocomplete="{{publisher}}">
+    {% else %}
     <input type="text" placeholder="Publisher" name ="fpublisher">
+    {% endif %}
+
     <h3>Edition</h3>
+    {% if edition %}
+    <input type="text" placeholder="Edition" name ="fedition" edition="{{edition}}">
+    {% else %}
     <input type="text" placeholder="Edition" name ="fedition">
+    {% endif %}
+
     <h3>Condition</h3>
     <select name="fcondition" id="fconditon">
         <option value="New">New</option>
@@ -28,14 +45,20 @@
         <option value="Heavily Used">Heavily Used</option>
         <option value="Damaged">Damaged</option>
     </select>
-    
-    <!-- <h2>Price Information</h2>
-    <h3> Price</h3>
-    <p>$</p> <input type="number" step="0.05" name="fprice"> -->
-    
+       
     <h3>Upload Images</h3>
     <input type= "file" id="book_image" name="file">
     <button type = "submit" formaction="{{ url_for('add_book')}}">Submit</button>
 </form>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class=flashes>
+        {% for message in messages %}
+        <h3>{{ message }}</h3>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
 
 {% endblock %}

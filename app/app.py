@@ -267,7 +267,16 @@ def add_book():
 
     # POST REQUEST FROM FORM
     if request.method == "POST":
-        # TODO - input validation
+        # validate input
+        if request.form['ftitle'] == '':
+            flash('Please fill out all fields')
+            return render_template('add_book.html',
+                                    title     = request.form['ftitle'],
+                                    publisher = request.form['fpublisher'],
+                                    edition   = request.form['fedition']
+                                  )
+
+
         book = {}
         book["title"]     = request.form['ftitle']
         book["publisher"] = request.form['fpublisher']
@@ -275,8 +284,8 @@ def add_book():
         book["edition"]   = request.form['fedition']
         book["condition"] = request.form['fcondition']
 
-        # get metadata from google books
 
+        # get metadata from google books
         google_api_response = requests.get( "https://www.googleapis.com/books/v1/volumes?q=" +
                                             book["title"] + 
                                             "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
@@ -290,38 +299,33 @@ def add_book():
         book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
 
 
-        # if file is not in requests, add book into the books collection and
-        # render account page
-        if 'file' not in request.files:
-            db.books.insert_one(book)
-
-        # get uploaded file
-        file = request.files['file']
-
-        if file and allowed_file((file.filename)):  # check for allowed extensions
-            filename = secure_filename(file.filename)
-            user = flask_login.current_user
-            # unique file name: user id + filename
-            name = str(user.id) + "_" + str(filename)
-            # upload file in chunks into the db using grid_fs
-            id = grid_fs.put(file, filename=name)
-            # document to be inserted into the images collection
-            query = {
-                "user": user.id,
-                "book_name": book["title"],
-                "img_id": id
-            }
-            # add gridfs id to the image field of the book document to be queried into the books collection
-            book["image"] = id
-            # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
-            image = grid_fs.get(id)
-            base64_data = codecs.encode(image.read(), 'base64')
-            image = base64_data.decode('utf-8')
-            book['image_base64'] = image
-            # change the image_exists field to True once an image field is added to book document
-            book['image_exists'] = True
-            # add the image query into the images collection
-            db.images.insert_one(query)
+        if 'file' in request.files:  # check for allowed extensions
+            file = request.files['file']
+            if allowed_file((file.filename)):
+                filename = secure_filename(file.filename)
+                user = flask_login.current_user
+                # unique file name: user id + filename
+                name = str(user.id) + "_" + str(filename)
+                # upload file in chunks into the db using grid_fs
+                id = grid_fs.put(file, filename=name)
+                # document to be inserted into the images collection
+                query = {
+                    "user": user.id,
+                    "book_name": book["title"],
+                    "img_id": id
+                }
+                # add gridfs id to the image field of the book document to be queried into the books collection
+                book["image"] = id
+                # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
+                image = grid_fs.get(id)
+                base64_data = codecs.encode(image.read(), 'base64')
+                image = base64_data.decode('utf-8')
+                book['image_base64'] = image
+                # change the image_exists field to True once an image field is added to book document
+                book['image_exists'] = True
+                # add the image query into the images collection
+                db.images.insert_one(query)
+        
         db.books.insert_one(book)
         return redirect(url_for('display_account'))
 
@@ -333,9 +337,6 @@ def edit_book(bookid):
     record existing attributes of book and pass them to template
     as existing field values after removing book from db
     '''
-
-
-
     book_record = db.books.find_one({"_id": ObjectId(bookid)})
     db.books.delete_one({"_id": ObjectId(bookid)})
     return render_template('edit_book.html', book=book_record)
