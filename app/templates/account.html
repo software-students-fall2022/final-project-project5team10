@@ -28,6 +28,10 @@
             <br>
             {% if doc["metadata"] %}
             <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
+            {% elif doc.image_exists %}
+                <img src="data:image/png;base64, {{doc.image_base64}}" width="500" height="500" />
+            {%else%}
+                <img src="../static/images/default.jpeg"/>
             {% endif %}
             </a>
         </div>

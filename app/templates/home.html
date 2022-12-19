@@ -28,6 +28,31 @@
         </div>
     </div>
 
+<!-- Search bar -->
+<form method='POST' action="{{url_for('home')}}" class="search-form">
+    <div id="search-bar">
+        <input type="text" name="query" placeholder="Search book titles">
+        <button type="submit" id="submit-search"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+
+    <div class="hidden" id="filter-buttons">
+        <!-- <input type="number" step="0.05" name="price-min">
+        <p> Min Price</p>
+        <input type="number" step="0.05"" name="price-max">
+        <p> Max Price</p> -->
+        <input type="text" name="edition">
+        <p> Edition </p>
+        <input type="text" name="publisher">
+        <p> Publisher </p>
+        <select name="condition" id="conditon">
+            <option value=""></option>
+            <option value="New">New</option>
+            <option value="Lightly Used">Lightly Used</option>
+            <option value="Heavily Used">Heavily Used</option>
+            <option value="Damaged">Damaged</option>
+        </select>
+        <p> Condition </p>
+
     <!-- Search bar -->
     <div class="search-form">
         <form method='POST' action="{{url_for('home')}}">
