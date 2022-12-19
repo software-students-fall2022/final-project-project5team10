@@ -37,17 +37,26 @@ def test_signup(flask_app):
     url='/signup'
     username=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
     password=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    response=flask_app.post(url ,data=dict(fusername="blah",fpassword="blah"),follow_redirects=True)
-    assert response==200
+    email=''.join(random.choices(string.ascii_uppercase+string.digits,k=4)) + "@gmail.com"
+    response=flask_app.post(url ,data=dict(fusername=username,fpassword=password,femail="email.com"))
+    assert response.status_code==200
 
-#ROUTE: route handler for Post request to '/login'
+#ROUTE: route handler for Post request to '/login' with invalid input
+def test_login_withIncorrect(flask_app):
+    url='/login'
+    username=""
+    password=""
+    response=flask_app.post(url,data=dict(fusername=username,fpassword=password))
+    assert response.status_code==200
+
+#ROUTE: route handler for Post request to '/login' 
 # def test_login(flask_app):
 #     url='/login'
-#     username="bookworm"
-#     password="1234"
-#     response=flask_app.post(url ,data=dict(fusername=username,fpassword=password),follow_redirects=True)
-#     assert flask_login.current_user.username== username
-
+#     flask_app.post('/signup',data=dict(fusername='testbook',fpassword='password',femail='booktest@gmail.com'))
+#     username="testbook"
+#     password="password"
+#     response=flask_app.post(url,data=dict(fusername=username,fpassword=password))
+#     assert response.status_code==200
 
 #ROUTE: route handler for request to '/logout'
 def test_logout(flask_app):
@@ -56,10 +65,10 @@ def test_logout(flask_app):
     assert response.status_code==302
 
 #ROUTE: route handler for Get request to '/add_book'
-# def test_add_book_get(flask_app):
-#     url='/add_book'
-#     response=flask_app.get(url)
-#     assert response.status_code==200
+def test_add_book_get(flask_app):
+    url='/add_book'
+    response=flask_app.get(url)
+    assert response.status_code==200
 
 #ROUTE: route handler for Post request to '/add_book'
 
@@ -134,6 +143,13 @@ def test_signup_withoutInvalidForm(flask_app):
     url='/signup'
     username=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
     password=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
+    response=flask_app.post(url)
+    assert response.status_code==400
+
+def test_login_badRequest(flask_app):
+    url='/login'
+    username="bookworm"
+    password="1234"
     response=flask_app.post(url)
     assert response.status_code==400
 
