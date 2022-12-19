@@ -1,6 +1,21 @@
 {% extends 'wrapper.html' %}
 {% block container %}
+{% if book.metadata %}
+<script type="text/javascript" src="https://www.google.com/books/jsapi.js"></script>
+<script type="text/javascript">
+  google.books.load();
 
+  function initialize() {
+    var viewer = new google.books.DefaultViewer(document.getElementById('viewerCanvas'));
+    const isbn = '{{ book["metadata"]["volumeInfo"]["industryIdentifiers"][0]["identifier"] | safe }}'
+    const loadIsbn = 'ISBN:' + isbn
+    console.log(loadIsbn)
+    viewer.load(loadIsbn);
+  }
+
+  google.books.setOnLoadCallback(initialize);
+</script>
+{% endif %}
 <div class="bookInfo">
     {% if book.image_exists %}
     <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
@@ -40,6 +55,11 @@
         {% if book.metadata.volumeInfo.description %}
         <h3>Description: {{book.metadata.volumeInfo.description}}</h3>
         {% endif %}
+
+        {% if book["metadata"]["volumeInfo"]["industryIdentifiers"][0]["identifier"] %}
+        <div id="viewerCanvas" style="width: 900px; height: 500px"></div>
+        {% endif %}
+    </body>
         {% endif %}
     </div>
 
