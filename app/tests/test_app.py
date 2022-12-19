@@ -31,6 +31,7 @@ def test_home_post(flask_app):
     url='/home'
     response=flask_app.post(url,data=dict(query="book1"))
     assert response.status_code==200
+    assert response.request.base_url == "http://localhost/home"
 
 # ======================================================#
 #                   signup/register tests               #
@@ -107,6 +108,18 @@ def test_add_book_post(flask_app):
     url='/add_book'
     response=flask_app.post(url,data=dict(ftitle="testbook",fpublisher='testpublisher',fedition='testedition',fcondition='testcondition'))
     assert response.status_code==200
+
+def test_add_book_helper():
+    mockReq = dict(ftitle="testbook",fpublisher='testpublisher',fedition='testedition',fcondition='testcondition')
+    book = app.add_book_helper(
+        reqForm=mockReq,
+        testing=True)
+    assert book["title"] == mockReq['ftitle']
+    assert book["publisher"] == mockReq['fpublisher']
+    assert book["user_id"] == "542c2b97bac0595474108b52"
+    assert book["edition"] == mockReq["fedition"]
+    assert book["condition"] == mockReq["fcondition"]
+
 
 # ======================================================#
 #                     book viewing tests                #

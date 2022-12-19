@@ -139,8 +139,29 @@ def findBookCollByQuery(reqForm, col=db.books):
             doc['condition'] = reqForm['condition']
         
         return col.find(dict(doc))
-            
 
+def add_book_helper(reqForm, testing=True):
+    if '' in [reqForm['ftitle'], reqForm['fpublisher'], reqForm['fedition']]:
+        flash('Please fill out all fields')
+        return render_template('add_book.html',
+                                title=request.form['ftitle'],
+                                publisher=request.form['fpublisher'],
+                                edition=request.form['fedition']
+                                )
+
+    book = {}
+    book["title"] = reqForm['ftitle']
+    book["publisher"] = reqForm['fpublisher']
+    if not testing:
+        book["user_id"] = user.id
+    else:
+        book["user_id"] = "542c2b97bac0595474108b52"
+    book["edition"] = reqForm['fedition']
+    book["condition"] = reqForm['fcondition']
+    return book
+
+
+        
 # ======================================================#
 #                     main routes                      #
 # ======================================================#
@@ -298,20 +319,23 @@ def add_book():
     # POST REQUEST FROM FORM
     if request.method == "POST":
         # validate input
-        if '' in [request.form['ftitle'], request.form['fpublisher'], request.form['fedition']]:
-            flash('Please fill out all fields')
-            return render_template('add_book.html',
-                                   title=request.form['ftitle'],
-                                   publisher=request.form['fpublisher'],
-                                   edition=request.form['fedition']
-                                   )
+        initbook = add_book_helper(request.form)
+        # if '' in [request.form['ftitle'], request.form['fpublisher'], request.form['fedition']]:
+        #     flash('Please fill out all fields')
+        #     return render_template('add_book.html',
+        #                            title=request.form['ftitle'],
+        #                            publisher=request.form['fpublisher'],
+        #                            edition=request.form['fedition']
+        #                            )
 
-        book = {}
-        book["title"] = request.form['ftitle']
-        book["publisher"] = request.form['fpublisher']
-        book["user_id"] = user.id
-        book["edition"] = request.form['fedition']
-        book["condition"] = request.form['fcondition']
+        # book = {}
+        # book["title"] = request.form['ftitle']
+        # book["publisher"] = request.form['fpublisher']
+        # book["user_id"] = user.id
+        # book["edition"] = request.form['fedition']
+        # book["condition"] = request.form['fcondition']
+
+        #========end of add book helper===============#
 
         # get metadata from google books
 
@@ -327,7 +351,7 @@ def add_book():
         # book["metadata"] = response
         # book["status"]   = 'swappable'
         # book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
-        book = get_and_insert_metadata(book)
+        book = get_and_insert_metadata(initbook)
         if 'file' in request.files:  # check for allowed extensions
             file = request.files['file']
             if allowed_file((file.filename)):
@@ -490,6 +514,8 @@ def send_swap(bookid, otherbookid):
             update_book_status(bookid, 'pending', otherbookid, 'pending')
             make_request(user, bookid, otherbookid)
             return redirect(url_for('home'))
+
+# def find_swappable_books():
 
 
 # updates book statuses
