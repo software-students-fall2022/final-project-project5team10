@@ -3,8 +3,9 @@
 <h1>Search Results</h1>
 {% for book in books %}
 <div class="search">
-     <a href="{{ url_for('for_sale', bookid=book._id)}}">
-         <h3>{{book.title}}</h3>
+     <a href="{{ url_for('book_info', bookid=book._id)}}">
+         <h3>{{ book.title }}</h3>
+
      </a>
         <!--<img class="cover" src="{{book.url}}"/>-->
 </div>

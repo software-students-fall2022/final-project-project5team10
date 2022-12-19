@@ -6,7 +6,7 @@
   --lgreen: #4C4C4C;
 }
 
-h1
+#title
 {
   font-size: 44px;
   font-weight: bold;
@@ -17,19 +17,11 @@ body {
   font-family: 'Roboto', sans-serif;
   margin: 10;
   background-color: var(--lpurple); 
-  /* 
-  BEIGE TO MAKE A BIT DARKER THAN WHITE,
-  NOT A FINAL COLOR   
-  */
-  
-  /* border: 10px solid; */
-}
-  
+}  
 header,
 footer,
 main {
   margin: 0;
-  /* border: 10px solid; */
 }
 
 header
@@ -85,7 +77,7 @@ label{
   width: 100%;
   background-color: var(--purple);
   color: var(--lpurple);
-  box-shadow: 0 0 2rem rgb(0 0 0 / 10%);
+  box-shadow: 0 0 0.5rem rgb(0 0 0 / 10%);
 }
 .nav-icon{
   font-size: 1.3rem;
@@ -97,7 +89,7 @@ label{
   margin-right: 1rem;
 }
 .nav-link, .nav-link:hover, .nav-link:active {
-  color: var(-lpurple);
+  color: var(--lpurple);
   text-decoration: none;
 }
 
