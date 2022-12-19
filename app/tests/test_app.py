@@ -15,7 +15,7 @@ import sys
 # collection = client.db.collection
 
 collection = mongomock.MongoClient().db.collection
-
+collection2 = mongomock.MongoClient().db.collection2
 
 # ======================================================#
 #                     main routes tests                 #
@@ -227,6 +227,26 @@ def test_update_book_status():
     # receiverBookObj status changed from pending to swappable
     assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b49")})["status"] == "swappable"
     collection.drop()
+
+def test_remove_all():
+    mybookid = "542c2b97bac0595474108b48"
+    otherbookid = "542c2b97bac0595474108b49"
+    req1 = {
+        "sender"            : ObjectId("542c2b97bac0595474108b48"),
+        "reciever"          : ObjectId("542c2b97bac0595474108b47"),
+        "booktoswap"        : ObjectId("542c2b97bac0595474108b46"),
+        "bookrequested"     : ObjectId("542c2b97bac0595474108b45"),
+    }
+    collection.insert_one(req1)
+    collection2.insert_one({"_id": ObjectId(mybookid)})
+    collection2.insert_one({"_id": ObjectId(otherbookid)})
+    
+    app.remove_all(mybookid, otherbookid, col=collection, col2=collection2)
+    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b48")}) is None
+    assert collection2.find_one({"_id": ObjectId(mybookid)}) is None
+    assert collection2.find_one({"_id": ObjectId(otherbookid)}) is None
+    collection.drop()
+    collection2.drop()
 #------------------------------------SET UP---------------------------------------------
 def test_locate_user():
     user1 = app.User({'_id': ObjectId("542c2b97bac0595474108b50")})

@@ -590,14 +590,7 @@ def view_swap(mybookid, otherbookid):
     if request.method == 'POST':
         # approve swap
         if 'fapprove' in request.form:
-            # remove all requests containing either of these books
-            db.requests.delete_many({"bookrequested": ObjectId(mybookid)})
-            db.requests.delete_many({"booktoswap": ObjectId(mybookid)})
-            db.requests.delete_many({"booktoswap": ObjectId(otherbookid)})
-            db.requests.delete_many({"bookrequested": ObjectId(otherbookid)})
-            # remove books from database
-            db.books.delete_one({"_id": ObjectId(mybookid)})
-            db.books.delete_one({"_id": ObjectId(otherbookid)})
+            remove_all(mybookid, otherbookid)
             return redirect(url_for('view_swap_requests'))
         # decline swap
         if 'fdecline' in request.form:
@@ -609,6 +602,22 @@ def view_swap(mybookid, otherbookid):
             update_book_status(mybookid, 'swappable', otherbookid, 'swappable')
             return redirect(url_for('view_swap_requests'))
 
+
+def remove_all(mybookid, otherbookid, col=db.requests, col2=db.books):
+    """
+    removes all requests containing either of these books and removes the books from database
+    @param mybookid: id of the current user's book (that would be given from swap)
+    @param otherbookid: id of the other user's book (that would be recieved from swap)
+    """
+    # remove all requests containing either of these books
+    col.delete_many({"bookrequested": ObjectId(mybookid)})
+    col.delete_many({"booktoswap": ObjectId(mybookid)})
+    col.delete_many({"booktoswap": ObjectId(otherbookid)})
+    col.delete_many({"bookrequested": ObjectId(otherbookid)})
+    # remove books from database
+    col2.delete_one({"_id": ObjectId(mybookid)})
+    col2.delete_one({"_id": ObjectId(otherbookid)})
+   
 
 #======================================================#
 #                         run                          #
