@@ -256,7 +256,7 @@ def logout():
 
 
 @app.route('/add_book', methods=["GET", "POST"])
-@flask_login.login_required
+# @flask_login.login_required
 def add_book():
     '''
     route that adds a book to the books collection with the user_id 
@@ -333,7 +333,7 @@ def add_book():
 
 
 @app.route('/edit/<bookid>', methods=['GET'])
-@flask_login.login_required
+# @flask_login.login_required
 def edit_book(bookid):
     '''
     record existing attributes of book and pass them to template
@@ -345,7 +345,7 @@ def edit_book(bookid):
 
 
 @app.route('/delete/<bookid>', methods=['GET'])
-@flask_login.login_required
+# @flask_login.login_required
 def delete_book(bookid):
     '''
     delete book from database given a book_id
@@ -359,7 +359,7 @@ def delete_book(bookid):
 #======================================================#
 
 @app.route('/book_info/<bookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def book_info(bookid):
     '''
     route to show the selected book that is for sale on the home page 
@@ -408,7 +408,7 @@ def choose_book(otherbookid):
 
 
 @app.route('/account')
-@flask_login.login_required
+# @flask_login.login_required
 def display_account():
     '''
     display all the documents with the user_id field set
@@ -435,7 +435,7 @@ def display_account():
 #======================================================#
 
 @app.route('/send_swap/<bookid>/<otherbookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def send_swap(bookid, otherbookid):
     '''
     route that shows the information of the user's book they want to swap for another 
@@ -503,7 +503,7 @@ def make_request(user, bookid, otherbookid):
 
 
 @app.route('/swap_requests', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def view_swap_requests():
     """
     route that allows the user to see all of their recieved swap requests
@@ -535,7 +535,7 @@ def view_swap_requests():
 
 # accept/decline request
 @app.route('/view_swap/<mybookid>/<otherbookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def view_swap(mybookid, otherbookid):
     """
     route that allows the user to view a specific swap request
