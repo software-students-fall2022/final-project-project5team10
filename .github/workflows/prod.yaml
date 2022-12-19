@@ -53,8 +53,8 @@ jobs:
             password: ${{ secrets.DOCKER_PASSWORD }}
         - name: Build and Push
           run: |
-            docker build . --tag sarahaltowaity1/bookshare
-            docker push sarahaltowaity1/bookshare
+            docker build . --tag sarahaltowaity1/bookshare-app
+            docker push sarahaltowaity1/bookshare-app
 
   deploy:
     runs-on: ubuntu-latest
