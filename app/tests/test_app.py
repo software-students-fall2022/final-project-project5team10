@@ -52,22 +52,12 @@ def test_signup(flask_app):
     assert response.status_code==200
 
 #ROUTE: route handler for Post request to '/login' with invalid input
-def test_login_withIncorrect(flask_app):
+def test_login(flask_app):
     url='/login'
     username=""
     password=""
     response=flask_app.post(url,data=dict(fusername=username,fpassword=password))
     assert response.status_code==200
-
-#ROUTE: route handler for Post request to '/login' 
-# def test_login(flask_app):
-#     url='/login'
-#     flask_app.post('/signup',data=dict(fusername='testbook',fpassword='password',femail='booktest@gmail.com'))
-#     username="testbook"
-#     password="password"
-#     response=flask_app.post(url,data=dict(fusername=username,fpassword=password))
-#     assert response.status_code==200
-
 #ROUTE: route handler for request to '/logout'
 def test_logout(flask_app):
     url='/logout'
