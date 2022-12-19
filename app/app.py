@@ -131,7 +131,7 @@ def authenticate():
 
 
 @app.route('/home', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def home():
     if request.method == 'POST':
         # make the criteria dictionary to be passed onto the dictionary
@@ -381,7 +381,7 @@ def book_info(bookid):
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def choose_book(otherbookid):
     '''
     route that shows all the user's books and allows them to choose one 
