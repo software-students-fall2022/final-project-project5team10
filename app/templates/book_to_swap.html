@@ -2,10 +2,22 @@
 
 {% block container %}
 
+<h1>Swapping For</h1>
+<div>
+    <img src="data:image/png;base64, {{otherbook.image_base64}}" alt="book_you_are_swapping_for" width="500" height="500"/>
+    <h3>Title: {{otherbook.title}}</h3>
+    <h3>Swapper: {{swapper_name}}</h3>
+</div>
+
 <h1>Choose Book to Swap</h1>
+
 {% for book in books %}
 <div class="selectBook">
-    <img src = "data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
+    {% if book.image_exists %}
+        <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
+    {% else %}
+        <img src="../static/images/default.jpeg"/>
+    {% endif %}
      <a href="{{ url_for('send_swap', bookid=book._id, otherbookid=otherbook._id)}}">
          <h3>{{book.title}}</h3>
      </a>

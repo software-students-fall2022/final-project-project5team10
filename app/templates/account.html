@@ -1,10 +1,15 @@
-{% extends 'wrapper.html' %} {% block css %}
+{% extends 'wrapper.html' %} 
+
+{% block css %}
 <link
     rel="stylesheet"
     href="../static/css/account.css"
     href="{{ url_for('static', filename='css/account.css') }}"
 />
-{% endblock %} {% block container %}
+{% endblock %} 
+
+
+{% block container %}
 <div class="books"></div>
 <div id="buttons">
     <h2 id="name">Welcome, {{username}}!</h2>
@@ -19,11 +24,21 @@
     </form>
     <br />
     
-    <h2 id="booksForSaleTitle">Books for sale</h2>
+    <h2 id="booksForSaleTitle">Books for Sale</h2>
     <div class="grid-container">
         {% for doc in docs %}
         <div class="grid-item">
-            <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}</a>
+            <a href="{{ url_for('book_info',bookid=doc._id)}}">{{doc.title}}
+            <br>
+            <br>
+            {% if doc["metadata"] %}
+            <img class= 'thumbnail' src="{{ doc.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
+            {% elif doc.image_exists %}
+                <img src="data:image/png;base64, {{doc.image_base64}}" width="500" height="500" />
+            {%else%}
+                <img src="../static/images/default.jpeg"/>
+            {% endif %}
+            </a>
         </div>
         {%endfor%}
     </div>
