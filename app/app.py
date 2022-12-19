@@ -268,7 +268,7 @@ def add_book():
     # POST REQUEST FROM FORM
     if request.method == "POST":
         # validate input
-        if request.form['ftitle'] == '':
+        if '' in [request.form['ftitle'], request.form['fpublisher'], request.form['fedition']]:
             flash('Please fill out all fields')
             return render_template('add_book.html',
                                     title     = request.form['ftitle'],
