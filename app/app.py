@@ -149,6 +149,8 @@ def authenticate():
 @flask_login.login_required
 def home():
     if request.method == 'POST':
+        if flask_login.current_user.is_anonymous:
+            return render_template("login.html")
         # make the criteria dictionary to be passed onto the dictionary
         query = request.form['query']
         doc = {}
@@ -278,6 +280,8 @@ def add_book():
     field set to the current user's id 
     '''
     user = flask_login.current_user
+    if user.is_anonymous:
+            return render_template("login.html")
     if request.method == "GET":
         return render_template("add_book.html")
 
@@ -353,6 +357,8 @@ def edit_book(bookid):
     record existing attributes of book and pass them to template
     as existing field values after removing book from db
     '''
+    if flask_login.current_user.is_anonymous:
+            return render_template("login.html")
     book_record = db.books.find_one({"_id": ObjectId(bookid)})
     db.books.delete_one({"_id": ObjectId(bookid)})
     return render_template('edit_book.html', book=book_record)
@@ -361,6 +367,8 @@ def edit_book(bookid):
 @app.route('/delete/<bookid>', methods=['GET'])
 @flask_login.login_required
 def delete_book(bookid):
+    if flask_login.current_user.is_anonymous:
+            return render_template("login.html")
     '''
     delete book from database given a book_id
     '''
@@ -375,6 +383,8 @@ def delete_book(bookid):
 @app.route('/book_info/<bookid>', methods=['GET', 'POST'])
 @flask_login.login_required
 def book_info(bookid):
+    if flask_login.current_user.is_anonymous:
+            return render_template("login.html")
     '''
     route to show the selected book that is for sale on the home page 
     '''
@@ -397,6 +407,8 @@ def book_info(bookid):
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
 @flask_login.login_required
 def choose_book(otherbookid):
+    if flask_login.current_user.is_anonymous:
+            return render_template("login.html")
     '''
     route that shows all the user's books and allows them to choose one 
     to swap for the book they want (links to send_swap for the chosen book)
@@ -428,6 +440,8 @@ def display_account():
     display all the documents with the user_id field set
     to the current user's id 
     '''
+    if flask_login.current_user.is_anonymous:
+            return render_template("login.html")
 
     user = flask_login.current_user
     docs_swappable = db.books.find(
@@ -465,6 +479,8 @@ def send_swap(bookid, otherbookid):
     @param otherbookid: id of the other user's book
     '''
     user = flask_login.current_user
+    if user.is_anonymous:
+        return render_template("login.html")
     if request.method == 'GET':
         book = db.books.find_one({"_id": ObjectId(bookid)})
         return render_template('send_swap.html', book=book, otherbookid=otherbookid)
@@ -488,21 +504,21 @@ def send_swap(bookid, otherbookid):
 #   'pending'  - when two users have requested to swap, 
 #                but the swap has not yet been done in real life
 def update_book_status(book_id_sender, status_sender, book_id_reciever, status_reciever, col=db.books):
-    col.find_one_and_update(
-        {
-            '_id' : ObjectId(book_id_sender)
-        },
-        {
-            '$set' : {'status' : status_sender}
-        }
-    )
-    col.find_one_and_update(
-        {
-            '_id' : ObjectId(book_id_reciever)
-        },
-        {
-            '$set' : {'status' : status_reciever}
-        }
+        col.find_one_and_update(
+            {
+                '_id' : ObjectId(book_id_sender)
+            },
+            {
+                '$set' : {'status' : status_sender}
+            }
+        )
+        col.find_one_and_update(
+            {
+                '_id' : ObjectId(book_id_reciever)
+            },
+            {
+                '$set' : {'status' : status_reciever}
+            }
     )
 
 
@@ -532,6 +548,8 @@ def view_swap_requests():
     route that allows the user to see all of their recieved swap requests
     """
     user = flask_login.current_user
+    if user.is_anonymous:
+            return render_template("login.html")
     requests = db.requests.find(
         {"reciever": ObjectId(user.id)}).sort("_id", -1)
 
@@ -565,6 +583,8 @@ def view_swap(mybookid, otherbookid):
     @param mybookid: id of the current user's book (that would be given from swap)
     @param otherbookid: id of the other user's book (that would be recieved from swap)
     """
+    if flask_login.current_user.is_anonymous:
+            return render_template("login.html")
     mybook = db.books.find_one({"_id": ObjectId(mybookid)})
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
 
