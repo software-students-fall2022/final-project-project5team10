@@ -1,4 +1,4 @@
-[![App CI](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml)
+[![App Testing](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml)
 [![App CD](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/docker-cd.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/docker-cd.yaml)
 # Bookshares
 

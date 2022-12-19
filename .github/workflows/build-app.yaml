@@ -8,6 +8,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: ./app
     strategy:
       matrix:
         python-version: ["3"]
@@ -19,11 +22,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          cd app
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
       - name: Run tests
         run: |
-          cd app
           pytest
