@@ -52,3 +52,7 @@ a {
     text-decoration: none;
     color: black;
 }
+
+.thumbnail {
+    border-radius: 10px;
+}
