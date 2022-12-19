@@ -158,12 +158,15 @@ def home():
     '''
     # return all the book documents from the books collection that do not have the current user's id
     # and are able to be swapped
-    docs = db.books.find(
+    docs = list(db.books.find(
         {
             "user_id": {"$ne": flask_login.current_user.id},
             'status' : 'swappable'
         }
-    )
+    ))
+
+    for doc in docs:
+        doc['owner'] = db.users.find_one({'_id' : ObjectId(doc['user_id'])})['username']
     # render the home template with those documents
     return render_template("home.html", docs=docs)
 
