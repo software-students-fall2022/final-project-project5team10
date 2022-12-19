@@ -22,7 +22,17 @@
             Add book to trade
         </button>
     </form>
+    <form>
+        <button
+            type="submit"
+            formaction="{{ url_for('view_swap_requests')}}"
+            class="block"
+        >
+            View Swap Requests
+        </button>
+    </form>
     <br />
+    
     
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -54,16 +64,6 @@
         </div>
         {%endfor%}
     </div>
-    
-    <form>
-        <button
-            type="submit"
-            formaction="{{ url_for('view_swap_requests')}}"
-            class="block"
-        >
-            View Swap Requests
-        </button>
-    </form>
 </div>
 <br />
 
