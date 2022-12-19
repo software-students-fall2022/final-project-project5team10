@@ -1,13 +1,22 @@
 {% extends 'wrapper.html' %}
 {% block container %}
-<h1>Search Results</h1>
-{% for book in books %}
-<div class="search">
-     <a href="{{ url_for('book_info', bookid=book._id)}}">
-         <h3>{{ book.title }}</h3>
-
-     </a>
-        <!--<img class="cover" src="{{book.url}}"/>-->
+<div id="search-container">
+    {% for book in books %}
+        <div id="search-item">
+            <a href="{{ url_for('book_info', bookid=book._id)}}">{{book.title}}</a>
+            {% if book["metadata"] %}
+            <br>
+            <br>
+            <img class= 'thumbnail' src="{{ book.metadata.volumeInfo.imageLinks.thumbnail }}" width="250" height="250">
+            {% elif book.image_exists %}
+            <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
+            {% else %}
+            <img src="../static/images/default.jpeg"/>
+            {% endif %}
+            <br>
+            <br>
+            <p>{{book.condition}}</p>
+        </div>    
+    {% endfor %}
 </div>
-{% endfor %}
 {% endblock %}

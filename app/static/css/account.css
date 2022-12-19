@@ -1,7 +1,16 @@
+:root{
+    --lpurple:#E6E6FA;
+    --mpurple: #5E2BFF;
+    --darkpurple: #8F00FF;
+    --purple: #8B80F9;
+    --gray: #4C4C4C;
+  }
+
 #name {
+    font-family:"Cormorant Garamond";
     text-align: center;
-    font-size: 300%;
-    text-decoration: underline;
+    font-size: 5rem;
+    font-weight: bold;
     margin: auto;
     max-width: fit-content;
 }
@@ -11,6 +20,7 @@
     max-width: fit-content;
 }
 #booksForSaleTitle {
+    font-family: 'Cormorant Garamond';
     margin: auto;
     max-width: fit-content;
     text-align: center;
@@ -19,40 +29,48 @@
 
 .block {
     display: block;
-    width: 100%;
+    max-width: 40%;
     border: none;
-    background-color: #bea9df;
+    background-color: var(--purple);
     padding: 14px 28px;
-    font-size: 16px;
+    font-size: 1rem;
     cursor: pointer;
     text-align: center;
-    color: white;
+    color: var(--lpurple);
     border-radius: 8px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.block:hover{
+    cursor:pointer;
+    color:var(--darkpurple);
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: auto auto auto;
-    background-color: #bea9df;
-    padding: 10px;
-    height: 550px;
+    grid-template-columns: auto auto auto auto auto;
+    grid-gap:2em;
+    background-color: var(--purple);
+    padding: 80px;
+    height: 600px;
     overflow: auto;
-    border-radius: 15px;
+    height:100vh;
+    width: 100vw;
 }
 .grid-item {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.8);
+    background-color: var(--lpurple);
     padding: 20px;
     font-size: 20px;
     text-align: center;
     border-radius: 8px;
 }
 
-a {
-    text-decoration: none;
-    color: black;
+.grid-item>a{
+    font-size: 1.3rem;
+}
+.grid-item>a:hover{
+    cursor:pointer;
+    color: var(--darkpurple);
 }
 
-.thumbnail {
-    border-radius: 10px;
-}
