@@ -6,6 +6,7 @@
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
 from werkzeug.utils import secure_filename
 import requests
+from dotenv import dotenv_values
 
 # mongodb
 import pymongo
@@ -38,8 +39,10 @@ app.secret_key = os.urandom(24)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-client = pymongo.MongoClient(host='db', port=27017)
-db = client["project5"]
+config = dotenv_values(".env")
+
+client = pymongo.MongoClient(config['mongoURI'])
+db = client[config['dbName']]
 
 grid_fs = gridfs.GridFS(db)
 
