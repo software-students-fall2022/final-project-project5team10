@@ -12,12 +12,12 @@
   font-weight: bold;
   font-family: 'Cormorant Garamond';
 }
-body {
+/* body {
   font-size: 24px;
   font-family: 'Roboto', sans-serif;
   margin: 10;
   background-color: var(--lpurple); 
-}  
+}   */
 header,
 footer,
 main {
