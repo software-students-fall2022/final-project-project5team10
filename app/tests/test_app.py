@@ -2,14 +2,20 @@ import pytest
 import random
 import string
 import app
+from bson.objectid import ObjectId
 import flask_login
 import mongomock
 from app import locate_user
 from app import user_loader
 from app import inject_user
+import sys
 
-client = mongomock.MongoClient()
-collection = client.db.collection
+
+# client = mongomock.MongoClient()
+# collection = client.db.collection
+
+collection = mongomock.MongoClient().db.collection
+
 
 # ======================================================#
 #                     main routes tests                 #
@@ -224,6 +230,26 @@ def test_allowed_file():
   test_file = "writing.png"
   assert app.allowed_file(test_file) is True
 
+
+
+def test_update_book_status():
+    senderBookObj = {
+        "_id" : ObjectId("542c2b97bac0595474108b48"),
+        "status": "swappable"
+    }
+    receiverBookObj = {
+        "_id" : ObjectId("542c2b97bac0595474108b49"),
+        "status": "pending"
+    }
+    insertArr = [senderBookObj, receiverBookObj]
+    collection.insert_many(insertArr)
+
+    app.update_book_status('542c2b97bac0595474108b48', 'pending', '542c2b97bac0595474108b49', 'swappable', testing=True, col=collection )
+
+    # senderBookObj status changed from swappable to pending
+    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b48")})["status"] == "pending"
+    # receiverBookObj status changed from pending to swappable
+    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b49")})["status"] == "swappable"
 
 #------------------------------------SET UP---------------------------------------------
 # def test_locate_user():
