@@ -3,9 +3,14 @@ import random
 import string
 import app
 import flask_login
-#import mongomock
+import mongomock
 
+client = mongomock.MongoClient()
+collection = client.db.collection
 
+# ======================================================#
+#                     main routes tests                 #
+# ======================================================#
 #ROUTE: route handler for request to '/'
 def test_authenticate(flask_app):
     url='/'
@@ -25,6 +30,9 @@ def test_home_post(flask_app):
     response=flask_app.post(url,data=dict(query="book1"))
     assert response.status_code==401
 
+# ======================================================#
+#                   signup/register tests               #
+# ======================================================#
 
 #ROUTE: route handler for Get request to '/signupPage'
 def test_signupPage(flask_app):
@@ -64,6 +72,10 @@ def test_logout(flask_app):
     response=flask_app.get(url)
     assert response.status_code==302
 
+# ======================================================#
+#                      book CRUD tests                  #
+# ======================================================#
+
 #ROUTE: route handler for Get request to '/add_book'
 def test_add_book_get(flask_app):
     url='/add_book'
@@ -71,32 +83,86 @@ def test_add_book_get(flask_app):
     assert response.status_code==200
 
 #ROUTE: route handler for Post request to '/add_book'
+def test_add_book_post(flask_app):
+    url='/add_book'
+    response=flask_app.post(url,data=dict(ftitle="testbook",fpublisher='testpublisher',fedition='testedition',fcondition='testcondition'))
+    assert response.status_code==200
+
+# ======================================================#
+#                     book viewing tests                #
+# ======================================================#
+
+#ROUTE: route handler for Get request to '/edit/<bookid>'
+def test_edit(flask_app):
+    url='/edit/2'
+    response=flask_app.get(url)
+    assert response.status_code==404
 
 
+#ROUTE: route handler for request to '/delete/<bookid>'
+def test_delete(flask_app):
+    url='/delete/2'
+    response=flask_app.get(url)
+    assert response.status_code==404
 
-#ROUTE: route handler for Get request to '/view_chat'
+# ======================================================#
+#                     book viewing tests                #
+# ======================================================#
 
+#ROUTE: route handler for Get request to '/book_info/<bookid>'
+def test_book_info_get(flask_app):
+    url='/book_info/2'
+    response=flask_app.get(url)
+    assert response.status_code==404
+
+#ROUTE: route handler for Post request to '/book_info/<bookid>'
+
+#ROUTE: route handler for Get request to '/book_to_swap/<otherbookid>'
+def test_book_to_swap_get(flask_app):
+    url='/book_to_swap/2'
+    response=flask_app.get(url)
+    assert response.status_code==404
+
+#ROUTE: route handler for Post request to '/book_to_swap/<otherbookid>'
+
+
+# ======================================================#
+#                        account test                   #
+# ======================================================#
 
 #ROUTE: route handler for request to '/account'
+def test_account(flask_app):
+    url='/account'
+    response=flask_app.get(url)
+    assert response.status_code==404
 
-#-----------------------------SWAP ROUTE TESTS-------------------------------------------------
-#ROUTE: route handler for Get request to '/for_sale'
+# ======================================================#
+#                     swap routes tests                 #
+# ======================================================#
 
-#ROUTE: route handler for Post request to '/for_sale'
+#ROUTE: route handler for Get request to '/send_swap/<bookid>/<otherbookid>'
+def test_sned_swap_get(flask_app):
+    url='/send_swao/2/4'
+    response=flask_app.get(url)
+    assert response.status_code==404
 
-#ROUTE: route handler for Get request to '/choose_book'
-
-#ROUTE: route handler for Post request to '/choose_book'
-
-#ROUTE: route handler for Get request to '/send_swap'
-
-#ROUTE: route handler for Post request to '/send_swap'
-
-#ROUTE: route handler for request to '/make_request'
+#ROUTE: route handler for Post request to '/send_swap/<bookid>/<otherbookid>'
 
 #ROUTE: route handler for Get request to '/swap_requests'
+def test_swap_requests(flask_app):
+    url='/swap_requests'
+    response=flask_app.get(url)
+    assert response.status_code==404
 
-#ROUTE: route handler for request to '/view_swap'
+
+#ROUTE: route handler for Get request to '/view_swap/<mybookid>/<otherbookid>'
+def test_view_swap(flask_app):
+    url='/view_swap/2/4'
+    response=flask_app.get(url)
+    assert response.status_code==404
+
+#ROUTE: route handler for Post request to '/view_swap/<mybookid>/<otherbookid>'
+
 
 #-----------------------------UNAUTHORIZED and INVALID TESTS-------------------------------------
 def test_home_notAuthorized(flask_app):
