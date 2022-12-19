@@ -8,9 +8,18 @@
          <h2>Trade Request</h2>
     </a>
     <h3> Trade {{req.mybook.title}} </h3>
-    <img src = "data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
+    {% if req.mybook.image_exists %}
+        <img src="data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
+    {% else %}
+        <img src="../static/images/default.jpeg"/>
+    {% endif %}
     <h3> For {{req.otherbook.title}} </h3>
-    <img src = "data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
+
+    {% if req.otherbook.image_exists %}
+        <img src="data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
+    {% else %}
+        <img src="../static/images/default.jpeg"/>
+    {% endif %}
 </div>
 
 {% endfor %}
