@@ -3,7 +3,7 @@ import random
 import string
 from app import app
 import flask_login
-
+import mongomock
 
 
 #ROUTE: route handler for request to '/'
@@ -16,15 +16,28 @@ def test_authenticate(flask_app):
 def test_home(flask_app):
     url='/home'
     response=flask_app.get(url)
-    assert response.status_code==200
+    assert response.status_code==401
 
+
+#ROUTE: route handler for post request to '/home'
+def test_home_post(flask_app):
+    url='/home'
+    response=flask_app.post(url,data=dict(query="book1"))
+    assert response.status_code==401
+
+
+#ROUTE: route handler for Get request to '/signupPage'
+def test_signupPage(flask_app):
+    url='/signupPage'
+    response=flask_app.get(url)
+    assert response.status_code==200
 
 #ROUTE: route handler for Post request to '/signup'
 def test_signup(flask_app):
     url='/signup'
     username=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
     password=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    response=flask_app.post(url ,data=dict(username=username,password=password),follow_redirects=True)
+    response=flask_app.post(url ,data=dict(fusername="blah",fpassword="blah"),follow_redirects=True)
     assert response==200
 
 #ROUTE: route handler for Post request to '/login'
