@@ -140,7 +140,7 @@ def findBookCollByQuery(reqForm, col=db.books):
         
         return col.find(dict(doc))
 
-def add_book_helper(reqForm, testing=True):
+def add_book_helper(reqForm, testing=False):
     if '' in [reqForm['ftitle'], reqForm['fpublisher'], reqForm['fedition']]:
         flash('Please fill out all fields')
         return render_template('add_book.html',
@@ -153,7 +153,7 @@ def add_book_helper(reqForm, testing=True):
     book["title"] = reqForm['ftitle']
     book["publisher"] = reqForm['fpublisher']
     if not testing:
-        book["user_id"] = user.id
+        book["user_id"] = flask_login.current_user.id
     else:
         book["user_id"] = "542c2b97bac0595474108b52"
     book["edition"] = reqForm['fedition']
