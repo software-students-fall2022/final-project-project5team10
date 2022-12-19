@@ -12,8 +12,12 @@
 {% block container %}
 
 <div class="bookInfo">
-    <img src = "data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
-    <h2>${{book.price}}</h2>
+    {% if book.image_exists %}
+        <img src="data:image/png;base64, {{book.image_base64}}" width="500" height="500" />
+    {% else %}
+        <img src="../static/images/default.jpeg"/>
+    {% endif %}
+    <!-- <h2>${{book.price}}</h2> -->
     <div class="bookDetails">
         <h2>Book Info:</h2>
         <h3>Title: {{book.title}}</h3>

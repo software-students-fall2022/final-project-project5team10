@@ -148,16 +148,16 @@ def home():
             doc['publisher'] = request.form['publisher']
         if request.form['condition'] != "":
             doc['condition'] = request.form['condition']
-        min_price = request.form['price-min']
-        max_price = request.form['price-max']
-        # check if the user enters floats for both min price and max price
-        if isfloat(min_price) and isfloat(max_price):
-            if min_price <= max_price:
-                doc['price'] = {'$gte': float(min_price), '$lte': float(max_price) }
-        elif isfloat(min_price): # in the case the user only inputs a min price
-            doc['price'] = {'$gte': float(min_price)}
-        elif isfloat(max_price): # in the case the user inputs only a max price
-            doc['price'] = {'$lte': float(max_price) }
+        # min_price = request.form['price-min']
+        # max_price = request.form['price-max']
+        # # check if the user enters floats for both min price and max price
+        # if isfloat(min_price) and isfloat(max_price):
+        #     if min_price <= max_price:
+        #         doc['price'] = {'$gte': float(min_price), '$lte': float(max_price) }
+        # elif isfloat(min_price): # in the case the user only inputs a min price
+        #     doc['price'] = {'$gte': float(min_price)}
+        # elif isfloat(max_price): # in the case the user inputs only a max price
+        #     doc['price'] = {'$lte': float(max_price) }
 
         books = db.books.find(dict(doc))
         # print(doc, file=sys.stderr)
@@ -284,7 +284,7 @@ def add_book():
         book["user_id"]   = user.id
         book["edition"]   = request.form['fedition']
         book["condition"] = request.form['fcondition']
-        book["price"]     = '{:4.2f}'.format(float(request.form['fprice']))
+        # book["price"] = '{:4.2f}'.format(float(request.form['fprice']))
 
         # get metadata from google books
 
@@ -298,7 +298,8 @@ def add_book():
         response = google_api_response["items"][0]
         book["metadata"] = response
         book["status"]   = 'swappable'
- 
+        book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
+
 
         # if file is not in requests, add book into the books collection and
         # render account page
@@ -328,6 +329,8 @@ def add_book():
             base64_data = codecs.encode(image.read(), 'base64')
             image = base64_data.decode('utf-8')
             book['image_base64'] = image
+            # change the image_exists field to True once an image field is added to book document
+            book['image_exists'] = True
             # add the image query into the images collection
             db.images.insert_one(query)
         db.books.insert_one(book)
