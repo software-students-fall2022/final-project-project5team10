@@ -577,6 +577,7 @@ def view_swap(mybookid, otherbookid):
                 {"$and": [{"bookrequested": ObjectId(mybookid)},
                           {"booktoswap": ObjectId(otherbookid)}]}
             )
+            update_book_status(mybookid, 'swappable', otherbookid, 'swappable')
             #flash('Request has been Declined')
             return redirect(url_for('view_swap_requests'))
 
