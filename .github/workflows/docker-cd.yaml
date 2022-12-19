@@ -28,6 +28,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
+          context: ./app
+          file: app/Dockerfile
           tags: saraha/bookshare:latest
 
   deploy-app:
