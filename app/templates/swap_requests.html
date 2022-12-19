@@ -9,17 +9,17 @@
                 <h2 id="view-trade">View Trade Request</h2>
             </a>
 
-            <h3> Get {{req.otheruser.username}}'s {{req.mybook.title}} </h3>
+            <h3> Get {{req.otheruser.username}}'s {{req.otherbook.title}} </h3>
             {% if req.mybook.image_exists %}
-                <img src="data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
+                <img src="data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
             {% else %}
                 <img src="../static/images/default.jpeg"/>
             {% endif %}
 
-            <h3> For Your {{req.otherbook.title}} </h3>
+            <h3> For Your {{req.mybook.title}} </h3>
 
             {% if req.otherbook.image_exists %}
-                <img src="data:image/png;base64, {{req.otherbook.image_base64}}" width="500" height="500" />
+                <img src="data:image/png;base64, {{req.mybook.image_base64}}" width="500" height="500" />
             {% else %}
                 <img src="../static/images/default.jpeg"/>
             {% endif %}
