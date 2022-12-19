@@ -1,6 +1,6 @@
-# ======================================================#
+#======================================================#
 #                        imports                       #
-# ======================================================#
+#======================================================#
 
 # flask
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for
@@ -28,9 +28,9 @@ import os
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
-# ======================================================#
+#======================================================#
 #                        setup                         #
-# ======================================================#
+#======================================================#
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -555,19 +555,19 @@ def view_swap_requests():
     swapreqs = []
 
     for req in requests:
-        print(req, file=sys.stderr)
         mybookid = req["bookrequested"]
-        print(mybookid, file=sys.stderr)
-        
         otherbookid = req["booktoswap"]
 
         # book the current user has
         mybook = db.books.find_one({"_id": ObjectId(mybookid)})
-        print(mybook, file=sys.stderr)
         # book other user wants
         otherbook = db.books.find_one({"_id": otherbookid})  
 
-        swapreqs.append({"mybook": mybook, "otherbook": otherbook})
+        swapreqs.append({
+                            "mybook"    : mybook,
+                            "otherbook" : otherbook,
+                            'otheruser' : db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+                        })
 
     return render_template('swap_requests.html', swapreqs=swapreqs)
 
@@ -585,7 +585,11 @@ def view_swap(mybookid, otherbookid):
     otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
 
     if request.method == 'GET':
-        return render_template("view_swap.html", mybook=mybook, otherbook=otherbook)
+        return render_template("view_swap.html", 
+                                mybook=mybook, 
+                                otherbook=otherbook, 
+                                otheruser=db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+                              )
     if request.method == 'POST':
         # approve swap
         if 'fapprove' in request.form:
