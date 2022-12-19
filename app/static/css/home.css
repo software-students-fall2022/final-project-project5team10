@@ -162,11 +162,10 @@ input{
     padding: 80px;
     height: 600px;
     overflow: auto;
-    border-radius: 15px;
 }
 
 .listing-item{
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--lpurple);
     padding: 20px;
     font-size: 20px;
     text-align: center;
@@ -176,7 +175,7 @@ input{
     font-size: 1.3rem;
 }
 .listing-item>a:hover{
-    cursor:point;
+    cursor:pointer;
     color: var(--darkpurple);
 }
 .listing-item>p{
