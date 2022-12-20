@@ -189,6 +189,7 @@ def test_book_info_get(flask_app):
     url = '/book_info/542c2b97bac0595474108b48'
     response = flask_app.get(url)
     assert response.status_code == 200
+    # assert b"<div class='bookInfo'>" in response.data
 
 # ROUTE: route handler for Post request to '/book_info/<bookid>'
 
