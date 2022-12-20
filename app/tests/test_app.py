@@ -9,6 +9,8 @@ from app import locate_user
 from app import user_loader
 from app import inject_user
 import sys
+import requests
+from prodict import Prodict
 
 
 # client = mongomock.MongoClient()
@@ -16,195 +18,419 @@ import sys
 
 collection = mongomock.MongoClient().db.collection
 collection2 = mongomock.MongoClient().db.collection2
+collection3 = mongomock.MongoClient().db.collection2
 
 # ======================================================#
 #                     main routes tests                 #
 # ======================================================#
-#ROUTE: route handler for request to '/'
-def test_authenticate(flask_app):
-    url='/'
-    response=flask_app.get(url)
-    assert response.status_code==200
+# ROUTE: route handler for request to '/'
 
-#ROUTE: route handler for post request to '/home'
+
+def test_authenticate(flask_app):
+    url = '/'
+    response = flask_app.get(url)
+    assert response.status_code == 200
+
+# ROUTE: route handler for post request to '/home'
+
+
 def test_home_post(flask_app):
-    url='/home'
-    response=flask_app.post(url,data=dict(query="book1"))
-    assert response.status_code==200
+    url = '/home'
+    response = flask_app.post(url, data=dict(query="book1"))
+    assert response.status_code == 200
+    assert response.request.base_url == "http://localhost/home"
 
 # ======================================================#
 #                   signup/register tests               #
 # ======================================================#
 
-#ROUTE: route handler for Get request to '/signupPage'
+# ROUTE: route handler for Get request to '/signupPage'
+
+
 def test_signupPage(flask_app):
-    url='/signupPage'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/signupPage'
+    response = flask_app.get(url)
+    assert response.status_code == 200
 
-#ROUTE: route handler for Post request to '/signup'
+# ROUTE: route handler for Post request to '/signup'
+
+
 def test_signup(flask_app):
-    url='/signup'
-    username=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    password=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    email=''.join(random.choices(string.ascii_uppercase+string.digits,k=4)) + "@gmail.com"
-    response=flask_app.post(url ,data=dict(fusername=username,fpassword=password,femail="email.com"))
-    assert response.status_code==200
+    url = '/signup'
+    username = ''.join(random.choices(
+        string.ascii_uppercase+string.digits, k=10))
+    password = ''.join(random.choices(
+        string.ascii_uppercase+string.digits, k=10))
+    email = ''.join(random.choices(string.ascii_uppercase +
+                    string.digits, k=10)) + "@gmail.com"
+    response = flask_app.post(url, data=dict(
+        fusername=username, fpassword=password, femail=email))
+    assert response.status_code == 302
 
-#ROUTE: route handler for Post request to '/login' with invalid input
+
+def test_signup_empty(flask_app, captured_templates):
+    url = '/signup'
+    email = ''.join(random.choices(string.ascii_uppercase +
+                    string.digits, k=10)) + "@gmail.com"
+    response = flask_app.post(url, data=dict(
+        fusername="", fpassword="password", femail=email))
+    assert response.status_code == 200
+    response = flask_app.post(url, data=dict(
+        fusername="username", fpassword="", femail=email))
+    assert response.status_code == 200
+    assert len(captured_templates) == 2
+    template, context = captured_templates[0]
+    assert template.name == "signup.html"
+    assert "crederror" in context
+    assert context["crederror"] == "Username or password must be at least 6 characters"
+
+
+def test_signup_space(flask_app, captured_templates):
+    url = '/signup'
+    email = ''.join(random.choices(string.ascii_uppercase +
+                    string.digits, k=10)) + "@gmail.com"
+    response = flask_app.post(url, data=dict(
+        fusername="test space", fpassword="password", femail=email))
+    assert response.status_code == 200
+    assert len(captured_templates) == 1
+    template, context = captured_templates[0]
+    assert template.name == "signup.html"
+    assert "blankerror" in context
+    assert context["blankerror"] == "Username or password cannot contain spaces"
+
+
+def test_signup_exist(flask_app, captured_templates):
+    url = '/signup'
+    email = ''.join(random.choices(string.ascii_uppercase +
+                    string.digits, k=10)) + "@gmail.com"
+    flask_app.post(url, data=dict(fusername='testingalready',
+                   fpassword='password', femail=email))
+    response = flask_app.post(url, data=dict(
+        fusername="testingalready", fpassword="password", femail=email))
+    assert response.status_code == 200
+    assert len(captured_templates) == 2
+    template, context = captured_templates[0]
+    assert template.name == "signup.html"
+    assert "unerror" in context
+    assert context["unerror"] == "This username already exists."
+
+
+# ROUTE: route handler for Post request to '/login' with invalid input
+def test_login_empty(flask_app):
+    url = '/login'
+    username = ""
+    password = ""
+    response = flask_app.post(url, data=dict(
+        fusername=username, fpassword=password))
+    assert response.status_code == 200
+
+
+def test_login_with_space(flask_app):
+    url = 'login'
+    response = flask_app.post(url, data=dict(
+        fusername="test space", fpassword="password"))
+    assert response.status_code == 302
+
+
 def test_login(flask_app):
-    url='/login'
-    username=""
-    password=""
-    response=flask_app.post(url,data=dict(fusername=username,fpassword=password))
-    assert response.status_code==200
-#ROUTE: route handler for request to '/logout'
+    url = 'login'
+    response = flask_app.post(url, data=dict(
+        fusername="test", fpassword="password"))
+    assert response.status_code == 200
+
+# ROUTE: route handler for request to '/logout'
+
+
 def test_logout(flask_app):
-    url='/logout'
-    response=flask_app.get(url)
-    assert response.status_code==302
+    url = '/logout'
+    response = flask_app.get(url)
+    assert response.status_code == 302
 
 # ======================================================#
 #                      book CRUD tests                  #
 # ======================================================#
 
-#ROUTE: route handler for Get request to '/add_book'
+# ROUTE: route handler for Get request to '/add_book'
+
+
 def test_add_book_get(flask_app):
-    url='/add_book'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/add_book'
+    response = flask_app.get(url)
+    assert response.status_code == 200
 
-#ROUTE: route handler for Post request to '/add_book'
+# ROUTE: route handler for Post request to '/add_book'
+
+
 def test_add_book_post(flask_app):
-    url='/add_book'
-    response=flask_app.post(url,data=dict(ftitle="testbook",fpublisher='testpublisher',fedition='testedition',fcondition='testcondition'))
-    assert response.status_code==200
+    url = '/add_book'
+    response = flask_app.post(url, data=dict(
+        ftitle="testbook", fpublisher='testpublisher', fedition='testedition', fcondition='testcondition'))
+    assert response.status_code == 200
+
+
+def test_add_book_helper():
+    mockReq = dict(ftitle="testbook", fpublisher='testpublisher',
+                   fedition='testedition', fcondition='testcondition')
+    book = app.add_book_helper(
+        reqForm=mockReq,
+        testing=True)
+    assert book["title"] == mockReq['ftitle']
+    assert book["publisher"] == mockReq['fpublisher']
+    assert book["user_id"] == "542c2b97bac0595474108b52"
+    assert book["edition"] == mockReq["fedition"]
+    assert book["condition"] == mockReq["fcondition"]
+
+
+def test_add_book_helper_missing_field():
+    # one field empty
+    mockReq = dict(ftitle="testbook", fpublisher='',
+                   fedition='testedition', fcondition='testcondition')
+    html_render = app.add_book_helper(
+        reqForm=mockReq,
+        testing=True)
+    assert "<h3>Please fill out all fields</h3>" in html_render
+
+
+def test_book_info_helper():
+    # book
+    user = 'user'
+    collection.insert_one({
+        "_id": ObjectId("542c2b97bac0595474108b52")
+    })
+    book = collection.find_one({"_id": ObjectId("542c2b97bac0595474108b52")})
+    # GET
+    res = app.book_info_helper(
+        book["_id"], "GET", coll=collection, currUser=user, testing=True)
+    assert "<h3>Title: </h3>" in res
+    # POST
+    res = app.book_info_helper(
+        book["_id"], "POST", coll=collection, currUser=user, testing=True)
+    assert res.status_code == 302
+
 
 # ======================================================#
 #                     book viewing tests                #
 # ======================================================#
 
-#ROUTE: route handler for Get request to '/edit/<bookid>'
-def test_edit(flask_app):
-    url='/edit/2'
-    response=flask_app.get(url)
-    assert response.status_code==200
+# ROUTE: route handler for Get request to '/edit/<bookid>'
+def test_edit(flask_app, captured_templates):
+    url = '/edit/2'
+    response = flask_app.get(url)
+    assert response.status_code == 200
+    # print(captured_templates)
+    assert len(captured_templates) == 1
 
 
-#ROUTE: route handler for request to '/delete/<bookid>'
+# ROUTE: route handler for request to '/delete/<bookid>'
 def test_delete(flask_app):
-    url='/delete/2'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/delete/2'
+    response = flask_app.get(url)
+    assert response.status_code == 200
 
 # ======================================================#
 #                     book viewing tests                #
 # ======================================================#
 
-#ROUTE: route handler for Get request to '/book_info/<bookid>'
+# ROUTE: route handler for Get request to '/book_info/<bookid>'
+
+
 def test_book_info_get(flask_app):
-    url='/book_info/542c2b97bac0595474108b48'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/book_info/542c2b97bac0595474108b48'
+    response = flask_app.get(url)
+    assert response.status_code == 200
+    # assert b"<div class='bookInfo'>" in response.data
 
-#ROUTE: route handler for Post request to '/book_info/<bookid>'
+# ROUTE: route handler for Post request to '/book_info/<bookid>'
 
-#ROUTE: route handler for Get request to '/book_to_swap/<otherbookid>'
+# ROUTE: route handler for Get request to '/book_to_swap/<otherbookid>'
+
+
 def test_book_to_swap(flask_app):
-    url='/book_to_swap/2'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/book_to_swap/2'
+    response = flask_app.get(url)
+    assert response.status_code == 200
 
 
 # ======================================================#
 #                        account test                   #
 # ======================================================#
 
-#ROUTE: route handler for request to '/account'
+# ROUTE: route handler for request to '/account'
 def test_account(flask_app):
-    url='/account'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/account'
+    response = flask_app.get(url)
+    assert response.status_code == 200
+
+def test_display_account_template():
+    userid = ObjectId("542c2b97bac0595474108b55")
+    userObj = {
+        "user_id": userid,
+        "username": "i_love_testing_so_much@hotmail.com"
+    }
+    res = app.display_account_helper(userObj, col=collection, testing=True)
+    assert "View Swap Requests" in res
+
 
 # ======================================================#
 #                     swap routes tests                 #
 # ======================================================#
 
-#ROUTE: route handler for Get request to '/send_swap/<bookid>/<otherbookid>'
+# ROUTE: route handler for Get request to '/send_swap/<bookid>/<otherbookid>'
+
+
 def test_send_swap_get(flask_app):
-    url='/send_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b49'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/send_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b49'
+    response = flask_app.get(url)
+    assert response.status_code == 200
 
-#ROUTE: route handler for Post request to '/send_swap/<bookid>/<otherbookid>'
+# ROUTE: route handler for Post request to '/send_swap/<bookid>/<otherbookid>'
+
+
 def test_send_swap_post(flask_app):
-    url='/send_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b49'
-    response=flask_app.post(url,data='fcancel')
-    assert response.status_code==200
-    response=flask_app.post(url,data='fsend')
-    assert response.status_code==200
+    url = '/send_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b49'
+    response = flask_app.post(url, data='fcancel')
+    assert response.status_code == 200
+    response = flask_app.post(url, data='fsend')
+    assert response.status_code == 200
 
-#ROUTE: route handler for Get request to '/swap_requests'
+# ROUTE: route handler for Get request to '/swap_requests'
+
+
 def test_swap_requests(flask_app):
-    url='/swap_requests'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/swap_requests'
+    response = flask_app.get(url)
+    assert response.status_code == 200
 
 
-
-#ROUTE: route handler for Get request to '/view_swap/<mybookid>/<otherbookid>'
+# ROUTE: route handler for Get request to '/view_swap/<mybookid>/<otherbookid>'
 def test_view_swap(flask_app):
-    url='/view_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b48'
-    response=flask_app.get(url)
-    assert response.status_code==200
+    url = '/view_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b48'
+    response = flask_app.get(url)
+    assert response.status_code == 200
 
-#ROUTE: route handler for Post request to '/view_swap/<mybookid>/<otherbookid>'
+def test_send_swap():
+    #setup
+    bookid = "542c2b97bac0595474108b56"
+    otherbookid = "542c2b97bac0595474108b57"
+    userid = "542c2b97bac0595474108b58"
+    bookObj1 = {
+        "_id": ObjectId(bookid)
+    }
+    bookObj2 = {
+        "_id": ObjectId(otherbookid)
+    }
+    userObj = {
+        "userid": userid
+    }
+    collection.insert_one(bookObj1)
+    collection.insert_one(bookObj2)
+
+    #test GET
+
+    #init GET mock req
+#     req = requests_mock.get(
+#     'https://test.com/4',
+#     [
+#         {'method': 'GET', 'form': 'fcancel'},
+#     ]
+# )
+    req = Prodict(method="GET")
+    res = app.send_swap_helper(req, bookid, otherbookid, userObj, col=collection, testing=True)
+    assert '''<form id="sendrequest" method="POST">''' in res
+
+    # test POST with fcancel
+    req = Prodict(method="POST", form="fcancel")
+    res = app.send_swap_helper(req, bookid, otherbookid, userObj, col=collection, testing=True)
+    assert res.status_code == 302
+
+    #test POST with fsend
+    req = Prodict(method="POST", form="fsend")
+    res = app.send_swap_helper(req, bookid, otherbookid, userObj, col=collection, testing=True)
+    assert res.status_code == 302
+
+# ROUTE: route handler for Post request to '/view_swap/<mybookid>/<otherbookid>'
+
+
 def test_view_swap_post(flask_app):
-    url='/view_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b48'
-    response=flask_app.post(url,data="fapprove")
-    assert response.status_code==200
-    response=flask_app.post(url,data="fdecline")
-    assert response.status_code==200
+    url = '/view_swap/542c2b97bac0595474108b48/542c2b97bac0595474108b48'
+    response = flask_app.post(url, data="fapprove")
+    assert response.status_code == 200
+    response = flask_app.post(url, data="fdecline")
+    assert response.status_code == 200
 
 
+def test_choose_book():
+    otherbookid = ObjectId("542c2b97bac0595474108b53")
+    userid = ObjectId("542c2b97bac0595474108b54")
+    otherBookObj = {
+        "_id": otherbookid,
+        "status": "swappable",
+        "user_id": userid
+    }
+    collection.insert_one(otherBookObj)
+    
+    userObj = {
+        "user_id": userid,
+        "_id": userid,
+        "username": "i_love_testing_so_much@hotmail.com"
+    }
+    collection2.insert_one(
+        userObj
+    )
+    res = app.choose_book_helper(otherbookid, curr_user=userObj, book_col=collection, user_col=collection2, testing=True)
+    assert "<h3>Owner: i_love_testing_so_much@hotmail.com</h3>" in res
+    collection.drop()
+    collection2.drop()
 
-#-----------------------------UNAUTHORIZED and INVALID TESTS-------------------------------------
+
+# -----------------------------UNAUTHORIZED and INVALID TESTS-------------------------------------
 
 def test_book_to_swap_notID(flask_app):
-    url='/book_to_swap'
-    response=flask_app.get(url)
-    assert response.status_code==404
+    url = '/book_to_swap'
+    response = flask_app.get(url)
+    assert response.status_code == 404
+
 
 def test_send_swap_noID(flask_app):
-    url='/send_swap'
-    response=flask_app.get(url)
-    assert response.status_code==404
+    url = '/send_swap'
+    response = flask_app.get(url)
+    assert response.status_code == 404
+
 
 def test_signup_withoutInvalidForm(flask_app):
-    url='/signup'
-    username=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    password=''.join(random.choices(string.ascii_uppercase+string.digits,k=4))
-    response=flask_app.post(url)
-    assert response.status_code==400
+    url = '/signup'
+    username = ''.join(random.choices(
+        string.ascii_uppercase+string.digits, k=4))
+    password = ''.join(random.choices(
+        string.ascii_uppercase+string.digits, k=4))
+    response = flask_app.post(url)
+    assert response.status_code == 400
+
 
 def test_login_badRequest(flask_app):
-    url='/login'
-    username="bookworm"
-    password="1234"
-    response=flask_app.post(url)
-    assert response.status_code==400
+    url = '/login'
+    username = "bookworm"
+    password = "1234"
+    response = flask_app.post(url)
+    assert response.status_code == 400
 
-#--------------------------------------HELPER FUNCTIONS------------------------------------------
+# --------------------------------------HELPER FUNCTIONS------------------------------------------
+
+
 def test_isfloat_true():
-   assert app.isfloat(1.4) is True
- 
+    assert app.isfloat(1.4) is True
+
+
 def test_isfloat_false():
-   assert app.isfloat('num') is False
- 
+    assert app.isfloat('num') is False
+
 # test allowed file
+
+
 def test_allowed_file():
-  test_file = "writing.png"
-  assert app.allowed_file(test_file) is True
+    test_file = "writing.png"
+    assert app.allowed_file(test_file) is True
+
 
 def test_get_and_insert_metadata():
     bookObj = {
@@ -214,6 +440,7 @@ def test_get_and_insert_metadata():
     assert bookObj["metadata"] is not None
     assert bookObj["status"] == "swappable"
     assert bookObj["image_exists"] == False
+
 
 def test_find_book_coll_by_query():
     reqForm = {
@@ -225,50 +452,55 @@ def test_find_book_coll_by_query():
     }
     books = app.findBookCollByQuery(reqForm, col=collection)
     assert books is not None
-    
-
 
 
 def test_update_book_status():
     senderBookObj = {
-        "_id" : ObjectId("542c2b97bac0595474108b48"),
+        "_id": ObjectId("542c2b97bac0595474108b48"),
         "status": "swappable"
     }
     receiverBookObj = {
-        "_id" : ObjectId("542c2b97bac0595474108b49"),
+        "_id": ObjectId("542c2b97bac0595474108b49"),
         "status": "pending"
     }
     insertArr = [senderBookObj, receiverBookObj]
     collection.insert_many(insertArr)
 
-    app.update_book_status('542c2b97bac0595474108b48', 'pending', '542c2b97bac0595474108b49', 'swappable', col=collection )
+    app.update_book_status('542c2b97bac0595474108b48', 'pending',
+                           '542c2b97bac0595474108b49', 'swappable', col=collection)
 
     # senderBookObj status changed from swappable to pending
-    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b48")})["status"] == "pending"
+    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b48")})[
+        "status"] == "pending"
     # receiverBookObj status changed from pending to swappable
-    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b49")})["status"] == "swappable"
+    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b49")})[
+        "status"] == "swappable"
     collection.drop()
+
 
 def test_remove_all():
     mybookid = "542c2b97bac0595474108b48"
     otherbookid = "542c2b97bac0595474108b49"
     req1 = {
-        "sender"            : ObjectId("542c2b97bac0595474108b48"),
-        "reciever"          : ObjectId("542c2b97bac0595474108b47"),
-        "booktoswap"        : ObjectId("542c2b97bac0595474108b46"),
-        "bookrequested"     : ObjectId("542c2b97bac0595474108b45"),
+        "sender": ObjectId("542c2b97bac0595474108b48"),
+        "reciever": ObjectId("542c2b97bac0595474108b47"),
+        "booktoswap": ObjectId("542c2b97bac0595474108b46"),
+        "bookrequested": ObjectId("542c2b97bac0595474108b45"),
     }
     collection.insert_one(req1)
     collection2.insert_one({"_id": ObjectId(mybookid)})
     collection2.insert_one({"_id": ObjectId(otherbookid)})
-    
+
     app.remove_all(mybookid, otherbookid, col=collection, col2=collection2)
-    assert collection.find_one({"_id": ObjectId("542c2b97bac0595474108b48")}) is None
+    assert collection.find_one(
+        {"_id": ObjectId("542c2b97bac0595474108b48")}) is None
     assert collection2.find_one({"_id": ObjectId(mybookid)}) is None
     assert collection2.find_one({"_id": ObjectId(otherbookid)}) is None
     collection.drop()
     collection2.drop()
-#------------------------------------SET UP---------------------------------------------
+# ------------------------------------SET UP---------------------------------------------
+
+
 def test_locate_user():
     user1 = app.User({'_id': ObjectId("542c2b97bac0595474108b50")})
     collection.insert_one(
@@ -277,13 +509,51 @@ def test_locate_user():
             "username": "username"
         }
     )
-    result = locate_user('542c2b97bac0595474108b50','username', col=collection)
-    assert result==user1
+    result = locate_user('542c2b97bac0595474108b50',
+                         'username', col=collection)
+    assert result == user1
     result = locate_user(username='username', col=collection)
-    assert result==user1
+    assert result == user1
     collection.drop()
 
-def test_inject_user():
-    result=inject_user()
-    assert type(result)==dict
 
+def test_inject_user():
+    result = inject_user()
+    assert type(result) == dict
+
+
+def test_edit_book_helper():
+    book = {
+        "_id": ObjectId("542c2b97bac0595474108b48"),
+        "status": "swappable"
+    }
+    collection.insert_one(book)
+    result = app.edit_book_helper("542c2b97bac0595474108b48", col=collection)
+    assert result == book
+    collection.drop()
+
+
+
+def test_req_array():
+    userid = "542c2b97bac0595474108b50"
+    otheruserid = "542c2b97bac0595474108b49"
+    mybookid = "542c2b97bac0595474108b42"
+    otherbookid = "542c2b97bac0595474108b43"
+
+    recent_id = collection.insert_one({ # (requests collection)
+        "sender": ObjectId(otheruserid),     
+        "reciever": ObjectId(userid), # recieves the request
+        "booktoswap": ObjectId(otherbookid),
+        "bookrequested": ObjectId(mybookid), 
+    }).inserted_id
+
+    collection2.insert_one({"_id":ObjectId(mybookid), "user_id": userid})
+    collection2.insert_one({"_id": ObjectId(otherbookid), "user_id": otheruserid})
+    collection3.insert_one({"_id": ObjectId(userid)}) # insert user
+
+    the_id = app.req_array(userid, col=collection, col2=collection2, col3=collection3)[0]["mybook"]["user_id"]
+    
+    assert collection.find_one({"_id":ObjectId(recent_id)})["reciever"] == ObjectId(the_id)
+    collection.drop()
+    collection2.drop()
+    collection3.drop()

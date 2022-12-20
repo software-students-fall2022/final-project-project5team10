@@ -14,6 +14,7 @@ import datetime
 from bson.objectid import ObjectId
 import codecs
 import gridfs
+from gridfs_helper import gridfs_helper_tool
 
 # user authentication
 import flask_login
@@ -23,6 +24,7 @@ from werkzeug.security import check_password_hash
 # testing
 import sys
 import os
+from prodict import Prodict
 
 # allowed file types for upload
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -139,8 +141,88 @@ def findBookCollByQuery(reqForm, col=db.books):
             doc['condition'] = reqForm['condition']
         
         return col.find(dict(doc))
-            
 
+def add_book_helper(reqForm, testing=False):
+    if '' in [reqForm['ftitle'], reqForm['fpublisher'], reqForm['fedition']]:
+        flash('Please fill out all fields')
+        return render_template('add_book.html',
+                                title=request.form['ftitle'],
+                                publisher=request.form['fpublisher'],
+                                edition=request.form['fedition']
+                                )
+
+    book = {}
+    book["title"] = reqForm['ftitle']
+    book["publisher"] = reqForm['fpublisher']
+    if not testing:
+        book["user_id"] = flask_login.current_user.id
+    else:
+        book["user_id"] = "542c2b97bac0595474108b52"
+    book["edition"] = reqForm['fedition']
+    book["condition"] = reqForm['fcondition']
+    return book
+
+def book_info_helper(bookid, reqMethod, coll=db.books, currUser=flask_login.current_user, testing=False):
+    book = coll.find_one({"_id": ObjectId(bookid)})
+
+    # conditional rendering: present options to edit/delete on page only if user owns the book
+    is_owner = book["user_id"] == currUser.id if not testing else True
+
+    if reqMethod == 'GET':
+        return render_template('book_info.html', book=book, is_owner=is_owner)
+
+    if reqMethod == 'POST':
+        # the user requests to swap one of their books for this book
+        # redirects to a list of the current users books to choose for the swap
+        return redirect(url_for('choose_book', otherbookid=book["_id"]))
+
+
+def edit_book_helper(bookid,col=db.books):
+    book_record = col.find_one({"_id": ObjectId(bookid)})
+    col.delete_one({"_id": ObjectId(bookid)})
+    return book_record
+
+def choose_book_helper(otherbookid, curr_user=flask_login.current_user, book_col=db.books, user_col=db.users, testing=False):
+    user = curr_user
+    myBooks = book_col.find({"user_id": user.id, 'status': 'swappable'}) if not testing else book_col.find({"user_id": user["user_id"], 'status': 'swappable'})
+    otherbook = book_col.find_one({"_id": ObjectId(otherbookid)})
+    otheruser = user_col.find_one({'_id': ObjectId(otherbook['user_id'])})
+    return render_template('book_to_swap.html',
+                           books=myBooks,
+                           otherbook=otherbook,
+                           swapper_name=otheruser['username'])
+def display_account_helper(currUser=flask_login.current_user, col=db.books, testing=False):
+    user = flask_login.current_user if not testing else currUser
+    user_id = user.id if not testing else user["user_id"]
+    docs_swappable = col.find(
+        {
+            "user_id": user_id,
+            'status': 'swappable'
+        }
+    )
+
+    # render the account template with the user's username and the books they have up for sale
+    username = user.data["username"] if not testing else user["username"]
+    return render_template("account.html",
+                           username=username,
+                           docs_swappable=docs_swappable)
+def send_swap_helper(req, bookid, otherbookid, user, col=db.books, testing=False):
+    if req.method == 'GET':
+        book = col.find_one({"_id": ObjectId(bookid)})
+        return render_template('send_swap.html', book=book, otherbookid=otherbookid)
+
+    # run when user chooses to either make swap or cancel
+    if req.method == 'POST':
+        # the user chooses not to send the request for this book
+        if 'fcancel' in req.form:
+            return redirect(url_for('choose_book', otherbookid=otherbookid))
+        # the user sends the request to the other user
+        elif 'fsend' in req.form:
+            update_book_status(bookid, 'pending', otherbookid, 'pending')
+            if not testing:
+                make_request(user, bookid, otherbookid)
+            return redirect(url_for('home'))
+            
 # ======================================================#
 #                     main routes                      #
 # ======================================================#
@@ -222,7 +304,7 @@ def signup():
     hashed_password = generate_password_hash(password)
 
     # check if there is a space in username
-    if username.isspace():
+    if ' ' in username:
         return render_template('signup.html', blankerror="Username or password cannot contain spaces")
     # check whether an account with this email already exists... don't allow duplicates
     if locate_user(username=username):
@@ -298,20 +380,24 @@ def add_book():
     # POST REQUEST FROM FORM
     if request.method == "POST":
         # validate input
-        if '' in [request.form['ftitle'], request.form['fpublisher'], request.form['fedition']]:
-            flash('Please fill out all fields')
-            return render_template('add_book.html',
-                                   title=request.form['ftitle'],
-                                   publisher=request.form['fpublisher'],
-                                   edition=request.form['fedition']
-                                   )
+        initbook = add_book_helper(request.form)
+        # if '' in [request.form['ftitle'], request.form['fpublisher'], request.form['fedition']]:
+        #     flash('Please fill out all fields')
+        #     return render_template('add_book.html',
+        #                            title=request.form['ftitle'],
+        #                            publisher=request.form['fpublisher'],
+        #                            edition=request.form['fedition']
+        #                            )
+        if not isinstance(initbook, dict): return initbook
 
-        book = {}
-        book["title"] = request.form['ftitle']
-        book["publisher"] = request.form['fpublisher']
-        book["user_id"] = user.id
-        book["edition"] = request.form['fedition']
-        book["condition"] = request.form['fcondition']
+        # book = {}
+        # book["title"] = request.form['ftitle']
+        # book["publisher"] = request.form['fpublisher']
+        # book["user_id"] = user.id
+        # book["edition"] = request.form['fedition']
+        # book["condition"] = request.form['fcondition']
+
+        #========end of add book helper===============#
 
         # get metadata from google books
 
@@ -327,35 +413,41 @@ def add_book():
         # book["metadata"] = response
         # book["status"]   = 'swappable'
         # book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
-        book = get_and_insert_metadata(book)
-        if 'file' in request.files:  # check for allowed extensions
-            file = request.files['file']
-            if allowed_file((file.filename)):
-                filename = secure_filename(file.filename)
-                user = flask_login.current_user
-                # unique file name: user id + filename
-                name = str(user.id) + "_" + str(filename)
-                # upload file in chunks into the db using grid_fs
-                id = grid_fs.put(file, filename=name)
-                # document to be inserted into the images collection
-                query = {
-                    "user": user.id,
-                    "book_name": book["title"],
-                    "img_id": id
-                }
-                # add gridfs id to the image field of the book document to be queried into the books collection
-                book["image"] = id
-                # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
-                image = grid_fs.get(id)
-                base64_data = codecs.encode(image.read(), 'base64')
-                image = base64_data.decode('utf-8')
-                book['image_base64'] = image
-                # change the image_exists field to True once an image field is added to book document
-                book['image_exists'] = True
-                # add the image query into the images collection
-                db.images.insert_one(query)
+        book = get_and_insert_metadata(initbook)
 
-        db.books.insert_one(book)
+        #====gridfs helper======#
+
+        gridfs_helper_tool(db, grid_fs, request.files, book, flask_login.current_user)
+
+        # if 'file' in request.files:  # check for allowed extensions
+        #     file = request.files['file']
+        #     if allowed_file((file.filename)):
+        #         filename = secure_filename(file.filename)
+        #         user = flask_login.current_user
+        #         # unique file name: user id + filename
+        #         name = str(user.id) + "_" + str(filename)
+        #         # upload file in chunks into the db using grid_fs
+        #         id = grid_fs.put(file, filename=name)
+        #         # document to be inserted into the images collection
+        #         query = {
+        #             "user": user.id,
+        #             "book_name": book["title"],
+        #             "img_id": id
+        #         }
+        #         # add gridfs id to the image field of the book document to be queried into the books collection
+        #         book["image"] = id
+        #         # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
+        #         image = grid_fs.get(id)
+        #         base64_data = codecs.encode(image.read(), 'base64')
+        #         image = base64_data.decode('utf-8')
+        #         book['image_base64'] = image
+        #         # change the image_exists field to True once an image field is added to book document
+        #         book['image_exists'] = True
+        #         # add the image query into the images collection
+        #         db.images.insert_one(query)
+        # db.books.insert_one(book)
+
+        #====gridfs helper======#
         return redirect(url_for('display_account'))
 
 
@@ -368,8 +460,10 @@ def edit_book(bookid):
     '''
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
-    book_record = db.books.find_one({"_id": ObjectId(bookid)})
-    db.books.delete_one({"_id": ObjectId(bookid)})
+    book_record=edit_book_helper(bookid)
+    #============edit_book_helper============================
+    # book_record = db.books.find_one({"_id": ObjectId(bookid)})
+    # db.books.delete_one({"_id": ObjectId(bookid)})
     return render_template('edit_book.html', book=book_record)
 
 
@@ -390,26 +484,31 @@ def delete_book(bookid):
 # ======================================================#
 
 @app.route('/book_info/<bookid>', methods=['GET', 'POST'])
-# @flask_login.login_required
+@flask_login.login_required
 def book_info(bookid):
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
     '''
     route to show the selected book that is for sale on the home page 
     '''
-    book = db.books.find_one({"_id": ObjectId(bookid)})
+    #===book info helper======
+    # book = db.books.find_one({"_id": ObjectId(bookid)})
 
-    # conditional rendering: present options to edit/delete on page only if user owns the book
-    user = flask_login.current_user
-    is_owner = book["user_id"] == user.id
+    # # conditional rendering: present options to edit/delete on page only if user owns the book
+    # user = flask_login.current_user
+    # is_owner = book["user_id"] == user.id
 
-    if request.method == 'GET':
-        return render_template('book_info.html', book=book, is_owner=is_owner)
+    # if request.method == 'GET':
+        # return render_template('book_info.html', book=book, is_owner=is_owner)
+        # return book_info_helper(bookid, request.method)
 
-    if request.method == 'POST':
-        # the user requests to swap one of their books for this book
-        # redirects to a list of the current users books to choose for the swap
-        return redirect(url_for('choose_book', otherbookid=book["_id"]))
+    # if request.method == 'POST':
+    #     # the user requests to swap one of their books for this book
+    #     # redirects to a list of the current users books to choose for the swap
+        # return redirect(url_for('choose_book', otherbookid=book["_id"]))
+    return book_info_helper(bookid, request.method)
+
+    #===end book info helper======
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
@@ -422,14 +521,16 @@ def choose_book(otherbookid):
     to swap for the book they want (links to send_swap for the chosen book)
     @param otherbookid: id of the other user's book
     '''
-    user = flask_login.current_user
-    myBooks = db.books.find({"user_id": user.id, 'status': 'swappable'})
-    otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
-    otheruser = db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
-    return render_template('book_to_swap.html',
-                           books=myBooks,
-                           otherbook=otherbook,
-                           swapper_name=otheruser['username'])
+    #===choose_book_helper===
+    # user = flask_login.current_user
+    # myBooks = db.books.find({"user_id": user.id, 'status': 'swappable'})
+    # otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
+    # otheruser = db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+    # return render_template('book_to_swap.html',
+    #                        books=myBooks,
+    #                        otherbook=otherbook,
+    #                        swapper_name=otheruser['username'])
+    return choose_book_helper(otherbookid, curr_user=flask_login.current_user, book_col=db.books, user_col=db.users)
 
 
 # ======================================================#
@@ -444,21 +545,23 @@ def display_account():
     display all the documents with the user_id field set
     to the current user's id 
     '''
+
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
+    
+    return display_account_helper()
+    # user = flask_login.current_user
+    # docs_swappable = db.books.find(
+    #     {
+    #         "user_id": user.id,
+    #         'status': 'swappable'
+    #     }
+    # )
 
-    user = flask_login.current_user
-    docs_swappable = db.books.find(
-        {
-            "user_id": user.id,
-            'status': 'swappable'
-        }
-    )
-
-    # render the account template with the user's username and the books they have up for sale
-    return render_template("account.html",
-                           username=user.data["username"],
-                           docs_swappable=docs_swappable)
+    # # render the account template with the user's username and the books they have up for sale
+    # return render_template("account.html",
+    #                        username=user.data["username"],
+    #                        docs_swappable=docs_swappable)
 
 
 # ======================================================#
@@ -476,20 +579,23 @@ def send_swap(bookid, otherbookid):
     user = flask_login.current_user
     if user.is_anonymous:
         return render_template("login.html")
-    if request.method == 'GET':
-        book = db.books.find_one({"_id": ObjectId(bookid)})
-        return render_template('send_swap.html', book=book, otherbookid=otherbookid)
+    return send_swap_helper(request, bookid, otherbookid, user)
+    # if request.method == 'GET':
+    #     book = db.books.find_one({"_id": ObjectId(bookid)})
+    #     return render_template('send_swap.html', book=book, otherbookid=otherbookid)
 
-    # run when user chooses to either make swap or cancel
-    if request.method == 'POST':
-        # the user chooses not to send the request for this book
-        if 'fcancel' in request.form:
-            return redirect(url_for('choose_book', otherbookid=otherbookid))
-        # the user sends the request to the other user
-        elif 'fsend' in request.form:
-            update_book_status(bookid, 'pending', otherbookid, 'pending')
-            make_request(user, bookid, otherbookid)
-            return redirect(url_for('home'))
+    # # run when user chooses to either make swap or cancel
+    # if request.method == 'POST':
+    #     # the user chooses not to send the request for this book
+    #     if 'fcancel' in request.form:
+    #         return redirect(url_for('choose_book', otherbookid=otherbookid))
+    #     # the user sends the request to the other user
+    #     elif 'fsend' in request.form:
+    #         update_book_status(bookid, 'pending', otherbookid, 'pending')
+    #         make_request(user, bookid, otherbookid)
+    #         return redirect(url_for('home'))
+
+# def find_swappable_books():
 
 
 # updates book statuses
@@ -544,29 +650,51 @@ def view_swap_requests():
     user = flask_login.current_user
     if user.is_anonymous:
         return render_template("login.html")
-    requests = db.requests.find(
-        {"reciever": ObjectId(user.id)}).sort("_id", -1)
+    # requests = db.requests.find(
+    #     {"reciever": ObjectId(user.id)}).sort("_id", -1)
 
     # create an array of swap requests
-    swapreqs = []
+    swapreqs = req_array(user.id)
 
+    # for req in requests:
+    #     mybookid = req["bookrequested"]
+    #     otherbookid = req["booktoswap"]
+# 
+    #     # book the current user has
+    #     mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+    #     # book other user wants
+    #     otherbook = db.books.find_one({"_id": otherbookid})
+# 
+    #     swapreqs.append({
+    #         "mybook": mybook,
+    #         "otherbook": otherbook,
+    #         'otheruser': db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+    #     })
+
+    return render_template('swap_requests.html', swapreqs=swapreqs)
+
+def req_array(userid, col=db.requests, col2=db.books, col3=db.users):
+    """
+    Creates an array of swap requests
+    """
+    requests = col.find(
+        {"reciever": ObjectId(userid)}).sort("_id", -1)
+    swapreqs = []
     for req in requests:
         mybookid = req["bookrequested"]
         otherbookid = req["booktoswap"]
 
         # book the current user has
-        mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+        mybook = col2.find_one({"_id": ObjectId(mybookid)})
         # book other user wants
-        otherbook = db.books.find_one({"_id": otherbookid})
+        otherbook = col2.find_one({"_id": otherbookid})
 
         swapreqs.append({
             "mybook": mybook,
             "otherbook": otherbook,
-            'otheruser': db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+            'otheruser': col3.find_one({'_id': ObjectId(otherbook['user_id'])})
         })
-
-    return render_template('swap_requests.html', swapreqs=swapreqs)
-
+    return swapreqs
 
 # accept/decline request
 @app.route('/view_swap/<mybookid>/<otherbookid>', methods=['GET', 'POST'])
@@ -622,6 +750,7 @@ def remove_all(mybookid, otherbookid, col=db.requests, col2=db.books):
 
 
 def get_and_insert_metadata(bookObj):
+    print(bookObj, file=sys.stderr)
     google_api_response = requests.get("https://www.googleapis.com/books/v1/volumes?q=" +
                                        bookObj["title"] +
                                        "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher
