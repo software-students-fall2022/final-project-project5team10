@@ -180,6 +180,16 @@ def edit_book_helper(bookid,col=db.books):
     book_record = col.find_one({"_id": ObjectId(bookid)})
     col.delete_one({"_id": ObjectId(bookid)})
     return book_record
+
+def choose_book_helper(otherbookid, curr_user=flask_login.current_user, book_col=db.books, user_col=db.users, testing=False):
+    user = curr_user
+    myBooks = book_col.find({"user_id": user.id, 'status': 'swappable'}) if not testing else book_col.find({"user_id": user["user_id"], 'status': 'swappable'})
+    otherbook = book_col.find_one({"_id": ObjectId(otherbookid)})
+    otheruser = user_col.find_one({'_id': ObjectId(otherbook['user_id'])})
+    return render_template('book_to_swap.html',
+                           books=myBooks,
+                           otherbook=otherbook,
+                           swapper_name=otheruser['username'])
             
 # ======================================================#
 #                     main routes                      #
@@ -479,14 +489,16 @@ def choose_book(otherbookid):
     to swap for the book they want (links to send_swap for the chosen book)
     @param otherbookid: id of the other user's book
     '''
-    user = flask_login.current_user
-    myBooks = db.books.find({"user_id": user.id, 'status': 'swappable'})
-    otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
-    otheruser = db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
-    return render_template('book_to_swap.html',
-                           books=myBooks,
-                           otherbook=otherbook,
-                           swapper_name=otheruser['username'])
+    #===choose_book_helper===
+    # user = flask_login.current_user
+    # myBooks = db.books.find({"user_id": user.id, 'status': 'swappable'})
+    # otherbook = db.books.find_one({"_id": ObjectId(otherbookid)})
+    # otheruser = db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+    # return render_template('book_to_swap.html',
+    #                        books=myBooks,
+    #                        otherbook=otherbook,
+    #                        swapper_name=otheruser['username'])
+    return choose_book_helper(otherbookid, curr_user=flask_login.current_user, book_col=db.books, user_col=db.users)
 
 
 # ======================================================#

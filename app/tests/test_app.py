@@ -65,7 +65,7 @@ def test_signup(flask_app):
     assert response.status_code == 302
 
 
-def test_signup_empty(flask_app,captured_templates):
+def test_signup_empty(flask_app, captured_templates):
     url = '/signup'
     email = ''.join(random.choices(string.ascii_uppercase +
                     string.digits, k=10)) + "@gmail.com"
@@ -82,7 +82,7 @@ def test_signup_empty(flask_app,captured_templates):
     assert context["crederror"] == "Username or password must be at least 6 characters"
 
 
-def test_signup_space(flask_app,captured_templates):
+def test_signup_space(flask_app, captured_templates):
     url = '/signup'
     email = ''.join(random.choices(string.ascii_uppercase +
                     string.digits, k=10)) + "@gmail.com"
@@ -95,11 +95,13 @@ def test_signup_space(flask_app,captured_templates):
     assert "blankerror" in context
     assert context["blankerror"] == "Username or password cannot contain spaces"
 
-def test_signup_exist(flask_app,captured_templates):
+
+def test_signup_exist(flask_app, captured_templates):
     url = '/signup'
     email = ''.join(random.choices(string.ascii_uppercase +
                     string.digits, k=10)) + "@gmail.com"
-    flask_app.post(url,data=dict(fusername='testingalready',fpassword='password',femail=email))
+    flask_app.post(url, data=dict(fusername='testingalready',
+                   fpassword='password', femail=email))
     response = flask_app.post(url, data=dict(
         fusername="testingalready", fpassword="password", femail=email))
     assert response.status_code == 200
@@ -108,8 +110,6 @@ def test_signup_exist(flask_app,captured_templates):
     assert template.name == "signup.html"
     assert "unerror" in context
     assert context["unerror"] == "This username already exists."
-
-
 
 
 # ROUTE: route handler for Post request to '/login' with invalid input
@@ -187,21 +187,23 @@ def test_add_book_helper_missing_field():
         testing=True)
     assert "<h3>Please fill out all fields</h3>" in html_render
 
+
 def test_book_info_helper():
-    #book
+    # book
     user = 'user'
     collection.insert_one({
         "_id": ObjectId("542c2b97bac0595474108b52")
     })
     book = collection.find_one({"_id": ObjectId("542c2b97bac0595474108b52")})
     # GET
-    res = app.book_info_helper(book["_id"], "GET", coll=collection, currUser=user, testing=True)
+    res = app.book_info_helper(
+        book["_id"], "GET", coll=collection, currUser=user, testing=True)
     assert "<h3>Title: </h3>" in res
     # POST
-    res = app.book_info_helper(book["_id"], "POST", coll=collection, currUser=user, testing=True)
+    res = app.book_info_helper(
+        book["_id"], "POST", coll=collection, currUser=user, testing=True)
     print(res)
     assert res.status_code == 302
-
 
 
 # ======================================================#
@@ -209,10 +211,12 @@ def test_book_info_helper():
 # ======================================================#
 
 # ROUTE: route handler for Get request to '/edit/<bookid>'
-def test_edit(flask_app):
+def test_edit(flask_app, captured_templates):
     url = '/edit/2'
     response = flask_app.get(url)
     assert response.status_code == 200
+    print(captured_templates)
+    assert len(captured_templates) == 1
 
 
 # ROUTE: route handler for request to '/delete/<bookid>'
@@ -301,6 +305,29 @@ def test_view_swap_post(flask_app):
     assert response.status_code == 200
     response = flask_app.post(url, data="fdecline")
     assert response.status_code == 200
+
+
+def test_choose_book():
+    otherbookid = ObjectId("542c2b97bac0595474108b53")
+    userid = ObjectId("542c2b97bac0595474108b54")
+    otherBookObj = {
+        "_id": otherbookid,
+        "status": "swappable",
+        "user_id": userid
+    }
+    collection.insert_one(otherBookObj)
+    
+    userObj = {
+        "user_id": userid,
+        "_id": userid,
+        "username": "i_love_testing_so_much@hotmail.com"
+    }
+    collection2.insert_one(
+        userObj
+    )
+    res = app.choose_book_helper(otherbookid, curr_user=userObj, book_col=collection, user_col=collection2, testing=True)
+    print(res)
+    assert "<h3>Owner: i_love_testing_so_much@hotmail.com</h3>" in res
 
 
 # -----------------------------UNAUTHORIZED and INVALID TESTS-------------------------------------
@@ -441,13 +468,13 @@ def test_inject_user():
     result = inject_user()
     assert type(result) == dict
 
+
 def test_edit_book_helper():
     book = {
         "_id": ObjectId("542c2b97bac0595474108b48"),
         "status": "swappable"
     }
     collection.insert_one(book)
-    result=app.edit_book_helper("542c2b97bac0595474108b48",col=collection)
-    assert result==book
+    result = app.edit_book_helper("542c2b97bac0595474108b48", col=collection)
+    assert result == book
     collection.drop()
-

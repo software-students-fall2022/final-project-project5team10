@@ -8,5 +8,4 @@ coverage
 pytest
 pytest_flask
 mongomock
-
-
+blinker
