@@ -192,7 +192,7 @@ def authenticate():
 
 
 @app.route('/home', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def home():
     if request.method == 'POST':
         if flask_login.current_user.is_anonymous:
@@ -470,7 +470,7 @@ def book_info(bookid):
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def choose_book(otherbookid):
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
