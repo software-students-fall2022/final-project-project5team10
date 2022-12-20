@@ -1,11 +1,11 @@
 [![App Testing](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/build-app.yaml)
 [![App CD](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/docker-cd.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/docker-cd.yaml)
-# Bookshares
+# Bookshare
 
-Bookshares aims to make college textbooks more affordable through the exchange of used books.
+Bookshare aims to make college textbooks more affordable through the exchange of used books.
 
 ## Project Description
-Bookshares consists of two subsystems: </br>
+Bookshare consists of two subsystems: </br>
 * **Flask Web App**: Displays user-supplied data and displays data fetched via Google Books API to display relevant data. Allows different users, after authentication, to send requests and view listings supplied by other users.
 * **MongoDB Database**: Stores user credentials and data per user
 ## User Cases
@@ -31,6 +31,20 @@ Users can register for an account. With an account, one can:
 
 ## Digital Ocean
 [Deployed Link](https://bookshares-app-ap28r.ondigitalocean.app/)
+
+## Code Coverage
+```txt
+Name                    Stmts   Miss  Cover
+-------------------------------------------
+app/app.py                267     43    84%
+app/gridfs_helper.py       23     17    26%
+app/tests/__init__.py       0      0   100%
+app/tests/conftest.py      17      0   100%
+app/tests/test_app.py     284      0   100%
+-------------------------------------------
+TOTAL                     591     60    90%
+```
+
 ## Authors
 
 [Sarah Al-Towaity](https://github.com/sarah-altowaity1) \
@@ -39,3 +53,10 @@ Users can register for an account. With an account, one can:
 [Danilo Montes](https://github.com/danilo-montes) \
 [Bhavig Pointi](https://github.com/bpointi) \
 [Misha Seo](https://github.com/mishaseo)
+
+## **DISCLAIMER**
+On the Digital Ocean deployment, the site sometimes gives a page saying that you are unauthorized to view that page.
+However, if you wait a bit and refresh, it will let you through.
+We believe this to be an issue on Digital Ocean's part, possibly a slow handling of flask user authentication that causes the site to not load the user's 'logged in' status quickly enough.
+This issue appears sometimes, and other times doesn't.
+We tried to fix it but since it seems to be an issue with Digital Ocean itself, approaching a fix proved difficult.

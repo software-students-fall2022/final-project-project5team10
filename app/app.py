@@ -314,7 +314,7 @@ def signup():
     # create a new document in the database for this new user
     # hash the password and save it to the database
     user_id = db.users.insert_one(
-        {"username": username, "password": hashed_password}).inserted_id
+        {"username": username, 'email' : email, "password": hashed_password}).inserted_id
     if user_id:
         # successfully created a new user... make a nice user object
         user = User({
