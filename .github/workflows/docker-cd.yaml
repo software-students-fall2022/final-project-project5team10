@@ -41,5 +41,5 @@ jobs:
       - name: DigitalOcean App Platform Deployment
         uses: digitalocean/app_action@main
         with:
-            app_name: bookshare
+            app_name: bookshares-app
             token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
