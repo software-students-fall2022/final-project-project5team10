@@ -53,3 +53,10 @@ TOTAL                     591     60    90%
 [Danilo Montes](https://github.com/danilo-montes) \
 [Bhavig Pointi](https://github.com/bpointi) \
 [Misha Seo](https://github.com/mishaseo)
+
+## **DISCLAIMER**
+On the Digital Ocean deployment, the site sometimes gives a page saying that you are unauthorized to view that page.
+However, if you wait a bit and refresh, it will let you through.
+We believe this to be an issue on Digital Ocean's part, possibly a slow handling of flask user authentication that causes the site to not load the user's 'logged in' status quickly enough.
+This issue appears sometimes, and other times doesn't.
+We tried to fix it but since it seems to be an issue with Digital Ocean itself, approaching a fix proved difficult.
