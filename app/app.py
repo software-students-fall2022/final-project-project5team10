@@ -176,7 +176,11 @@ def book_info_helper(bookid, reqMethod, coll=db.books, currUser=flask_login.curr
         return redirect(url_for('choose_book', otherbookid=book["_id"]))
 
 
-        
+def edit_book_helper(bookid,col=db.books):
+    book_record = col.find_one({"_id": ObjectId(bookid)})
+    col.delete_one({"_id": ObjectId(bookid)})
+    return book_record
+            
 # ======================================================#
 #                     main routes                      #
 # ======================================================#
@@ -258,7 +262,7 @@ def signup():
     hashed_password = generate_password_hash(password)
 
     # check if there is a space in username
-    if username.isspace():
+    if ' ' in username:
         return render_template('signup.html', blankerror="Username or password cannot contain spaces")
     # check whether an account with this email already exists... don't allow duplicates
     if locate_user(username=username):
@@ -414,8 +418,10 @@ def edit_book(bookid):
     '''
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
-    book_record = db.books.find_one({"_id": ObjectId(bookid)})
-    db.books.delete_one({"_id": ObjectId(bookid)})
+    book_record=edit_book_helper(bookid)
+    #============edit_book_helper============================
+    # book_record = db.books.find_one({"_id": ObjectId(bookid)})
+    # db.books.delete_one({"_id": ObjectId(bookid)})
     return render_template('edit_book.html', book=book_record)
 
 
