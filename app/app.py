@@ -615,29 +615,51 @@ def view_swap_requests():
     user = flask_login.current_user
     if user.is_anonymous:
         return render_template("login.html")
-    requests = db.requests.find(
-        {"reciever": ObjectId(user.id)}).sort("_id", -1)
+    # requests = db.requests.find(
+    #     {"reciever": ObjectId(user.id)}).sort("_id", -1)
 
     # create an array of swap requests
-    swapreqs = []
+    swapreqs = req_array(user.id)
 
+    # for req in requests:
+    #     mybookid = req["bookrequested"]
+    #     otherbookid = req["booktoswap"]
+# 
+    #     # book the current user has
+    #     mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+    #     # book other user wants
+    #     otherbook = db.books.find_one({"_id": otherbookid})
+# 
+    #     swapreqs.append({
+    #         "mybook": mybook,
+    #         "otherbook": otherbook,
+    #         'otheruser': db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+    #     })
+
+    return render_template('swap_requests.html', swapreqs=swapreqs)
+
+def req_array(userid, col=db.requests, col2=db.books, col3=db.users):
+    """
+    Creates an array of swap requests
+    """
+    requests = col.find(
+        {"reciever": ObjectId(userid)}).sort("_id", -1)
+    swapreqs = []
     for req in requests:
         mybookid = req["bookrequested"]
         otherbookid = req["booktoswap"]
 
         # book the current user has
-        mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+        mybook = col2.find_one({"_id": ObjectId(mybookid)})
         # book other user wants
-        otherbook = db.books.find_one({"_id": otherbookid})
+        otherbook = col2.find_one({"_id": otherbookid})
 
         swapreqs.append({
             "mybook": mybook,
             "otherbook": otherbook,
-            'otheruser': db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+            'otheruser': col3.find_one({'_id': ObjectId(otherbook['user_id'])})
         })
-
-    return render_template('swap_requests.html', swapreqs=swapreqs)
-
+    return swapreqs
 
 # accept/decline request
 @app.route('/view_swap/<mybookid>/<otherbookid>', methods=['GET', 'POST'])
