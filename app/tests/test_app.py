@@ -65,7 +65,7 @@ def test_signup(flask_app):
     assert response.status_code == 302
 
 
-def test_signup_empty(flask_app):
+def test_signup_empty(flask_app,captured_templates):
     url = '/signup'
     email = ''.join(random.choices(string.ascii_uppercase +
                     string.digits, k=10)) + "@gmail.com"
@@ -75,15 +75,41 @@ def test_signup_empty(flask_app):
     response = flask_app.post(url, data=dict(
         fusername="username", fpassword="", femail=email))
     assert response.status_code == 200
+    assert len(captured_templates) == 2
+    template, context = captured_templates[0]
+    assert template.name == "signup.html"
+    assert "crederror" in context
+    assert context["crederror"] == "Username or password must be at least 6 characters"
 
 
-def test_signup_space(flask_app):
+def test_signup_space(flask_app,captured_templates):
     url = '/signup'
     email = ''.join(random.choices(string.ascii_uppercase +
                     string.digits, k=10)) + "@gmail.com"
     response = flask_app.post(url, data=dict(
         fusername="test space", fpassword="password", femail=email))
     assert response.status_code == 200
+    assert len(captured_templates) == 1
+    template, context = captured_templates[0]
+    assert template.name == "signup.html"
+    assert "blankerror" in context
+    assert context["blankerror"] == "Username or password cannot contain spaces"
+
+def test_signup_exist(flask_app,captured_templates):
+    url = '/signup'
+    email = ''.join(random.choices(string.ascii_uppercase +
+                    string.digits, k=10)) + "@gmail.com"
+    flask_app.post(url,data=dict(fusername='testingalready',fpassword='password',femail=email))
+    response = flask_app.post(url, data=dict(
+        fusername="testingalready", fpassword="password", femail=email))
+    assert response.status_code == 200
+    assert len(captured_templates) == 2
+    template, context = captured_templates[0]
+    assert template.name == "signup.html"
+    assert "unerror" in context
+    assert context["unerror"] == "This username already exists."
+
+
 
 
 # ROUTE: route handler for Post request to '/login' with invalid input
@@ -414,3 +440,14 @@ def test_locate_user():
 def test_inject_user():
     result = inject_user()
     assert type(result) == dict
+
+def test_edit_book_helper():
+    book = {
+        "_id": ObjectId("542c2b97bac0595474108b48"),
+        "status": "swappable"
+    }
+    collection.insert_one(book)
+    result=app.edit_book_helper("542c2b97bac0595474108b48",col=collection)
+    assert result==book
+    collection.drop()
+
