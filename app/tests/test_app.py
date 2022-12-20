@@ -308,7 +308,7 @@ def test_view_swap(flask_app):
     response = flask_app.get(url)
     assert response.status_code == 200
 
-def test_send_swap(requests_mock: Mocker):
+def test_send_swap():
     #setup
     bookid = "542c2b97bac0595474108b56"
     otherbookid = "542c2b97bac0595474108b57"
