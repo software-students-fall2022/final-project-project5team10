@@ -24,6 +24,7 @@ from werkzeug.security import check_password_hash
 # testing
 import sys
 import os
+from prodict import Prodict
 
 # allowed file types for upload
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -190,6 +191,37 @@ def choose_book_helper(otherbookid, curr_user=flask_login.current_user, book_col
                            books=myBooks,
                            otherbook=otherbook,
                            swapper_name=otheruser['username'])
+def display_account_helper(currUser=flask_login.current_user, col=db.books, testing=False):
+    user = flask_login.current_user if not testing else currUser
+    user_id = user.id if not testing else user["user_id"]
+    docs_swappable = col.find(
+        {
+            "user_id": user_id,
+            'status': 'swappable'
+        }
+    )
+
+    # render the account template with the user's username and the books they have up for sale
+    username = user.data["username"] if not testing else user["username"]
+    return render_template("account.html",
+                           username=username,
+                           docs_swappable=docs_swappable)
+def send_swap_helper(req, bookid, otherbookid, user, col=db.books, testing=False):
+    if req.method == 'GET':
+        book = col.find_one({"_id": ObjectId(bookid)})
+        return render_template('send_swap.html', book=book, otherbookid=otherbookid)
+
+    # run when user chooses to either make swap or cancel
+    if req.method == 'POST':
+        # the user chooses not to send the request for this book
+        if 'fcancel' in req.form:
+            return redirect(url_for('choose_book', otherbookid=otherbookid))
+        # the user sends the request to the other user
+        elif 'fsend' in req.form:
+            update_book_status(bookid, 'pending', otherbookid, 'pending')
+            if not testing:
+                make_request(user, bookid, otherbookid)
+            return redirect(url_for('home'))
             
 # ======================================================#
 #                     main routes                      #
@@ -452,7 +484,7 @@ def delete_book(bookid):
 # ======================================================#
 
 @app.route('/book_info/<bookid>', methods=['GET', 'POST'])
-# @flask_login.login_required
+@flask_login.login_required
 def book_info(bookid):
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
@@ -513,21 +545,23 @@ def display_account():
     display all the documents with the user_id field set
     to the current user's id 
     '''
+
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
+    
+    return display_account_helper()
+    # user = flask_login.current_user
+    # docs_swappable = db.books.find(
+    #     {
+    #         "user_id": user.id,
+    #         'status': 'swappable'
+    #     }
+    # )
 
-    user = flask_login.current_user
-    docs_swappable = db.books.find(
-        {
-            "user_id": user.id,
-            'status': 'swappable'
-        }
-    )
-
-    # render the account template with the user's username and the books they have up for sale
-    return render_template("account.html",
-                           username=user.data["username"],
-                           docs_swappable=docs_swappable)
+    # # render the account template with the user's username and the books they have up for sale
+    # return render_template("account.html",
+    #                        username=user.data["username"],
+    #                        docs_swappable=docs_swappable)
 
 
 # ======================================================#
@@ -545,20 +579,21 @@ def send_swap(bookid, otherbookid):
     user = flask_login.current_user
     if user.is_anonymous:
         return render_template("login.html")
-    if request.method == 'GET':
-        book = db.books.find_one({"_id": ObjectId(bookid)})
-        return render_template('send_swap.html', book=book, otherbookid=otherbookid)
+    return send_swap_helper(request, bookid, otherbookid, user)
+    # if request.method == 'GET':
+    #     book = db.books.find_one({"_id": ObjectId(bookid)})
+    #     return render_template('send_swap.html', book=book, otherbookid=otherbookid)
 
-    # run when user chooses to either make swap or cancel
-    if request.method == 'POST':
-        # the user chooses not to send the request for this book
-        if 'fcancel' in request.form:
-            return redirect(url_for('choose_book', otherbookid=otherbookid))
-        # the user sends the request to the other user
-        elif 'fsend' in request.form:
-            update_book_status(bookid, 'pending', otherbookid, 'pending')
-            make_request(user, bookid, otherbookid)
-            return redirect(url_for('home'))
+    # # run when user chooses to either make swap or cancel
+    # if request.method == 'POST':
+    #     # the user chooses not to send the request for this book
+    #     if 'fcancel' in request.form:
+    #         return redirect(url_for('choose_book', otherbookid=otherbookid))
+    #     # the user sends the request to the other user
+    #     elif 'fsend' in request.form:
+    #         update_book_status(bookid, 'pending', otherbookid, 'pending')
+    #         make_request(user, bookid, otherbookid)
+    #         return redirect(url_for('home'))
 
 # def find_swappable_books():
 

@@ -9,6 +9,8 @@ from app import locate_user
 from app import user_loader
 from app import inject_user
 import sys
+import requests
+from prodict import Prodict
 
 
 # client = mongomock.MongoClient()
@@ -203,7 +205,6 @@ def test_book_info_helper():
     # POST
     res = app.book_info_helper(
         book["_id"], "POST", coll=collection, currUser=user, testing=True)
-    print(res)
     assert res.status_code == 302
 
 
@@ -216,7 +217,7 @@ def test_edit(flask_app, captured_templates):
     url = '/edit/2'
     response = flask_app.get(url)
     assert response.status_code == 200
-    print(captured_templates)
+    # print(captured_templates)
     assert len(captured_templates) == 1
 
 
@@ -260,6 +261,16 @@ def test_account(flask_app):
     response = flask_app.get(url)
     assert response.status_code == 200
 
+def test_display_account_template():
+    userid = ObjectId("542c2b97bac0595474108b55")
+    userObj = {
+        "user_id": userid,
+        "username": "i_love_testing_so_much@hotmail.com"
+    }
+    res = app.display_account_helper(userObj, col=collection, testing=True)
+    assert "View Swap Requests" in res
+
+
 # ======================================================#
 #                     swap routes tests                 #
 # ======================================================#
@@ -297,6 +308,46 @@ def test_view_swap(flask_app):
     response = flask_app.get(url)
     assert response.status_code == 200
 
+def test_send_swap(requests_mock: Mocker):
+    #setup
+    bookid = "542c2b97bac0595474108b56"
+    otherbookid = "542c2b97bac0595474108b57"
+    userid = "542c2b97bac0595474108b58"
+    bookObj1 = {
+        "_id": ObjectId(bookid)
+    }
+    bookObj2 = {
+        "_id": ObjectId(otherbookid)
+    }
+    userObj = {
+        "userid": userid
+    }
+    collection.insert_one(bookObj1)
+    collection.insert_one(bookObj2)
+
+    #test GET
+
+    #init GET mock req
+#     req = requests_mock.get(
+#     'https://test.com/4',
+#     [
+#         {'method': 'GET', 'form': 'fcancel'},
+#     ]
+# )
+    req = Prodict(method="GET")
+    res = app.send_swap_helper(req, bookid, otherbookid, userObj, col=collection, testing=True)
+    assert '''<form id="sendrequest" method="POST">''' in res
+
+    # test POST with fcancel
+    req = Prodict(method="POST", form="fcancel")
+    res = app.send_swap_helper(req, bookid, otherbookid, userObj, col=collection, testing=True)
+    assert res.status_code == 302
+
+    #test POST with fsend
+    req = Prodict(method="POST", form="fsend")
+    res = app.send_swap_helper(req, bookid, otherbookid, userObj, col=collection, testing=True)
+    assert res.status_code == 302
+
 # ROUTE: route handler for Post request to '/view_swap/<mybookid>/<otherbookid>'
 
 
@@ -327,7 +378,6 @@ def test_choose_book():
         userObj
     )
     res = app.choose_book_helper(otherbookid, curr_user=userObj, book_col=collection, user_col=collection2, testing=True)
-    print(res)
     assert "<h3>Owner: i_love_testing_so_much@hotmail.com</h3>" in res
     collection.drop()
     collection2.drop()
