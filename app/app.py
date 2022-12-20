@@ -190,6 +190,21 @@ def choose_book_helper(otherbookid, curr_user=flask_login.current_user, book_col
                            books=myBooks,
                            otherbook=otherbook,
                            swapper_name=otheruser['username'])
+def display_account_helper(currUser=flask_login.current_user, col=db.books, testing=False):
+    user = flask_login.current_user if not testing else currUser
+    user_id = user.id if not testing else user["user_id"]
+    docs_swappable = col.find(
+        {
+            "user_id": user_id,
+            'status': 'swappable'
+        }
+    )
+
+    # render the account template with the user's username and the books they have up for sale
+    username = user.data["username"] if not testing else user["username"]
+    return render_template("account.html",
+                           username=username,
+                           docs_swappable=docs_swappable)
             
 # ======================================================#
 #                     main routes                      #
@@ -513,21 +528,23 @@ def display_account():
     display all the documents with the user_id field set
     to the current user's id 
     '''
+
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
+    
+    return display_account_helper()
+    # user = flask_login.current_user
+    # docs_swappable = db.books.find(
+    #     {
+    #         "user_id": user.id,
+    #         'status': 'swappable'
+    #     }
+    # )
 
-    user = flask_login.current_user
-    docs_swappable = db.books.find(
-        {
-            "user_id": user.id,
-            'status': 'swappable'
-        }
-    )
-
-    # render the account template with the user's username and the books they have up for sale
-    return render_template("account.html",
-                           username=user.data["username"],
-                           docs_swappable=docs_swappable)
+    # # render the account template with the user's username and the books they have up for sale
+    # return render_template("account.html",
+    #                        username=user.data["username"],
+    #                        docs_swappable=docs_swappable)
 
 
 # ======================================================#

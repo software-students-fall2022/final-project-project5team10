@@ -260,6 +260,16 @@ def test_account(flask_app):
     response = flask_app.get(url)
     assert response.status_code == 200
 
+def test_display_account_template():
+    userid = ObjectId("542c2b97bac0595474108b55")
+    userObj = {
+        "user_id": userid,
+        "username": "i_love_testing_so_much@hotmail.com"
+    }
+    res = app.display_account_helper(userObj, col=collection, testing=True)
+    assert "View Swap Requests" in res
+
+
 # ======================================================#
 #                     swap routes tests                 #
 # ======================================================#
