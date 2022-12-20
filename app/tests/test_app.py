@@ -161,6 +161,23 @@ def test_add_book_helper_missing_field():
         testing=True)
     assert "<h3>Please fill out all fields</h3>" in html_render
 
+def test_book_info_helper():
+    #book
+    user = 'user'
+    collection.insert_one({
+        "_id": ObjectId("542c2b97bac0595474108b52")
+    })
+    book = collection.find_one({"_id": ObjectId("542c2b97bac0595474108b52")})
+    # GET
+    res = app.book_info_helper(book["_id"], "GET", coll=collection, currUser=user, testing=True)
+    assert "<h3>Title: </h3>" in res
+    # POST
+    res = app.book_info_helper(book["_id"], "POST", coll=collection, currUser=user, testing=True)
+    print(res)
+    assert res.status_code == 302
+
+
+
 # ======================================================#
 #                     book viewing tests                #
 # ======================================================#

@@ -161,12 +161,11 @@ def add_book_helper(reqForm, testing=False):
     book["condition"] = reqForm['fcondition']
     return book
 
-def book_info_helper(bookid, reqMethod, coll=db.books, currUser=flask_login.current_user):
+def book_info_helper(bookid, reqMethod, coll=db.books, currUser=flask_login.current_user, testing=False):
     book = coll.find_one({"_id": ObjectId(bookid)})
 
     # conditional rendering: present options to edit/delete on page only if user owns the book
-    user = currUser
-    is_owner = book["user_id"] == user.id
+    is_owner = book["user_id"] == currUser.id if not testing else True
 
     if reqMethod == 'GET':
         return render_template('book_info.html', book=book, is_owner=is_owner)
@@ -175,7 +174,6 @@ def book_info_helper(bookid, reqMethod, coll=db.books, currUser=flask_login.curr
         # the user requests to swap one of their books for this book
         # redirects to a list of the current users books to choose for the swap
         return redirect(url_for('choose_book', otherbookid=book["_id"]))
-    return book
 
 
         
@@ -446,22 +444,21 @@ def book_info(bookid):
     route to show the selected book that is for sale on the home page 
     '''
     #===book info helper======
-    book = db.books.find_one({"_id": ObjectId(bookid)})
+    # book = db.books.find_one({"_id": ObjectId(bookid)})
 
-    # conditional rendering: present options to edit/delete on page only if user owns the book
-    user = flask_login.current_user
-    is_owner = book["user_id"] == user.id
-    # reqMethod = request.method
+    # # conditional rendering: present options to edit/delete on page only if user owns the book
+    # user = flask_login.current_user
+    # is_owner = book["user_id"] == user.id
 
-    if request.method == 'GET':
-        return render_template('book_info.html', book=book, is_owner=is_owner)
-        # book_info_helper(bookid, reqMethod)
+    # if request.method == 'GET':
+        # return render_template('book_info.html', book=book, is_owner=is_owner)
+        # return book_info_helper(bookid, request.method)
 
-    if request.method == 'POST':
+    # if request.method == 'POST':
     #     # the user requests to swap one of their books for this book
     #     # redirects to a list of the current users books to choose for the swap
-        return redirect(url_for('choose_book', otherbookid=book["_id"]))
-        # book_info_helper(bookid, reqMethod)
+        # return redirect(url_for('choose_book', otherbookid=book["_id"]))
+    return book_info_helper(bookid, request.method)
 
     #===end book info helper======
 
