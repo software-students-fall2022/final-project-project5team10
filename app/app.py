@@ -161,8 +161,26 @@ def add_book_helper(reqForm, testing=False):
     book["condition"] = reqForm['fcondition']
     return book
 
+def book_info_helper(bookid, reqMethod, coll=db.books, currUser=flask_login.current_user, testing=False):
+    book = coll.find_one({"_id": ObjectId(bookid)})
 
-        
+    # conditional rendering: present options to edit/delete on page only if user owns the book
+    is_owner = book["user_id"] == currUser.id if not testing else True
+
+    if reqMethod == 'GET':
+        return render_template('book_info.html', book=book, is_owner=is_owner)
+
+    if reqMethod == 'POST':
+        # the user requests to swap one of their books for this book
+        # redirects to a list of the current users books to choose for the swap
+        return redirect(url_for('choose_book', otherbookid=book["_id"]))
+
+
+def edit_book_helper(bookid,col=db.books):
+    book_record = col.find_one({"_id": ObjectId(bookid)})
+    col.delete_one({"_id": ObjectId(bookid)})
+    return book_record
+            
 # ======================================================#
 #                     main routes                      #
 # ======================================================#
@@ -174,7 +192,7 @@ def authenticate():
 
 
 @app.route('/home', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def home():
     if request.method == 'POST':
         if flask_login.current_user.is_anonymous:
@@ -244,7 +262,7 @@ def signup():
     hashed_password = generate_password_hash(password)
 
     # check if there is a space in username
-    if username.isspace():
+    if ' ' in username:
         return render_template('signup.html', blankerror="Username or password cannot contain spaces")
     # check whether an account with this email already exists... don't allow duplicates
     if locate_user(username=username):
@@ -328,6 +346,7 @@ def add_book():
         #                            publisher=request.form['fpublisher'],
         #                            edition=request.form['fedition']
         #                            )
+        if not isinstance(initbook, dict): return initbook
 
         # book = {}
         # book["title"] = request.form['ftitle']
@@ -399,8 +418,10 @@ def edit_book(bookid):
     '''
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
-    book_record = db.books.find_one({"_id": ObjectId(bookid)})
-    db.books.delete_one({"_id": ObjectId(bookid)})
+    book_record=edit_book_helper(bookid)
+    #============edit_book_helper============================
+    # book_record = db.books.find_one({"_id": ObjectId(bookid)})
+    # db.books.delete_one({"_id": ObjectId(bookid)})
     return render_template('edit_book.html', book=book_record)
 
 
@@ -428,23 +449,28 @@ def book_info(bookid):
     '''
     route to show the selected book that is for sale on the home page 
     '''
-    book = db.books.find_one({"_id": ObjectId(bookid)})
+    #===book info helper======
+    # book = db.books.find_one({"_id": ObjectId(bookid)})
 
-    # conditional rendering: present options to edit/delete on page only if user owns the book
-    user = flask_login.current_user
-    is_owner = book["user_id"] == user.id
+    # # conditional rendering: present options to edit/delete on page only if user owns the book
+    # user = flask_login.current_user
+    # is_owner = book["user_id"] == user.id
 
-    if request.method == 'GET':
-        return render_template('book_info.html', book=book, is_owner=is_owner)
+    # if request.method == 'GET':
+        # return render_template('book_info.html', book=book, is_owner=is_owner)
+        # return book_info_helper(bookid, request.method)
 
-    if request.method == 'POST':
-        # the user requests to swap one of their books for this book
-        # redirects to a list of the current users books to choose for the swap
-        return redirect(url_for('choose_book', otherbookid=book["_id"]))
+    # if request.method == 'POST':
+    #     # the user requests to swap one of their books for this book
+    #     # redirects to a list of the current users books to choose for the swap
+        # return redirect(url_for('choose_book', otherbookid=book["_id"]))
+    return book_info_helper(bookid, request.method)
+
+    #===end book info helper======
 
 
 @app.route('/book_to_swap/<otherbookid>', methods=['GET', 'POST'])
-@flask_login.login_required
+# @flask_login.login_required
 def choose_book(otherbookid):
     if flask_login.current_user.is_anonymous:
         return render_template("login.html")
@@ -677,6 +703,7 @@ def remove_all(mybookid, otherbookid, col=db.requests, col2=db.books):
 
 
 def get_and_insert_metadata(bookObj):
+    print(bookObj, file=sys.stderr)
     google_api_response = requests.get("https://www.googleapis.com/books/v1/volumes?q=" +
                                        bookObj["title"] +
                                        "&key=AIzaSyBtBvjNsaxUyGijiKJdks4c1lVbWp_w2AE").json()  # publisher

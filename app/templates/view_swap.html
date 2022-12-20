@@ -40,21 +40,8 @@
         <br/><br/>
         <div id="tradeInfo">
                 <br/><br/>
-                <h1> Trade {{otheruser.username}}'s {{mybook.title}} </h3>
+                <h1> Trade {{otheruser.username}}'s {{otherbook.title}} </h3>
                 <h1> Email: {{otheruser.email}}   </h1>
-                {% if mybook.image_exists %}
-                    <img src="data:image/png;base64, {{mybook.image_base64}}" width="500" height="500" />
-                {% else %}
-                    <img src="{{ url_for('static', filename='images/default.jpeg') }}"/>
-                {% endif %}
-                <div id="bookDetails">
-                    <h3>Title: {{mybook.title}}</h3>
-                    <h3>Edition: {{mybook.edition}}</h3>
-                    <h3>Publisher: {{mybook.publisher}}</h3>
-                    <h3>Condition: {{mybook.condition}}</h3>
-                </div>
-                <br/><br/>
-                <h1> For Your {{otherbook.title}} </h1>
                 {% if otherbook.image_exists %}
                     <img src="data:image/png;base64, {{otherbook.image_base64}}" width="500" height="500" />
                 {% else %}
@@ -65,6 +52,19 @@
                     <h3>Edition: {{otherbook.edition}}</h3>
                     <h3>Publisher: {{otherbook.publisher}}</h3>
                     <h3>Condition: {{otherbook.condition}}</h3>
+                </div>
+                <br/><br/>
+                <h1> For Your {{mybook.title}} </h1>
+                {% if mybook.image_exists %}
+                    <img src="data:image/png;base64, {{mybook.image_base64}}" width="500" height="500" />
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default.jpeg') }}"/>
+                {% endif %}
+                <div id="bookDetails">
+                    <h3>Title: {{mybook.title}}</h3>
+                    <h3>Edition: {{mybook.edition}}</h3>
+                    <h3>Publisher: {{mybook.publisher}}</h3>
+                    <h3>Condition: {{mybook.condition}}</h3>
                 </div>
             
             <div>
