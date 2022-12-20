@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="../static/css/reset.css">
+    <link rel="stylesheet" href="../static/css/signup.css"> 
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+</head>
+
+<body>
+	<div class="signup-form-container">
+	<form method="POST" class="signup-form" id="signup-form">
+		<p class="form-header">Sign up</p>
+		<div>
+			<input class="signup-form-input" placeholder="Username(min 6 characters)" type="text" name="fusername" value="">
+            {% if unerror %}
+			<p id="duplicateUser" class="signup-form-error">{{ unerror }}</p>
+            {% endif %}
+		</div>
+		<div>
+			<input class="signup-form-input" placeholder="Enter email" type="text" name="femail" value="">
+		</div>
+		<div>
+			<input class="signup-form-input" placeholder="Password(min 6 characters)"type="password" name="fpassword" value="">
+            {% if blankerror%}
+            <p id="passwordError" class="signup-form-error">{{ blankerror }}</p>
+            {% endif %}
+            {% if crederror %}
+            <p id="passwordError" class="signup-form-error">{{ crederror }}</p>
+            {% endif %}
+		</div>
+		<div><input class="submit" type="submit" formaction="{{ url_for('signup') }}" value="Register"></div>
+	</form>
+	</div>
+</body>

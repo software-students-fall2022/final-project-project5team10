@@ -1,0 +1,12 @@
+flask
+flask_login
+werkzeug
+pymongo
+datetime
+requests
+coverage
+pytest
+pytest_flask
+mongomock
+blinker
+prodict

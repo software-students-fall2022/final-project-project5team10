@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Bookshare</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link href='https://fonts.googleapis.com/css?family=Cormorant Garamond' rel='stylesheet'>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/wrapper.css') }}"
+    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+  </head>
+  
+  <body>
+    <div class="container">
+        <header>
+            <div class="nav-container">
+                <a class="nav-title" href="{{ url_for('home')}}">
+                <h1 id="title">BookShare</h1>
+                </a>
+                <div class="right-nav">
+                <label for="view-account" title="My Account">
+                    <a class="nav-link" href="{{ url_for('display_account')}}">
+                    <span class="material-symbols-outlined nav-icon">person</span>
+                    </a>
+                </label>
+                <label for="logout" title="Logout">
+                    <a class="nav-link" href="{{ url_for('logout')}}">
+                    <span class="material-symbols-outlined nav-icon">logout</span>
+                    </a>
+                </label>
+            </div>
+            </div>
+        </header>
+        
+    <main>
+        <br/><br/>
+        <div id="tradeInfo">
+                <br/><br/>
+                <h1> Trade {{otheruser.username}}'s {{otherbook.title}} </h3>
+                <h1> Email: {{otheruser.email}}   </h1>
+                {% if otherbook.image_exists %}
+                    <img src="data:image/png;base64, {{otherbook.image_base64}}" width="500" height="500" />
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default.jpeg') }}"/>
+                {% endif %}
+                <div id="bookDetails">
+                    <h3>Title: {{otherbook.title}}</h3>
+                    <h3>Edition: {{otherbook.edition}}</h3>
+                    <h3>Publisher: {{otherbook.publisher}}</h3>
+                    <h3>Condition: {{otherbook.condition}}</h3>
+                </div>
+                <br/><br/>
+                <h1> For Your {{mybook.title}} </h1>
+                {% if mybook.image_exists %}
+                    <img src="data:image/png;base64, {{mybook.image_base64}}" width="500" height="500" />
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default.jpeg') }}"/>
+                {% endif %}
+                <div id="bookDetails">
+                    <h3>Title: {{mybook.title}}</h3>
+                    <h3>Edition: {{mybook.edition}}</h3>
+                    <h3>Publisher: {{mybook.publisher}}</h3>
+                    <h3>Condition: {{mybook.condition}}</h3>
+                </div>
+            
+            <div>
+                <form id="approve" method="POST">
+                    <input type="submit" name="fapprove" value="Approve">
+                </form>
+                <form id="decline" method="POST">
+                    <input type="submit" name="fdecline" value="Decline">
+                </form>
+            </div>
+        </div>
+    </main>
+
+  </body>
+
+</html>

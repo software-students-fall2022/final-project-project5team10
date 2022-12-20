@@ -1,0 +1,58 @@
+{% extends 'wrapper.html' %}
+
+{% block css %}
+<link
+  rel="stylesheet"
+  href="../static/css/add_book.css"
+  href="{{ url_for('static', filename='css/add_book.css') }}"
+/>
+{% endblock %}
+
+
+{% block container %}
+<h1 id="add-title">Add Listing</h1>
+
+<div class="add-book-form">
+  <form class="add-form" method="POST" enctype="multipart/form-data">
+
+      {% if title %}
+      <input type="text" placeholder="Title" name ="ftitle" autocomplete="{{title}}">
+      {% else %}
+      <input type="text" placeholder="Title" name ="ftitle">
+      {% endif %}
+      
+      {% if publisher %}
+      <input type="text" placeholder="Publisher" name ="fpublisher" autocomplete="{{publisher}}">
+      {% else %}
+      <input type="text" placeholder="Publisher" name ="fpublisher">
+      {% endif %}
+
+      {% if edition %}
+      <input type="text" placeholder="Edition" name ="fedition" edition="{{edition}}">
+      {% else %}
+      <input type="text" placeholder="Edition" name ="fedition">
+      {% endif %}
+
+      <select name="fcondition" id="fconditon">
+          <option value="" selected>Choose Condition</option>
+          <option value="New">New</option>
+          <option value="Lightly Used">Lightly Used</option>
+          <option value="Heavily Used">Heavily Used</option>
+          <option value="Damaged">Damaged</option>
+      </select>
+        
+      <input type= "file" id="book_image" name="file">
+      <button type = "submit" formaction="{{ url_for('add_book')}}">Submit</button>
+  </form>
+
+  {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          <div class=flashes>
+          {% for message in messages %}
+          <h3>{{ message }}</h3>
+          {% endfor %}
+          </div>
+      {% endif %}
+  {% endwith %}
+</div>
+{% endblock %}

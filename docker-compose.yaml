@@ -1,0 +1,15 @@
+services:
+  app:
+    container_name: app
+    build: ./app
+    command: python app.py
+    ports:
+      - "3000:3000"
+    # volumes:
+    links:
+      - db
+  db:
+    container_name: db
+    image: mongo:latest
+    ports:
+      - "27017:27017"

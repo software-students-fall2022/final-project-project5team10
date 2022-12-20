@@ -1,0 +1,91 @@
+:root{
+--lpurple:#E6E6FA;
+--mpurple: #5E2BFF;
+--darkpurple: #8F00FF;
+--purple: #8B80F9;
+--gray: #4C4C4C;
+--black: #282828;
+}
+#add-title{
+    font-family:"Cormorant Garamond";
+    text-align: center;
+    font-size: 5rem;
+    font-weight: bold;
+    margin: auto;
+    max-width: fit-content;
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+.add-book-form{
+    display:flex;
+    font-family: 'Cormorant Garamond';
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--purple);
+    height: 100vh;
+    width: 100vw;
+}
+.add-book-form>form{
+    display:flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.add-form>h2{
+    color:var(--lpurple);
+    margin-left: 8%;
+}
+
+.add-form>input{
+    margin-left:auto;
+    margin-right:auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width:60vw;
+    background-color: var(--lpurple);
+    text-align: center;
+    padding-top:10px;
+    padding-bottom: 10px;
+}
+
+.add-form>input:placeholder{
+    color: var(--gray);
+}
+
+.add-form>select{
+    margin:auto;
+    width:60vw;
+    text-align: center;
+}
+
+.add-form>button{
+    min-width: 40%;
+    border-radius: 2rem;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.4rem;
+    font-family: 'Roboto', sans-serif;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: var(--darkpurple);
+    color: var(--lpurple);
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.add-form>button:hover{
+    cursor: pointer;
+    background-color: var(--lpurple);
+    color: var(--black);
+}
+
+.flashes{
+    margin-top:13px;
+    margin-left:auto;
+    margin-right:auto;
+    width: fit-content;
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.5rem;
+    color: var(--lpurple);
+}

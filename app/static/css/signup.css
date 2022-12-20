@@ -1,0 +1,121 @@
+:root{
+    --lpurple:#E6E6FA;
+    --mpurple: #5E2BFF;
+    --darkpurple: #8F00FF;
+    --purple: #8B80F9;
+    --lgreen: #4C4C4C;
+}
+
+body{
+  font-size: 24px;
+  font-family: 'Roboto', sans-serif;
+}
+
+.signup-form-container{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index:1000;
+    background-color: var(--darkpurple);
+    top:0;
+    left:0;
+    width:100vw;
+    min-height: 100vh;
+}
+
+.signup-form{
+    min-height: 35rem;
+    display:flex;
+    flex-direction:column;
+    align-items: center;
+    background-color: var(--lpurple);
+    width:40%;
+    height:45%;
+    border-radius: 1rem;
+    padding:2.5rem;
+    box-shadow: 0px 11px 35px 2px rgba(0,0,0,0.14);
+}
+
+.form-header{
+    font-size:2rem;
+    color: var(--purple);
+    font-weight: bold;
+    align-items:center;
+    margin-top: 1.5rem;
+    margin-bottom: 5rem;
+}
+
+.signup-form-input{
+    font-size: 1.5rem;
+    color: rgb(38, 50, 56);
+    font-weight: 700;
+    letter-spacing: 1px;
+    background-color: rgba(136, 126, 126, 0.04);
+    border-radius: 1rem;
+    box-sizing: border-box;
+    border-color: 2px solid rgba(0, 0, 0, 0.02);
+    margin-bottom: 50px;
+    outline:none;
+    padding:10px 20px;
+    text-align: center;
+}
+
+.signup-form-input::placeholder{
+    color: rgb(150, 150, 150);
+}
+
+.signup-form-input{
+    font-size: 1.5rem;
+    color: rgb(38, 50, 56);
+    font-weight: 700;
+    letter-spacing: 1px;
+    background-color: rgba(136, 126, 126, 0.04);
+    border-radius: 1rem;
+    box-sizing: border-box;
+    border-color: 2px solid rgba(0, 0, 0, 0.02);
+    margin-bottom: 50px;
+    outline:none;
+    padding:10px 20px;
+    text-align: center;
+}
+
+.submit{
+    cursor:pointer;
+    border-radius:5rem;
+    background-color: var(--purple);
+    color:var(--lpurple);
+    font-size:1rem;
+    padding-left:40px;
+    padding-right:40px;
+    padding-top:10px;
+    padding-bottom:10px;
+    margin-bottom: 15px;
+}
+
+.signup-question{
+    margin-top:10px;
+    margin-bottom: 1px;
+    font-size:0.75rem;
+}
+.signup{
+    margin-top:3px;
+    font-size: 0.88rem;
+}
+
+.signup-form-input:focus{
+    border:2px solid rgba(0,0,0,0.14) !important;
+}
+
+.signup-form-error{
+    margin-bottom:10px;
+    margin-top:-25px;
+    text-align: center;
+    color: red;
+    font-style:italic;
+    font-size: 0.88rem;
+}
+
+.hidden{
+    display:none;
+}

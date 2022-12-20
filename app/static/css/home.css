@@ -1,0 +1,188 @@
+:root{
+    --lpurple:#E6E6FA;
+    --mpurple: #5E2BFF;
+    --darkpurple: #8F00FF;
+    --purple: #8B80F9;
+    --gray: #4C4C4C;
+    --black: #282828;
+  }
+
+body{
+    font-size: 24px;
+    font-family: 'Roboto', sans-serif;
+    margin:0;
+    background-color: var(--purple);
+}
+
+.home-banner{
+    display:flex;
+    max-height: 600px;
+}
+
+#banner-right{
+    flex:0 1 50%;
+    max-width:50%;
+    height: 600px;
+}
+
+img{
+    height:600px;
+    width: 100vw;
+}
+
+#banner-left{
+    flex:0 1 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 50%;
+    background-color: var(--lpurple);
+    height: 600px;
+}
+
+#homepage-title {
+    font-family: 'Cormorant Garamond';
+    font-size: 2rem;
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--purple);
+}
+#homepage-subtitle{
+    margin-left: 10px;
+    font-family: 'Cormorant Garamond';
+    font-size: 1.4rem;
+    color: var(--purple);
+}
+
+/***************** Search Form *****************/
+
+.search-form {
+    display: flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content: center;
+    flex-basis: 100%;
+}
+
+.search-bar-container{
+    display:inline-block;
+}
+
+.search-bar {
+    background-color: var(--lpurple);
+    text-align: center;
+    padding-left: 3rem;
+    padding-right:3rem;
+    padding-top:5px;
+    padding-bottom: 5px;
+    border-radius: 4px;    
+    margin:auto;
+}
+
+input::placeholder{
+    text-align: center;
+    margin:auto;
+    font-size: 1rem;
+    color: var(--gray);
+}
+
+#submit-button-in-text{
+    font-size:1rem;
+    margin-bottom:10px;
+    color:var(--mpurple);
+}
+#submit-button-in-text:hover{
+    color: var(--darkpurple);
+}
+
+#filter-buttons-reveal{
+    margin-right:35px;
+
+}
+#filter-button-reveal:hover{
+    cursor:pointer;
+    color: var(--darkpurple);
+}
+#filter-buttons.hidden {
+    display: none;
+}
+
+#submit-search {
+    margin-left: 10px;
+}
+
+#submit-search:hover {
+    cursor: pointer;
+}
+
+input{
+    height: 35px;
+    line-height: 45px;;
+}
+/**************** filters ******************/
+.filter-toggle{
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom:5px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+#filter-form{
+    margin-top:10px;
+    display:none;
+    align-items: center;
+    flex-direction: column;
+}
+#filter-form>label{
+    font-size: 1rem;
+    color: var(--lpurple);
+    margin-top: 5px;
+}
+#filter-form>input{
+    background-color: var(--lpurple);
+    text-align: center;
+}
+#filter-form>select{
+    font-size:1rem;
+    text-align: center;
+    margin-top:5px;
+}
+#filter-form>select>#special{
+    color:white;
+}
+
+/***************** Book Listings *****************/
+.listing-container {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+    grid-gap:2em;
+    background-color: var(--purple);
+    padding: 80px;
+    height: 600px;
+    overflow: auto;
+}
+
+.listing-item{
+    background-color: var(--lpurple);
+    padding: 20px;
+    font-size: 20px;
+    text-align: center;
+    border-radius: 8px;
+}
+.listing-item>a{
+    font-size: 1.3rem;
+}
+.listing-item>a:hover{
+    cursor:pointer;
+    color: var(--darkpurple);
+}
+.listing-item>p{
+    font-size: 1rem;
+}
+
+
+
+
+
