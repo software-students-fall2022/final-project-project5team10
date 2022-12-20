@@ -2,20 +2,25 @@
 [![App CD](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/docker-cd.yaml/badge.svg)](https://github.com/software-students-fall2022/final-project-project5team10/actions/workflows/docker-cd.yaml)
 # Bookshare
 
-Bookshare aims to make college textbooks more affordable through the exchange of used books.
+<!-- Bookshare aims to make college textbooks more affordable through the exchange of used books. -->
+
+Bookshare is a used book exchange platform where participants can trade books between each other. It fulfills needs across various types of end-users, including:
+* Avid readers
+* College students
+* Book collectors
 
 ## Project Description
 Bookshare consists of two subsystems: </br>
-* **Flask Web App**: Displays user-supplied data and displays data fetched via Google Books API to display relevant data. Allows different users, after authentication, to send requests and view listings supplied by other users.
+* **Flask Web App**: Displays user-supplied data and displays data fetched via Google Books API to display relevant data. Allows different users, after authentication, to send requests and view listings supplied by other users
 * **MongoDB Database**: Stores user credentials and data per user
-## User Cases
+## Use Cases
 
 Users can register for an account. With an account, one can:
 
-* search for books
-* check book previews via Google Books API
-* upload books to your account to put them up for trade
-* upload pictures and details regarding your listing
+* search for books to trade for
+* view book metadata and book previews via Google Books API
+* upload books to account and put them up for trade
+* create trade listings with details and optional images
 
 ## How to Run Project Locally
 1. While running Docker, at the root directory of the project: </br>
@@ -32,18 +37,82 @@ Users can register for an account. With an account, one can:
 ## Digital Ocean
 [Deployed Link](https://bookshares-app-ap28r.ondigitalocean.app/)
 
-## Code Coverage
-```txt
+## Unit Testing
+## Run Unit Tests
+
+### 0. Setup
+
+Install the latest versions of pip and virtualenv:
+
+*Unix/macOS*
+
+```
+python3 -m pip install --user --upgrade pip
+
+python3 -m pip install --user virtualenv
+```
+
+*Windows*
+```
+py -m pip install --upgrade pip
+
+py -m pip install --user virtualenv
+```
+### 1. Enter virtual environment
+
+Set up and activate a virtual environment in the root directory with:
+
+*Unix/macOS*
+```
+python3 -m venv env
+
+source env/bin/activate
+```
+*Windows*
+```
+py -m venv env
+
+.\env\Scripts\activate
+```
+### 2. Navigate to subsystem directory
+
+Change the current directory to the web app's with:
+
+```
+cd app
+```
+
+### 3. Install testing dependencies
+
+Install the requisite testing packages with:
+
+```
+pip install -r requirements.txt
+```
+
+### 4. Run tests
+
+To run tests with coverage reports, execute in your terminal:
+
+```
+coverage run -m pytest
+
+coverage report
+```
+
+Code coverage report:
+```
 Name                    Stmts   Miss  Cover
 -------------------------------------------
 app/app.py                267     43    84%
-app/gridfs_helper.py       23     17    26%
+app/gridfs_helper.py        4      0   100%
 app/tests/__init__.py       0      0   100%
 app/tests/conftest.py      17      0   100%
 app/tests/test_app.py     284      0   100%
 -------------------------------------------
-TOTAL                     591     60    90%
+TOTAL                     572     43    92%
 ```
+Custom flask web app subsystem code coverage: **84%**
 
 ## Authors
 
@@ -53,7 +122,7 @@ TOTAL                     591     60    90%
 [Danilo Montes](https://github.com/danilo-montes) \
 [Bhavig Pointi](https://github.com/bpointi) \
 [Misha Seo](https://github.com/mishaseo)
-
+***
 ## **DISCLAIMER**
 On the Digital Ocean deployment, the site sometimes gives a page saying that you are unauthorized to view that page.
 However, if you wait a bit and refresh, it will let you through.

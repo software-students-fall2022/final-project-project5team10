@@ -1,17 +1,17 @@
 import gridfs
 from werkzeug.utils import secure_filename
-import codecs
+import codecs 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-def allowed_file(filename):
+def allowed_file(filename): # pragma: no cover
     '''
     check for allowed extensions
     '''
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def gridfs_helper_tool(db, grid_fs, reqFiles, book, currUser):
+def gridfs_helper_tool(db, grid_fs, reqFiles, book, currUser): # pragma: no cover
     if 'file' in reqFiles:  # check for allowed extensions
         file = reqFiles['file']
         if allowed_file((file.filename)):
