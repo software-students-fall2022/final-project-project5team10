@@ -28,7 +28,7 @@ Users can register for an account. With an account, one can:
 
 2. The database container will be created and the Flask Web Application will run on `localhost:3000` or `127:0.0.1:3000` </br>
 3. Create a username and password (constrained to minimum 6 characters each), login and start viewing other users' listings or add your own listing by navigating to the 'My Account' link on the top right corner.
-4. You will be able to view all listings on the homepage and click on the title of each listing to learn more detail about the listing and add a trade request for one of your own listings.
+4. You will be able to view all listings on the homepage and click on the title of each listing to learn more details about the listing and add a trade request for one of your own listings.
 5. Once both parties confirm the trade in the 'My Account>View Trade Requests', use the contact information provided to finalize the trade. 
 
 ## Docker Hub
@@ -38,7 +38,6 @@ Users can register for an account. With an account, one can:
 [Deployed Link](https://bookshares-app-ap28r.ondigitalocean.app/)
 
 ## Unit Testing
-## Run Unit Tests
 
 ### 0. Setup
 
