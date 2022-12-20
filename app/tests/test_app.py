@@ -16,6 +16,7 @@ import sys
 
 collection = mongomock.MongoClient().db.collection
 collection2 = mongomock.MongoClient().db.collection2
+collection3 = mongomock.MongoClient().db.collection2
 
 # ======================================================#
 #                     main routes tests                 #
@@ -396,3 +397,28 @@ def test_locate_user():
 def test_inject_user():
     result = inject_user()
     assert type(result) == dict
+
+
+def test_req_array():
+    userid = "542c2b97bac0595474108b50"
+    otheruserid = "542c2b97bac0595474108b49"
+    mybookid = "542c2b97bac0595474108b42"
+    otherbookid = "542c2b97bac0595474108b43"
+
+    recent_id = collection.insert_one({ # (requests collection)
+        "sender": ObjectId(otheruserid),     
+        "reciever": ObjectId(userid), # recieves the request
+        "booktoswap": ObjectId(otherbookid),
+        "bookrequested": ObjectId(mybookid), 
+    }).inserted_id
+
+    collection2.insert_one({"_id":ObjectId(mybookid), "user_id": userid})
+    collection2.insert_one({"_id": ObjectId(otherbookid), "user_id": otheruserid})
+    collection3.insert_one({"_id": ObjectId(userid)}) # insert user
+
+    the_id = app.req_array(userid, col=collection, col2=collection2, col3=collection3)[0]["mybook"]["user_id"]
+    
+    assert collection.find_one({"_id":ObjectId(recent_id)})["reciever"] == ObjectId(the_id)
+    collection.drop()
+    collection2.drop()
+    collection3.drop()

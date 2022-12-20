@@ -14,6 +14,7 @@ import datetime
 from bson.objectid import ObjectId
 import codecs
 import gridfs
+from gridfs_helper import gridfs_helper_tool
 
 # user authentication
 import flask_login
@@ -352,34 +353,40 @@ def add_book():
         # book["status"]   = 'swappable'
         # book['image_exists'] = False # a boolean to indicate whether an image has been uplaoded to form, initially set to False
         book = get_and_insert_metadata(initbook)
-        if 'file' in request.files:  # check for allowed extensions
-            file = request.files['file']
-            if allowed_file((file.filename)):
-                filename = secure_filename(file.filename)
-                user = flask_login.current_user
-                # unique file name: user id + filename
-                name = str(user.id) + "_" + str(filename)
-                # upload file in chunks into the db using grid_fs
-                id = grid_fs.put(file, filename=name)
-                # document to be inserted into the images collection
-                query = {
-                    "user": user.id,
-                    "book_name": book["title"],
-                    "img_id": id
-                }
-                # add gridfs id to the image field of the book document to be queried into the books collection
-                book["image"] = id
-                # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
-                image = grid_fs.get(id)
-                base64_data = codecs.encode(image.read(), 'base64')
-                image = base64_data.decode('utf-8')
-                book['image_base64'] = image
-                # change the image_exists field to True once an image field is added to book document
-                book['image_exists'] = True
-                # add the image query into the images collection
-                db.images.insert_one(query)
 
-        db.books.insert_one(book)
+        #====gridfs helper======#
+
+        gridfs_helper_tool(db, grid_fs, request.files, book, flask_login.current_user)
+
+        # if 'file' in request.files:  # check for allowed extensions
+        #     file = request.files['file']
+        #     if allowed_file((file.filename)):
+        #         filename = secure_filename(file.filename)
+        #         user = flask_login.current_user
+        #         # unique file name: user id + filename
+        #         name = str(user.id) + "_" + str(filename)
+        #         # upload file in chunks into the db using grid_fs
+        #         id = grid_fs.put(file, filename=name)
+        #         # document to be inserted into the images collection
+        #         query = {
+        #             "user": user.id,
+        #             "book_name": book["title"],
+        #             "img_id": id
+        #         }
+        #         # add gridfs id to the image field of the book document to be queried into the books collection
+        #         book["image"] = id
+        #         # get image chunks, read it, encode it, add the encoding to the "image_base64" field to be able to render it using html
+        #         image = grid_fs.get(id)
+        #         base64_data = codecs.encode(image.read(), 'base64')
+        #         image = base64_data.decode('utf-8')
+        #         book['image_base64'] = image
+        #         # change the image_exists field to True once an image field is added to book document
+        #         book['image_exists'] = True
+        #         # add the image query into the images collection
+        #         db.images.insert_one(query)
+        # db.books.insert_one(book)
+
+        #====gridfs helper======#
         return redirect(url_for('display_account'))
 
 
@@ -570,29 +577,51 @@ def view_swap_requests():
     user = flask_login.current_user
     if user.is_anonymous:
         return render_template("login.html")
-    requests = db.requests.find(
-        {"reciever": ObjectId(user.id)}).sort("_id", -1)
+    # requests = db.requests.find(
+    #     {"reciever": ObjectId(user.id)}).sort("_id", -1)
 
     # create an array of swap requests
-    swapreqs = []
+    swapreqs = req_array(user.id)
 
+    # for req in requests:
+    #     mybookid = req["bookrequested"]
+    #     otherbookid = req["booktoswap"]
+# 
+    #     # book the current user has
+    #     mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+    #     # book other user wants
+    #     otherbook = db.books.find_one({"_id": otherbookid})
+# 
+    #     swapreqs.append({
+    #         "mybook": mybook,
+    #         "otherbook": otherbook,
+    #         'otheruser': db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+    #     })
+
+    return render_template('swap_requests.html', swapreqs=swapreqs)
+
+def req_array(userid, col=db.requests, col2=db.books, col3=db.users):
+    """
+    Creates an array of swap requests
+    """
+    requests = col.find(
+        {"reciever": ObjectId(userid)}).sort("_id", -1)
+    swapreqs = []
     for req in requests:
         mybookid = req["bookrequested"]
         otherbookid = req["booktoswap"]
 
         # book the current user has
-        mybook = db.books.find_one({"_id": ObjectId(mybookid)})
+        mybook = col2.find_one({"_id": ObjectId(mybookid)})
         # book other user wants
-        otherbook = db.books.find_one({"_id": otherbookid})
+        otherbook = col2.find_one({"_id": otherbookid})
 
         swapreqs.append({
             "mybook": mybook,
             "otherbook": otherbook,
-            'otheruser': db.users.find_one({'_id': ObjectId(otherbook['user_id'])})
+            'otheruser': col3.find_one({'_id': ObjectId(otherbook['user_id'])})
         })
-
-    return render_template('swap_requests.html', swapreqs=swapreqs)
-
+    return swapreqs
 
 # accept/decline request
 @app.route('/view_swap/<mybookid>/<otherbookid>', methods=['GET', 'POST'])
